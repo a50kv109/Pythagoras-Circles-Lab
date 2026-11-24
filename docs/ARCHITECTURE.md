@@ -43,8 +43,8 @@ flowchart TD
 
 ## 2. Entry Points & Configuration
 
-- **`index.html`**: Root HTML document loading Google Fonts (`Plus Jakarta Sans`, `JetBrains Mono`) and KaTeX stylesheet (`katex@0.16.11` from jsDelivr CDN), mounting `#root` and `/src/main.tsx`.
-- **`src/main.tsx`**: React 19 `createRoot` entry point importing `src/App.tsx` and `src/index.css`.
+- **`index.html`**: Root HTML document loading optional Google Fonts (`Plus Jakarta Sans`, `JetBrains Mono` as progressive enhancement over system fallbacks in `src/index.css`) and mounting `#root` and `/src/main.tsx`.
+- **`src/main.tsx`**: React 19 `createRoot` entry point importing `katex/dist/katex.min.css` (bundled locally alongside KaTeX font assets by Vite), `src/App.tsx`, and `src/index.css`.
 - **`src/index.css`**: Tailwind CSS v4 entry (`@import "tailwindcss";`).
 - **`vite.config.ts`**: Vite 8 configuration with `@vitejs/plugin-react`, `@tailwindcss/vite`, `@` path alias, and conditional HMR toggle (`DISABLE_HMR`).
 - **`tsconfig.json`**: ES2022/ESNext bundler TypeScript configuration (`allowImportingTsExtensions`, `noEmit`).
@@ -71,7 +71,7 @@ All files in `src/math/` are pure TypeScript functions free of React or DOM side
 
 - **`src/types/geometry.ts`**: Strongly typed interfaces (`Point2D`, `RightTriangleCalculations`, `SquareVertices`, `HypotenuseSquareVertices`, `CircleInSquareGeometry`, `TriangleIncircleGeometry`, `FourCirclesCalculations`, `InvariantValidation`, `PresetConfiguration`, `ActiveModuleId`, `DisplayMode`, `BoardLayerFilter`, `HoveredObject`, `SavedConfiguration`).
 - **`src/geometry/transforms.ts`**: Converts between mathematical Cartesian coordinates (origin-centered, $+y$ up) and SVG viewport pixel coordinates ($+y$ down) via `toScreen`, `toMath`, and `formatPoint`.
-- **`src/i18n/translations.ts`**: Translation dictionary (`ru`, `uk`, `en`) powering `Header`, `BottomToolbar`, `GeometryBoard`, and `FourCirclesPanel` metadata. *(Note: Detailed prose inside several analytical panels and modals is currently primarily in Russian; see `docs/PROJECT_STATUS.md`.)*
+- **`src/i18n/translations.ts`**: Complete `ru`, `uk`, and `en` UI dictionary powering `Header`, `BottomToolbar` (including Load popover and status messages), `GeometryBoard`, `FourCirclesView`, `RightTriangleView`, `InteractivePoint` hover inspection tooltips, `ControlsPanel` (with preset descriptions keyed by `preset.id`), `FourCirclesPanel`, `SpectralAnalysisPanel`, `InvariantsPanel` (keyed by invariant ID), `ComparisonModal`, `TestRunnerModal`, and `HelpModal`. Switching language in `App.tsx` also updates `document.documentElement.lang`.
 
 ---
 

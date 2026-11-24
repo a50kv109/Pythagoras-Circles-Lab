@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { HoveredObject, Point2D } from '../../types/geometry.ts';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 
 interface InteractivePointProps {
   id: string;
@@ -17,6 +18,7 @@ interface InteractivePointProps {
   onPointerDown?: (e: React.PointerEvent<SVGGElement>) => void;
   onHoverObject?: (obj: HoveredObject | null) => void;
   isDragging?: boolean;
+  t?: Translations;
 }
 
 export const InteractivePoint: React.FC<InteractivePointProps> = ({
@@ -30,6 +32,7 @@ export const InteractivePoint: React.FC<InteractivePointProps> = ({
   onPointerDown,
   onHoverObject,
   isDragging = false,
+  t = TRANSLATIONS.ru,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -41,13 +44,13 @@ export const InteractivePoint: React.FC<InteractivePointProps> = ({
     setIsHovered(true);
     onHoverObject?.({
       id,
-      title: `Вершина ${name}`,
-      details: `Координаты: (${mathCoord.x.toFixed(2)}, ${mathCoord.y.toFixed(2)}) · ${
+      title: `${t.hover.vertexPrefix} ${name}`,
+      details: `${t.hover.coordsLabel}: (${mathCoord.x.toFixed(2)}, ${mathCoord.y.toFixed(2)}) · ${
         axisConstraint === 'y-axis'
-          ? 'Перемещение по вертикальной оси (x = 0)'
+          ? t.hover.dragY
           : axisConstraint === 'x-axis'
-          ? 'Перемещение по горизонтальной оси (y = 0)'
-          : 'Фиксированная вершина'
+          ? t.hover.dragX
+          : t.hover.fixedVertex
       }`,
       category: 'vertex',
     });
@@ -67,7 +70,7 @@ export const InteractivePoint: React.FC<InteractivePointProps> = ({
       onPointerLeave={handleLeave}
       tabIndex={isDraggable ? 0 : -1}
       role="button"
-      aria-label={`Вершина ${name}`}
+      aria-label={`${t.hover.vertexPrefix} ${name}`}
     >
       {/* Glow / Hover effect ring */}
       {(isHovered || isDragging) && (

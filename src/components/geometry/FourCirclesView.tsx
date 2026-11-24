@@ -12,6 +12,7 @@ import {
   Point2D,
 } from '../../types/geometry.ts';
 import { toScreen } from '../../geometry/transforms.ts';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 
 interface FourCirclesViewProps {
   calc: FourCirclesCalculations;
@@ -23,6 +24,7 @@ interface FourCirclesViewProps {
   showCenters?: boolean;
   showRadii?: boolean;
   onHoverObject?: (obj: HoveredObject | null) => void;
+  t?: Translations;
 }
 
 export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
@@ -35,6 +37,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
   showCenters = true,
   showRadii = true,
   onHoverObject,
+  t = TRANSLATIONS.ru,
 }) => {
   const { squareA, squareB, squareC, circleA, circleB, circleC, incircle, triangle } = calc;
 
@@ -95,8 +98,8 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'square-Qa',
-                title: 'Квадрат Q_a на катете a',
-                details: `Сторона a = ${squareA.side.toFixed(2)}, Площадь a² = ${squareA.area.toFixed(2)}`,
+                title: t.hover.squareQaTitle,
+                details: `${t.hover.sideLabel} a = ${squareA.side.toFixed(2)}, ${t.hover.areaLabel} a² = ${squareA.area.toFixed(2)}`,
                 category: 'polygon',
               })
             }
@@ -115,8 +118,8 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'square-Qb',
-                title: 'Квадрат Q_b на катете b',
-                details: `Сторона b = ${squareB.side.toFixed(2)}, Площадь b² = ${squareB.area.toFixed(2)}`,
+                title: t.hover.squareQbTitle,
+                details: `${t.hover.sideLabel} b = ${squareB.side.toFixed(2)}, ${t.hover.areaLabel} b² = ${squareB.area.toFixed(2)}`,
                 category: 'polygon',
               })
             }
@@ -135,8 +138,8 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'square-Qc',
-                title: 'Квадрат Q_c на гипотенузе c',
-                details: `Сторона c = ${squareC.side.toFixed(3)}, Площадь c² = ${squareC.area.toFixed(2)}`,
+                title: t.hover.squareQcTitle,
+                details: `${t.hover.sideLabel} c = ${squareC.side.toFixed(3)}, ${t.hover.areaLabel} c² = ${squareC.area.toFixed(2)}`,
                 category: 'polygon',
               })
             }
@@ -190,7 +193,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'circle-Ka',
-                title: 'Круг K_a (вписан в квадрат Q_a)',
+                title: t.hover.circleKaTitle,
                 details: `d = a = ${circleA.diameter.toFixed(2)} · K_a = ${circleA.area.toFixed(3)} · √K_a = ${circleA.sqrtArea.toFixed(3)}`,
                 category: 'circle',
               })
@@ -211,7 +214,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'circle-Kb',
-                title: 'Круг K_b (вписан в квадрат Q_b)',
+                title: t.hover.circleKbTitle,
                 details: `d = b = ${circleB.diameter.toFixed(2)} · K_b = ${circleB.area.toFixed(3)} · √K_b = ${circleB.sqrtArea.toFixed(3)}`,
                 category: 'circle',
               })
@@ -232,7 +235,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'circle-Kc',
-                title: 'Круг K_c (вписан в квадрат Q_c)',
+                title: t.hover.circleKcTitle,
                 details: `d = c = ${circleC.diameter.toFixed(3)} · K_c = ${circleC.area.toFixed(3)} · √K_c = ${circleC.sqrtArea.toFixed(3)}`,
                 category: 'circle',
               })
@@ -411,7 +414,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerEnter={() =>
               onHoverObject?.({
                 id: 'circle-Ki',
-                title: 'Вписанный круг K_i (внутри треугольника OAB)',
+                title: t.hover.circleKiTitle,
                 details: `r = (a+b-c)/2 = ${incircle.radius.toFixed(3)} · K_i = ${incircle.area.toFixed(3)} · √K_i = ${incircle.sqrtArea.toFixed(3)}`,
                 category: 'circle',
               })
@@ -468,7 +471,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                 onPointerEnter={() =>
                   onHoverObject?.({
                     id: 'tan-OA',
-                    title: 'Точка касания на катете OA',
+                    title: t.hover.tanOATitle,
                     details: `T_a = (0, ${incircle.radius.toFixed(3)})`,
                     category: 'vertex',
                   })
@@ -486,7 +489,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                 onPointerEnter={() =>
                   onHoverObject?.({
                     id: 'tan-OB',
-                    title: 'Точка касания на катете OB',
+                    title: t.hover.tanOBTitle,
                     details: `T_b = (${incircle.radius.toFixed(3)}, 0)`,
                     category: 'vertex',
                   })
@@ -504,7 +507,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                 onPointerEnter={() =>
                   onHoverObject?.({
                     id: 'tan-AB',
-                    title: 'Точка касания на гипотенузе AB',
+                    title: t.hover.tanABTitle,
                     details: `T_c = (${incircle.tangencyAB.x.toFixed(3)}, ${incircle.tangencyAB.y.toFixed(3)})`,
                     category: 'vertex',
                   })
@@ -524,7 +527,7 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                 onPointerEnter={() =>
                   onHoverObject?.({
                     id: 'incenter-I',
-                    title: 'Центр вписанной окружности I = (r, r)',
+                    title: t.hover.incenterTitle,
                     details: `I = (${incircle.center.x.toFixed(3)}, ${incircle.center.y.toFixed(3)}), r = ${incircle.radius.toFixed(3)}`,
                     category: 'vertex',
                   })

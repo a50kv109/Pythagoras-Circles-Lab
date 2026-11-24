@@ -85,7 +85,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
             ) : (
               <AlertCircle className="w-3.5 h-3.5" />
             )}
-            {t.panel.identityHold}
+            {residualOk ? t.panel.identityHold : t.panel.identityFail}
           </span>
         </div>
 
@@ -95,19 +95,19 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono tabular-nums text-xs">
           <div className="bg-white rounded-md border border-slate-200/70 p-2">
-            <div className="text-[11px] font-sans text-slate-500">Левая часть: √K_a + √K_b</div>
+            <div className="text-[11px] font-sans text-slate-500">{t.panel.lhsLabel}</div>
             <div className="text-sm font-bold text-slate-900 mt-0.5">
               {calc.sqrtSumLegs.toFixed(6)}
             </div>
           </div>
           <div className="bg-white rounded-md border border-slate-200/70 p-2">
-            <div className="text-[11px] font-sans text-slate-500">Правая часть: √K_c + √K_i</div>
+            <div className="text-[11px] font-sans text-slate-500">{t.panel.rhsLabel}</div>
             <div className="text-sm font-bold text-slate-900 mt-0.5">
               {calc.sqrtSumHypAndIn.toFixed(6)}
             </div>
           </div>
           <div className="bg-white rounded-md border border-slate-200/70 p-2">
-            <div className="text-[11px] font-sans text-slate-500">Невязка тождества</div>
+            <div className="text-[11px] font-sans text-slate-500">{t.panel.residualLabel}</div>
             <div className="text-sm font-bold text-emerald-700 mt-0.5">
               {calc.identityResidualAbs < 1e-13
                 ? '< 10⁻¹³'
@@ -120,7 +120,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
       {/* Contextual Module Explanation (Concise, no wall of text) */}
       {activeModule === 'identity_proof' && (
         <div className="p-3 rounded-lg bg-indigo-50/50 border border-indigo-200/70 text-xs text-slate-700 space-y-1.5">
-          <div className="font-bold text-slate-900">Алгебраическое доказательство тождества</div>
+          <div className="font-bold text-slate-900">{t.panel.proofTitle}</div>
           <div className="overflow-x-auto">
             <MathFormula tex="\sqrt{K_a}+\sqrt{K_b}=\frac{\sqrt{\pi}}{2}(a+b), \quad \sqrt{K_c}+\sqrt{K_i}=\frac{\sqrt{\pi}}{2}c+\sqrt{\pi}\frac{a+b-c}{2}=\frac{\sqrt{\pi}}{2}(a+b)" />
           </div>
@@ -129,11 +129,11 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
 
       {activeModule === 'incircle_focus' && (
         <div className="p-3 rounded-lg bg-amber-50/60 border border-amber-200/70 text-xs text-slate-700 space-y-1.5">
-          <div className="font-bold text-slate-900">Геометрия вписанной окружности K_i</div>
+          <div className="font-bold text-slate-900">{t.panel.incircleTitle}</div>
           <p className="text-slate-600">
-            Обычная вписанная окружность касается катетов в точках <span className="font-mono">(0, r)</span> и{' '}
-            <span className="font-mono">(r, 0)</span> и гипотенузы в точке{' '}
-            <span className="font-mono">T_c</span>. Её радиус всегда положителен:
+            {t.panel.incircleDescBefore} <span className="font-mono">(0, r)</span> {t.helpModal.sec1IntroAnd}{' '}
+            <span className="font-mono">(r, 0)</span> {t.panel.incircleDescMiddle}{' '}
+            <span className="font-mono">T_c</span>. {t.panel.incircleDescAfter}
           </p>
           <div className="text-center">
             <MathFormula
@@ -145,10 +145,10 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
 
       {/* Primary Parameters: a, b, c, r */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <MetricCard label="Катет a" symbol="a" value={triangle.a.toFixed(2)} accentColor="sky" />
-        <MetricCard label="Катет b" symbol="b" value={triangle.b.toFixed(2)} accentColor="emerald" />
+        <MetricCard label={t.panel.legA} symbol="a" value={triangle.a.toFixed(2)} accentColor="sky" />
+        <MetricCard label={t.panel.legB} symbol="b" value={triangle.b.toFixed(2)} accentColor="emerald" />
         <MetricCard
-          label="Гипотенуза c"
+          label={t.panel.hypC}
           symbol="c"
           value={triangle.c}
           subtext="√(a² + b²)"
@@ -156,7 +156,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
           accentColor="rose"
         />
         <MetricCard
-          label="Радиус K_i"
+          label={t.panel.radiusKi}
           symbol="r"
           value={incircle.radius}
           subtext="(a + b - c)/2"
@@ -166,21 +166,21 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
       </div>
 
       {/* Four Circles Areas & Square Roots Table */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="border border-slate-200 rounded-lg overflow-x-auto">
         <table className="w-full text-xs">
           <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
             <tr>
-              <th className="py-2 px-3 text-left">Круг</th>
-              <th className="py-2 px-3 text-left">Расположение</th>
-              <th className="py-2 px-3 text-right">Диаметр / Радиус</th>
-              <th className="py-2 px-3 text-right">Площадь K</th>
-              <th className="py-2 px-3 text-right">Корень √K</th>
+              <th className="py-2 px-3 text-left">{t.panel.colCircle}</th>
+              <th className="py-2 px-3 text-left">{t.panel.colLocation}</th>
+              <th className="py-2 px-3 text-right">{t.panel.colDim}</th>
+              <th className="py-2 px-3 text-right">{t.panel.colArea}</th>
+              <th className="py-2 px-3 text-right">{t.panel.colSqrt}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-mono tabular-nums">
             <tr className="hover:bg-slate-50/70">
               <td className="py-2 px-3 font-bold text-blue-700">K_a</td>
-              <td className="py-2 px-3 font-sans text-slate-600">Квадрат Q_a</td>
+              <td className="py-2 px-3 font-sans text-slate-600">{t.panel.locSquareQa}</td>
               <td className="py-2 px-3 text-right text-slate-700">
                 d = {circleA.diameter.toFixed(2)}
               </td>
@@ -193,7 +193,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
             </tr>
             <tr className="hover:bg-slate-50/70">
               <td className="py-2 px-3 font-bold text-emerald-700">K_b</td>
-              <td className="py-2 px-3 font-sans text-slate-600">Квадрат Q_b</td>
+              <td className="py-2 px-3 font-sans text-slate-600">{t.panel.locSquareQb}</td>
               <td className="py-2 px-3 text-right text-slate-700">
                 d = {circleB.diameter.toFixed(2)}
               </td>
@@ -206,7 +206,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
             </tr>
             <tr className="hover:bg-slate-50/70">
               <td className="py-2 px-3 font-bold text-rose-700">K_c</td>
-              <td className="py-2 px-3 font-sans text-slate-600">Квадрат Q_c</td>
+              <td className="py-2 px-3 font-sans text-slate-600">{t.panel.locSquareQc}</td>
               <td className="py-2 px-3 text-right text-slate-700">
                 d = {circleC.diameter.toFixed(3)}
               </td>
@@ -219,7 +219,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
             </tr>
             <tr className="hover:bg-slate-50/70 bg-amber-50/30">
               <td className="py-2 px-3 font-bold text-amber-800">K_i</td>
-              <td className="py-2 px-3 font-sans text-slate-700">Внутри △OAB</td>
+              <td className="py-2 px-3 font-sans text-slate-700">{t.panel.locInsideTri}</td>
               <td className="py-2 px-3 text-right text-slate-700">
                 r = {incircle.radius.toFixed(3)}
               </td>
@@ -255,17 +255,16 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
               <MathFormula tex="K_a + K_b - K_c - K_i = -K_i" />
             </div>
             <div className="font-mono tabular-nums text-rose-700 font-semibold">
-              {calc.areaMinusAll.toFixed(4)} ≠ 0 (равняется -K_i)
+              {calc.areaMinusAll.toFixed(4)} ≠ 0 ({t.panel.equalsMinusKi})
             </div>
           </div>
         </div>
 
         {displayMode === 'research' && (
           <div className="text-[11px] text-slate-500 leading-relaxed pt-0.5">
-            Прямое равенство площадей <span className="font-mono">K_a + K_b = K_c + K_i</span> неверно,
-            так как по теореме Пифагора <span className="font-mono">K_a + K_b = K_c</span>, а площадь
-            вписанной окружности <span className="font-mono">K_i = πr² &gt; 0</span>. Тождество
-            выполняется именно для квадратных корней из площадей (линейных масштабов диаметров).
+            {t.panel.contrastNoteBefore} <span className="font-mono">K_a + K_b = K_c + K_i</span>{' '}
+            {t.panel.contrastNoteMiddle} <span className="font-mono">K_a + K_b = K_c</span>
+            {t.panel.contrastNoteAfter} <span className="font-mono">K_i = πr² &gt; 0</span>.
           </div>
         )}
       </div>

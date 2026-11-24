@@ -18,6 +18,7 @@ import {
   sampleSpectralCurves,
 } from '../../math/FourCirclesSpectralAnalysis.ts';
 import { MathFormula } from '../common/MathFormula.tsx';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 import {
   Activity,
   ChevronDown,
@@ -34,6 +35,7 @@ import {
 interface SpectralAnalysisPanelProps {
   calc: FourCirclesCalculations;
   onChangeT: (targetT: number, recordHistory?: boolean) => void;
+  t?: Translations;
 }
 
 const SERIES_ORDER: CircleKey[] = ['Ka', 'Kb', 'Kc', 'Ki'];
@@ -63,6 +65,7 @@ function formatTLabel(val: number): string {
 export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
   calc,
   onChangeT,
+  t = TRANSLATIONS.ru,
 }) => {
   const [graphMode, setGraphMode] = useState<SpectralGraphMode>('areas');
   const [linearKind, setLinearKind] = useState<LinearMeasureKind>('radius');
@@ -337,12 +340,12 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       <div className="flex flex-wrap items-baseline justify-between gap-2 pb-2 border-b border-slate-100">
         <div>
           <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-            Параметрический спектральный анализ четырёх кругов
+            {t.spectral.title}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Безразмерный параметр <span className="font-mono font-semibold text-slate-700">t = b / a</span>
+            {t.spectral.subtitleBefore} <span className="font-mono font-semibold text-slate-700">t = b / a</span>
             <span className="mx-1.5" aria-hidden="true">·</span>
-            нормировка на гипотенузный круг <span className="font-mono">K_c</span>
+            {t.spectral.subtitleAfter} <span className="font-mono">K_c</span>
           </p>
         </div>
 
@@ -352,36 +355,36 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       </div>
 
       {/* Mode Selector Tabs: Areas | Perimeters | Radii & Diameters */}
-      <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 p-1 bg-slate-100 rounded-lg">
         <button
           onClick={() => setGraphMode('areas')}
-          className={`flex-1 px-2.5 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex-1 px-2 py-1.5 text-[11px] sm:text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
             graphMode === 'areas'
               ? 'bg-white text-slate-900 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <PieChart className="w-3.5 h-3.5 text-blue-600" /> Площади
+          <PieChart className="w-3.5 h-3.5 text-blue-600" /> {t.spectral.tabAreas}
         </button>
         <button
           onClick={() => setGraphMode('perimeters')}
-          className={`flex-1 px-2.5 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex-1 px-2 py-1.5 text-[11px] sm:text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
             graphMode === 'perimeters'
               ? 'bg-white text-slate-900 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Activity className="w-3.5 h-3.5 text-emerald-600" /> Периметры
+          <Activity className="w-3.5 h-3.5 text-emerald-600" /> {t.spectral.tabPerimeters}
         </button>
         <button
           onClick={() => setGraphMode('radii_diameters')}
-          className={`flex-1 px-2.5 py-1.5 text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
+          className={`flex-1 px-2 py-1.5 text-[11px] sm:text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shrink-0 ${
             graphMode === 'radii_diameters'
               ? 'bg-white text-slate-900 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Layers className="w-3.5 h-3.5 text-amber-600" /> Радиусы / Диаметры
+          <Layers className="w-3.5 h-3.5 text-amber-600" /> {t.spectral.tabRadiiDiameters}
         </button>
       </div>
 
@@ -389,8 +392,8 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       {graphMode === 'radii_diameters' && (
         <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200/80 text-xs">
           <span className="text-slate-600">
-            Линейный масштаб: <span className="font-mono">D = 2R</span> — нормированные кривые{' '}
-            <span className="font-mono">R_x/R_c</span> и <span className="font-mono">D_x/D_c</span> совпадают
+            {t.spectral.linearNoteBefore} <span className="font-mono">D = 2R</span> — {t.spectral.linearNoteMiddle}{' '}
+            <span className="font-mono">R_x/R_c</span> {t.spectral.linearNoteAnd} <span className="font-mono">D_x/D_c</span> {t.spectral.linearNoteAfter}
           </span>
           <div className="flex items-center gap-1 p-0.5 bg-slate-200/70 rounded-md text-[11px] font-semibold">
             <button
@@ -401,7 +404,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Радиусы (R)
+              {t.spectral.radiiBtn}
             </button>
             <button
               onClick={() => setLinearKind('diameter')}
@@ -411,7 +414,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Диаметры (D)
+              {t.spectral.diametersBtn}
             </button>
           </div>
         </div>
@@ -424,7 +427,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
         {/* Plot Header: Title & 4-Curve Legend */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-xs font-bold text-slate-800">
-            Графики функций от отношения катетов <span className="font-mono">t = b/a</span>
+            {t.spectral.plotTitle} <span className="font-mono">t = b/a</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-xs font-mono font-semibold">
@@ -461,18 +464,18 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                 className={`px-2 py-1 rounded transition-colors whitespace-nowrap shrink-0 ${
                   scaleMode === 'log' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
                 }`}
-                title="Логарифмическая шкала t (симметрия t ↔ 1/t вокруг t = 1)"
+                title={t.spectral.logScaleTitle}
               >
-                Лог. t
+                {t.spectral.logScaleBtn}
               </button>
               <button
                 onClick={() => setScaleMode('linear')}
                 className={`px-2 py-1 rounded transition-colors whitespace-nowrap shrink-0 ${
                   scaleMode === 'linear' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
                 }`}
-                title="Линейная шкала t"
+                title={t.spectral.linearScaleTitle}
               >
-                Линейн. t
+                {t.spectral.linearScaleBtn}
               </button>
             </div>
 
@@ -480,29 +483,29 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
             <button
               onClick={handleZoomIn}
               className="p-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-              title="Приблизить диапазон t"
-              aria-label="Приблизить график"
+              title={t.spectral.zoomInTitle}
+              aria-label={t.spectral.zoomInTitle}
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleZoomOut}
               className="p-1.5 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-              title="Отдалить диапазон t"
-              aria-label="Отдалить график"
+              title={t.spectral.zoomOutTitle}
+              aria-label={t.spectral.zoomOutTitle}
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleResetRange}
               className="px-2 py-1 rounded border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-mono flex items-center gap-1 whitespace-nowrap shrink-0"
-              title="Сбросить диапазон на [0.1, 10]"
+              title={t.spectral.resetRangeTitle}
             >
               <RotateCcw className="w-3 h-3" /> [0.1, 10]
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => {
                 setIsSweepingSymmetry(false);
@@ -513,9 +516,9 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                   ? 'bg-indigo-600 text-white'
                   : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
               }`}
-              title="Установить симметричный треугольник t = 1 (a = b)"
+              title={t.spectral.symmetryBtnTitle}
             >
-              t = 1 (Симметрия)
+              {t.spectral.symmetryBtn}
             </button>
             <button
               onClick={() => setIsSweepingSymmetry(!isSweepingSymmetry)}
@@ -527,11 +530,11 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
             >
               {isSweepingSymmetry ? (
                 <>
-                  <Pause className="w-3 h-3" /> Пауза
+                  <Pause className="w-3 h-3" /> {t.spectral.pauseBtn}
                 </>
               ) : (
                 <>
-                  <Play className="w-3 h-3" /> Пройти через симметрию
+                  <Play className="w-3 h-3" /> {t.spectral.sweepBtn}
                 </>
               )}
             </button>
@@ -540,16 +543,16 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
 
         {/* Out-of-range alert when user zoomed away from currentT */}
         {!isCurrentTInRange && (
-          <div className="flex items-center justify-between px-2.5 py-1.5 rounded bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded bg-amber-50 border border-amber-200 text-[11px] text-amber-900">
             <span>
-              Текущее значение <span className="font-mono font-bold">t = {currentT.toFixed(3)}</span>{' '}
-              вне видимого диапазона [{formatTLabel(tMin)}, {formatTLabel(tMax)}].
+              {t.spectral.outOfRangeBefore} <span className="font-mono font-bold">t = {currentT.toFixed(3)}</span>{' '}
+              {t.spectral.outOfRangeMiddle} [{formatTLabel(tMin)}, {formatTLabel(tMax)}].
             </span>
             <button
               onClick={handleFitCurrentT}
               className="font-semibold underline hover:text-amber-700 whitespace-nowrap"
             >
-              Включить в диапазон
+              {t.spectral.fitRangeBtn}
             </button>
           </div>
         )}
@@ -565,7 +568,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerUp}
             role="img"
-            aria-label="Декартовый график нормированных характеристик четырёх кругов в зависимости от t = b/a"
+            aria-label={t.spectral.svgAriaLabel}
           >
             {/* Plot Area Background */}
             <rect
@@ -645,7 +648,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
               fill="#475569"
               fontFamily="ui-monospace, SFMono-Regular, Menlo, monospace"
             >
-              t = b / a {scaleMode === 'log' ? '(логарифмическая шкала)' : '(линейная шкала)'}
+              t = b / a {scaleMode === 'log' ? t.spectral.axisLogLabel : t.spectral.axisLinearLabel}
             </text>
             <text
               x={14}
@@ -691,7 +694,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                   fontWeight="600"
                   fill="#475569"
                 >
-                  Симметрия
+                  {t.spectral.symmetryTag}
                 </text>
               </g>
             )}
@@ -763,7 +766,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
         {/* Synchronized Current Point Readout Bar (directly under graph) */}
         <div className="px-3 py-2 rounded-md bg-slate-50 border border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs font-mono tabular-nums">
           <span className="text-slate-700 font-semibold">
-            Текущая точка: <span className="text-slate-900">t = {currentT.toFixed(4)}</span>
+            {t.spectral.currentPointLabel} <span className="text-slate-900">t = {currentT.toFixed(4)}</span>
           </span>
           <div className="flex flex-wrap items-center gap-3 font-bold">
             {SERIES_ORDER.map((key) => {
@@ -784,7 +787,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       {/* ================================================================== */}
       <div className="space-y-1.5">
         <div className="text-xs font-semibold text-slate-600">
-          Эталонные точки отношения катетов <span className="font-mono">t = b/a</span>:
+          {t.spectral.referenceTitle} <span className="font-mono">t = b/a</span>:
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {referenceReadouts.map((ref) => {
@@ -816,7 +819,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                   <div className="text-amber-700 font-semibold">
                     {modeSymbolPrefix}_i: {ref.norm.Ki.toFixed(3)}
                   </div>
-                  {isSym && <div className="font-sans text-indigo-700 font-semibold">(Симметрия)</div>}
+                  {isSym && <div className="font-sans text-indigo-700 font-semibold">({t.spectral.symmetryTag})</div>}
                 </div>
               </button>
             );
@@ -829,25 +832,25 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       {/* ================================================================== */}
       <div className="space-y-2.5 pt-1 border-t border-slate-100">
         {/* Geometry Parameters Row */}
-        <div className="grid grid-cols-5 gap-1.5 text-center font-mono tabular-nums">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-center font-mono tabular-nums">
           <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70">
             <div className="text-[10px] font-sans text-slate-500">t = b/a</div>
             <div className="text-xs font-bold text-slate-900">{currentT.toFixed(4)}</div>
           </div>
           <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70">
-            <div className="text-[10px] font-sans text-slate-500">Катет a</div>
+            <div className="text-[10px] font-sans text-slate-500">{t.spectral.legAShort}</div>
             <div className="text-xs font-bold text-blue-700">{calc.triangle.a.toFixed(3)}</div>
           </div>
           <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70">
-            <div className="text-[10px] font-sans text-slate-500">Катет b</div>
+            <div className="text-[10px] font-sans text-slate-500">{t.spectral.legBShort}</div>
             <div className="text-xs font-bold text-emerald-700">{calc.triangle.b.toFixed(3)}</div>
           </div>
           <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70">
-            <div className="text-[10px] font-sans text-slate-500">Гипот. c</div>
+            <div className="text-[10px] font-sans text-slate-500">{t.spectral.hypCShort}</div>
             <div className="text-xs font-bold text-rose-700">{calc.triangle.c.toFixed(3)}</div>
           </div>
-          <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70">
-            <div className="text-[10px] font-sans text-slate-500">Радиус r</div>
+          <div className="p-2 rounded-md bg-slate-50 border border-slate-200/70 col-span-2 sm:col-span-1">
+            <div className="text-[10px] font-sans text-slate-500">{t.spectral.radRShort}</div>
             <div className="text-xs font-bold text-amber-700">{calc.incircle.radius.toFixed(3)}</div>
           </div>
         </div>
@@ -857,14 +860,14 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
           <table className="w-full text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
               <tr>
-                <th className="py-2 px-2.5 text-left">Круг</th>
+                <th className="py-2 px-2.5 text-left">{t.spectral.colCircle}</th>
                 <th className="py-2 px-2.5 text-right">
                   {modeSymbolPrefix}_x / {modeSymbolPrefix}_c
                 </th>
-                <th className="py-2 px-2.5 text-right">Площадь K</th>
-                <th className="py-2 px-2.5 text-right">Периметр P</th>
-                <th className="py-2 px-2.5 text-right">Радиус R</th>
-                <th className="py-2 px-2.5 text-right">Диаметр D</th>
+                <th className="py-2 px-2.5 text-right">{t.spectral.colArea}</th>
+                <th className="py-2 px-2.5 text-right">{t.spectral.colPerimeter}</th>
+                <th className="py-2 px-2.5 text-right">{t.spectral.colRadius}</th>
+                <th className="py-2 px-2.5 text-right">{t.spectral.colDiameter}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-mono tabular-nums">
@@ -911,7 +914,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
           onClick={() => setShowShareBars(!showShareBars)}
           className="w-full flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900 py-1"
         >
-          <span>Долевое распределение в текущем состоянии (вспомогательно)</span>
+          <span>{t.spectral.shareToggle}</span>
           {showShareBars ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
 
@@ -934,7 +937,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
                       {item.label}
                     </span>
                     <span className="text-slate-700">
-                      {modeSymbolPrefix}_x/{modeSymbolPrefix}_c = {normVal.toFixed(4)} (доля{' '}
+                      {modeSymbolPrefix}_x/{modeSymbolPrefix}_c = {normVal.toFixed(4)} ({t.spectral.shareLabel}{' '}
                       {(graphMode === 'areas' ? item.areaSharePercent : item.perimeterSharePercent).toFixed(1)}%)
                     </span>
                   </div>

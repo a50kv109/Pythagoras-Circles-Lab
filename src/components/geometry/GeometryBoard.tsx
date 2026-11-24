@@ -228,12 +228,12 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[400px] bg-slate-50 overflow-hidden select-none flex flex-col"
+      className="relative w-full h-full min-h-[260px] lg:min-h-[400px] bg-slate-50 overflow-hidden select-none flex flex-col"
     >
       {/* Board Top Toolbar */}
       <div className="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         {/* Layer selector */}
-        <div className="flex items-center gap-1 p-1 bg-white/92 backdrop-blur-md rounded-lg border border-slate-200/90 shadow-xs pointer-events-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 bg-white/92 backdrop-blur-md rounded-lg border border-slate-200/90 shadow-xs pointer-events-auto max-w-full">
           <span className="text-[11px] font-semibold text-slate-500 px-2 flex items-center gap-1 whitespace-nowrap shrink-0">
             <Layers className="w-3.5 h-3.5 text-slate-400" /> {t.board.layers}
           </span>
@@ -253,7 +253,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
         </div>
 
         {/* Visibility Toggles & Zoom Deck */}
-        <div className="flex items-center gap-1 p-1 bg-white/92 backdrop-blur-md rounded-lg border border-slate-200/90 shadow-xs pointer-events-auto ml-auto">
+        <div className="flex flex-wrap items-center gap-1 p-1 bg-white/92 backdrop-blur-md rounded-lg border border-slate-200/90 shadow-xs pointer-events-auto ml-auto max-w-full">
           <button
             onClick={() => setShowGrid(!showGrid)}
             className={`px-2 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
@@ -300,28 +300,28 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           <button
             onClick={() => setScale((s) => Math.min(120, s * 1.15))}
             className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded"
-            title="Увеличить"
+            title={t.board.zoomInTitle}
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={() => setScale((s) => Math.max(12, s * 0.85))}
             className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded"
-            title="Уменьшить"
+            title={t.board.zoomOutTitle}
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={handleFitView}
             className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded"
-            title="Вписать конструкцию"
+            title={t.board.fitViewTitle}
           >
             <Maximize2 className="w-4 h-4" />
           </button>
           <button
             onClick={handleFitView}
             className="p-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded"
-            title="Сброс вида"
+            title={t.board.resetViewTitle}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -378,6 +378,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showCenters={showCenters}
           showRadii={showRadii}
           onHoverObject={setHoveredObj}
+          t={t}
         />
 
         {/* Right Triangle OAB */}
@@ -389,6 +390,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showAngles={showAngles}
           showAltitude={false}
           onHoverObject={setHoveredObj}
+          t={t}
         />
 
         {/* Fixed Origin Vertex O */}
@@ -403,8 +405,8 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           onPointerEnter={() =>
             setHoveredObj({
               id: 'vertex-O',
-              title: 'Вершина O (Прямой угол 90°)',
-              details: 'Фиксированное начало координат (0, 0). Гарантирует сохранение прямого угла.',
+              title: t.hover.originTitle,
+              details: t.hover.originDetails,
               category: 'vertex',
             })
           }
@@ -423,6 +425,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           isDragging={activeDrag === 'A'}
           onPointerDown={handlePointerDownA}
           onHoverObject={setHoveredObj}
+          t={t}
         />
 
         {/* Interactive Point B (along x-axis) */}
@@ -437,12 +440,13 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           isDragging={activeDrag === 'B'}
           onPointerDown={handlePointerDownB}
           onHoverObject={setHoveredObj}
+          t={t}
         />
       </svg>
 
       {/* Bottom Board HUD: Hover Inspector + Drag Hint */}
       <div className="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600 shadow-xs">
+        <div className="hidden sm:flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600 shadow-xs">
           <Compass className="w-3.5 h-3.5 text-blue-600 shrink-0" />
           <span>{t.board.dragHint}</span>
         </div>

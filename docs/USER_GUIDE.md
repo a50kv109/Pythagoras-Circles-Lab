@@ -8,7 +8,7 @@ This practical guide explains how to launch, operate, and interpret the **Four-C
 
 1. Install dependencies (first time only):
    ```bash
-   npm install
+   bun install --frozen-lockfile   # or: npm install
    ```
 2. Start the development server:
    ```bash
@@ -102,4 +102,4 @@ In the bottom toolbar (`BottomToolbar`):
 - **Пошагово:** Animate layer-by-layer construction (`△ и Kᵢ` $\to$ `Квадраты Q` $\to$ `Круги K_a,b,c` $\to$ `Все`).
 - **Сравнить (Header):** Compare the current configuration side-by-side with another configuration.
 - **Тесты 8/8 (Header):** Inspect all 5 control triangles and load any of them onto the board.
-- **RU / UK / EN:** Switch navigation and board labels between Russian, Ukrainian, and English.
+- **RU / UK / EN:** Switch the entire user interface (navigation, toolbar popovers, SVG hover tooltips, controls, analytical panels, invariant checkers, and modals) between Russian, Ukrainian, and English.

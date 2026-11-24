@@ -37,6 +37,10 @@ export default function App() {
   const [lang, setLang] = useState<LanguageCode>('ru');
   const t = TRANSLATIONS[lang];
 
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   // Active Four Circles view & display mode
   const [activeModule, setActiveModule] = useState<ActiveModuleId>('four_circles');
   const [displayMode, setDisplayMode] = useState<DisplayMode>('research');
@@ -245,7 +249,7 @@ export default function App() {
   }, [a, b]);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 font-sans">
+    <div className="flex flex-col h-dvh w-full overflow-hidden bg-slate-100 text-slate-900 font-sans">
       {/* Top Header */}
       <Header
         activeModule={activeModule}
@@ -260,7 +264,7 @@ export default function App() {
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Zone: GEOMETRY BOARD */}
         <section
-          aria-label="Интерактивная геометрическая сцена четырёх кругов"
+          aria-label={t.aria.boardSection}
           className={`relative bg-white transition-all ${
             isRightPanelOpen
               ? 'flex-1 lg:flex-[1.4] h-[45vh] lg:h-full border-b lg:border-b-0 lg:border-r border-slate-200'
@@ -285,7 +289,7 @@ export default function App() {
         {/* Right Zone: CONTROLS & NUMERIC OBSERVER DECK */}
         {isRightPanelOpen && (
           <aside
-            aria-label="Панель управления и числового наблюдения"
+            aria-label={t.aria.panelAside}
             className="flex-1 lg:flex-[1] h-[55vh] lg:h-full overflow-y-auto bg-slate-50/70 p-4 space-y-4"
           >
             <ControlsPanel
@@ -293,10 +297,11 @@ export default function App() {
               onChangeA={handleChangeA}
               onChangeB={handleChangeB}
               onSetBoth={handleSetBoth}
+              t={t}
             />
 
             {activeModule === 'spectral_analysis' ? (
-              <SpectralAnalysisPanel calc={calc} onChangeT={handleChangeT} />
+              <SpectralAnalysisPanel calc={calc} onChangeT={handleChangeT} t={t} />
             ) : (
               <FourCirclesPanel
                 calc={calc}
@@ -307,7 +312,7 @@ export default function App() {
               />
             )}
 
-            <InvariantsPanel calc={calc} />
+            <InvariantsPanel calc={calc} t={t} />
           </aside>
         )}
       </div>
@@ -338,15 +343,17 @@ export default function App() {
         isOpen={isCompareModalOpen}
         onClose={() => setIsCompareModalOpen(false)}
         onApplyConfig={(na, nb) => handleSetBoth(na, nb, true)}
+        t={t}
       />
 
       <TestRunnerModal
         isOpen={isTestModalOpen}
         onClose={() => setIsTestModalOpen(false)}
         onLoadTestCase={(na, nb) => handleSetBoth(na, nb, true)}
+        t={t}
       />
 
-      <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} />
+      <HelpModal isOpen={isHelpModalOpen} onClose={() => setIsHelpModalOpen(false)} t={t} />
     </div>
   );
 }

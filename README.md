@@ -1,6 +1,6 @@
-# Four-Circles Pythagorean Geometry Lab
+# Four-Circles Pythagorean Geometry Lab (`Pythagoras-Circles-Lab`)
 
-*Interactive Parametric Exploration of the Pythagorean Theorem Through Four Circles.*
+*Interactive exploration of the Pythagorean theorem through four circles, geometric relationships, and parametric visualization.*
 
 [Русская версия (`README_RU.md`)](README_RU.md) · [Mathematical Foundation](docs/MATHEMATICAL_FOUNDATION.md) · [Formula Passports (UMFP)](docs/FORMULA_PASSPORTS.md) · [Dependency Graph](docs/FORMULA_DEPENDENCY_GRAPH.md) · [Mathematical Proofs](docs/MATHEMATICAL_PROOFS.md) · [Architecture](docs/ARCHITECTURE.md) · [User Guide](docs/USER_GUIDE.md) · [Verification & Testing](docs/VERIFICATION_AND_TESTING.md) · [Release Readiness](docs/RELEASE_READINESS.md)
 
@@ -67,7 +67,7 @@ Full step-by-step derivations, UMFP formula passports (`PCL-A01`–`PCL-F24`), a
   3. `03. Incircle Kᵢ` — Focused view of $\triangle OAB$ and $K_i$ with tangency points $T_a, T_b, T_c$.
   4. `04. Spectral Analysis` — Interactive parametric function plotting over $t = b/a$.
 - **Live 8-Invariant Verification (`InvariantsPanel.tsx` & `TestRunnerModal.tsx`):** Scale-normalized validation of inradius positivity, square orthogonality, tangency of all four circles, area formulas, central $\sqrt{K}$ identity, Pythagorean area sum, and area contrast at tolerance $10^{-9}$.
-- **Experiment Controls & Exports:** Preset control triangles `(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(1,10,√101)`, `(10,1,√101)`, `(8,15,17)`; continuous leg sweep; Undo/Redo history; side-by-side comparison modal; JSON configuration save/load (`localStorage` + file export/import); PNG/SVG board export; step-by-step construction animation; `RU/UK/EN` switcher covering top navigation, bottom toolbar, board controls, and summary headers *(detailed analytical panel copy and modals are currently primarily in Russian; see [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md))*.
+- **Experiment Controls & Exports:** Preset control triangles `(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(1,10,√101)`, `(10,1,√101)`, `(8,15,17)`; continuous leg sweep; Undo/Redo history; side-by-side comparison modal; JSON configuration save/load (`localStorage` + file export/import); PNG/SVG board export; step-by-step construction animation; full **`RU / UK / EN` localization** across top navigation, bottom toolbar (including Load/Save popovers), SVG hover tooltips, controls, analytical panels, invariant checkers, and modals (with synchronized `<html lang>`).
 
 ---
 
@@ -114,19 +114,19 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full module map and M
 
 - **Frontend:** React 19 (`^19.0.1`), TypeScript (`^7.0.2`), Vite 8 (`^8.3.0`)
 - **Styling & Icons:** Tailwind CSS v4 (`@tailwindcss/vite`), `lucide-react`
-- **Mathematical Rendering:** `katex` (via `MathFormula.tsx` and CDN stylesheet in `index.html`)
+- **Mathematical Rendering:** `katex` (`MathFormula.tsx` with `katex/dist/katex.min.css` and `.woff2`/`.woff`/`.ttf` math fonts bundled locally via Vite; no external KaTeX CDN dependency)
 - **Testing & Verification:** Node `assert/strict` executed via `tsx` (`src/tests/geometry.test.ts`), TypeScript compiler (`tsc --noEmit`)
 
 ---
 
 ## 9. Installation
 
-**Prerequisites:** Node.js (v18+ recommended) and `npm`.
+**Prerequisites:** Node.js (v18+ recommended) and `bun` (authoritative lockfile: `bun.lock`) or `npm`.
 
 ```bash
-git clone <repository-url>
-cd Four-Circles-Pythagorean-Lab
-npm install
+git clone https://github.com/a50kv109/Pythagoras-Circles-Lab.git
+cd Pythagoras-Circles-Lab
+bun install --frozen-lockfile   # or: npm install
 ```
 
 ---
@@ -206,8 +206,10 @@ See [`docs/VERIFICATION_AND_TESTING.md`](docs/VERIFICATION_AND_TESTING.md) for t
 │   ├── App.tsx                          # Application root & state orchestration
 │   ├── index.css                        # Tailwind CSS v4 entry
 │   └── main.tsx                         # React DOM entry point
-├── index.html                           # HTML entry with fonts & KaTeX CSS
+├── bun.lock                             # Authoritative lockfile (Bun)
+├── index.html                           # HTML entry (offline-safe KaTeX bundled by Vite)
 ├── LICENSE                              # MIT License
+├── metadata.json                        # App descriptor metadata
 ├── package.json                         # Project metadata, scripts & dependencies
 ├── tsconfig.json                        # TypeScript configuration
 └── vite.config.ts                       # Vite 8 build & dev server config
@@ -240,4 +242,4 @@ The MIT License permits commercial use, modification, distribution, private use,
 
 *Note:* This copyright notice and attribution apply solely to the original software, architecture, implementation, interactive visualizations, and documentation in this repository. They do not claim ownership over classical Euclidean geometry, the Pythagorean theorem, established formulas, or general mathematical knowledge.
 
-See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) and [`docs/RELEASE_READINESS.md`](docs/RELEASE_READINESS.md) for current project status, known UI localization limits, and verification scope.
+See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md) and [`docs/RELEASE_READINESS.md`](docs/RELEASE_READINESS.md) for current project status, verification scope, and release notes.

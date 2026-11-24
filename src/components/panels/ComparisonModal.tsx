@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { FourCirclesCalculations } from '../../types/geometry.ts';
 import { calculateFourCircles } from '../../math/FourCirclesModel.ts';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 import { X, ArrowLeftRight, BookmarkPlus } from 'lucide-react';
 
 interface ComparisonModalProps {
@@ -13,6 +14,7 @@ interface ComparisonModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApplyConfig: (a: number, b: number) => void;
+  t?: Translations;
 }
 
 const MiniFourCirclesPreview: React.FC<{
@@ -119,6 +121,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
   isOpen,
   onClose,
   onApplyConfig,
+  t = TRANSLATIONS.ru,
 }) => {
   const [savedConfig, setSavedConfig] = useState<{ a: number; b: number }>({
     a: 4,
@@ -138,14 +141,14 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
   };
 
   const metricsToCompare = [
-    { label: 'Катет a', v1: config1.triangle.a.toFixed(2), v2: config2.triangle.a.toFixed(2) },
-    { label: 'Катет b', v1: config1.triangle.b.toFixed(2), v2: config2.triangle.b.toFixed(2) },
-    { label: 'Гипотенуза c', v1: config1.triangle.c.toFixed(4), v2: config2.triangle.c.toFixed(4) },
-    { label: 'Вписанный радиус r', v1: config1.incircle.radius.toFixed(4), v2: config2.incircle.radius.toFixed(4) },
-    { label: 'Площадь K_a', v1: config1.circleA.area.toFixed(4), v2: config2.circleA.area.toFixed(4) },
-    { label: 'Площадь K_b', v1: config1.circleB.area.toFixed(4), v2: config2.circleB.area.toFixed(4) },
-    { label: 'Площадь K_c', v1: config1.circleC.area.toFixed(4), v2: config2.circleC.area.toFixed(4) },
-    { label: 'Площадь K_i', v1: config1.incircle.area.toFixed(4), v2: config2.incircle.area.toFixed(4) },
+    { label: t.compareModal.metrics.legA, v1: config1.triangle.a.toFixed(2), v2: config2.triangle.a.toFixed(2) },
+    { label: t.compareModal.metrics.legB, v1: config1.triangle.b.toFixed(2), v2: config2.triangle.b.toFixed(2) },
+    { label: t.compareModal.metrics.hypC, v1: config1.triangle.c.toFixed(4), v2: config2.triangle.c.toFixed(4) },
+    { label: t.compareModal.metrics.inradiusR, v1: config1.incircle.radius.toFixed(4), v2: config2.incircle.radius.toFixed(4) },
+    { label: t.compareModal.metrics.areaKa, v1: config1.circleA.area.toFixed(4), v2: config2.circleA.area.toFixed(4) },
+    { label: t.compareModal.metrics.areaKb, v1: config1.circleB.area.toFixed(4), v2: config2.circleB.area.toFixed(4) },
+    { label: t.compareModal.metrics.areaKc, v1: config1.circleC.area.toFixed(4), v2: config2.circleC.area.toFixed(4) },
+    { label: t.compareModal.metrics.areaKi, v1: config1.incircle.area.toFixed(4), v2: config2.incircle.area.toFixed(4) },
     { label: '√K_a + √K_b', v1: config1.sqrtSumLegs.toFixed(5), v2: config2.sqrtSumLegs.toFixed(5) },
     { label: '√K_c + √K_i', v1: config1.sqrtSumHypAndIn.toFixed(5), v2: config2.sqrtSumHypAndIn.toFixed(5) },
   ];
@@ -155,9 +158,9 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Сравнение четырёхкруговых конфигураций</h3>
+            <h3 className="text-base font-bold text-slate-900">{t.compareModal.title}</h3>
             <p className="text-xs text-slate-500">
-              Сопоставление эталонного треугольника и текущей конструкции
+              {t.compareModal.subtitle}
             </p>
           </div>
           <button
@@ -174,40 +177,40 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
               onClick={handleCaptureCurrent}
               className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors flex items-center gap-1.5"
             >
-              <BookmarkPlus className="w-4 h-4" /> Зафиксировать текущую в Конфигурацию 1
+              <BookmarkPlus className="w-4 h-4" /> {t.compareModal.captureBtn}
             </button>
 
             <button
               onClick={() => onApplyConfig(savedConfig.a, savedConfig.b)}
               className="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5"
             >
-              <ArrowLeftRight className="w-3.5 h-3.5" /> Загрузить Конфигурацию 1
+              <ArrowLeftRight className="w-3.5 h-3.5" /> {t.compareModal.loadBtn}
             </button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <MiniFourCirclesPreview
               calc={config1}
-              label={`Конфигурация 1 (a=${savedConfig.a}, b=${savedConfig.b})`}
+              label={`${t.compareModal.config1} (a=${savedConfig.a}, b=${savedConfig.b})`}
               accent="text-slate-700"
             />
             <MiniFourCirclesPreview
               calc={config2}
-              label={`Конфигурация 2 (a=${config2.triangle.a}, b=${config2.triangle.b})`}
+              label={`${t.compareModal.config2} (a=${config2.triangle.a}, b=${config2.triangle.b})`}
               accent="text-indigo-700"
             />
           </div>
 
-          <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <div className="border border-slate-200 rounded-xl overflow-x-auto">
             <table className="w-full text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 font-semibold text-slate-700">
                 <tr>
-                  <th className="py-2 px-4 text-left">Величина</th>
+                  <th className="py-2 px-4 text-left">{t.compareModal.colQuantity}</th>
                   <th className="py-2 px-4 text-right bg-slate-100/50">
-                    Конф. 1 (a={savedConfig.a}, b={savedConfig.b})
+                    {t.compareModal.colConf1} (a={savedConfig.a}, b={savedConfig.b})
                   </th>
                   <th className="py-2 px-4 text-right text-indigo-700 bg-indigo-50/40">
-                    Конф. 2 (a={config2.triangle.a}, b={config2.triangle.b})
+                    {t.compareModal.colConf2} (a={config2.triangle.a}, b={config2.triangle.b})
                   </th>
                 </tr>
               </thead>
@@ -229,7 +232,7 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition-colors"
           >
-            Закрыть
+            {t.actions.close}
           </button>
         </div>
       </div>

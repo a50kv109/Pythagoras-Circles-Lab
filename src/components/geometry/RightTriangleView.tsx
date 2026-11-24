@@ -6,6 +6,7 @@
 import React from 'react';
 import { HoveredObject, Point2D, RightTriangleCalculations } from '../../types/geometry.ts';
 import { toScreen } from '../../geometry/transforms.ts';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 
 interface RightTriangleViewProps {
   triangle: RightTriangleCalculations;
@@ -15,6 +16,7 @@ interface RightTriangleViewProps {
   showAngles?: boolean;
   showAltitude?: boolean;
   onHoverObject?: (obj: HoveredObject | null) => void;
+  t?: Translations;
 }
 
 function describeSvgArc(
@@ -45,6 +47,7 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
   showAngles = true,
   showAltitude = false,
   onHoverObject,
+  t = TRANSLATIONS.ru,
 }) => {
   const pO = toScreen(triangle.O, origin, scale);
   const pA = toScreen(triangle.A, origin, scale);
@@ -78,8 +81,8 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
         onPointerEnter={() =>
           onHoverObject?.({
             id: 'triangle-OAB',
-            title: 'Прямоугольный треугольник OAB',
-            details: `Катеты a=${triangle.a.toFixed(2)}, b=${triangle.b.toFixed(2)}, гипотенуза c=${triangle.c.toFixed(3)}, S=${triangle.area.toFixed(2)}`,
+            title: t.hover.triangleTitle,
+            details: `${t.hover.triangleLegsPrefix} a=${triangle.a.toFixed(2)}, b=${triangle.b.toFixed(2)}, ${t.hover.triangleHypLabel} c=${triangle.c.toFixed(3)}, S=${triangle.area.toFixed(2)}`,
             category: 'polygon',
           })
         }
@@ -131,8 +134,8 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
         onPointerEnter={() =>
           onHoverObject?.({
             id: 'leg-a',
-            title: 'Вертикальный катет OA',
-            details: `Длина a = ${triangle.a.toFixed(3)} ед. · Проекция на гипотенузу c_a = ${triangle.projectionA.toFixed(3)}`,
+            title: t.hover.legOATitle,
+            details: `${t.hover.lengthUnit} a = ${triangle.a.toFixed(3)} ${t.controls.unitShort} · ${t.hover.projHyp} c_a = ${triangle.projectionA.toFixed(3)}`,
             category: 'segment',
           })
         }
@@ -149,8 +152,8 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
         onPointerEnter={() =>
           onHoverObject?.({
             id: 'leg-b',
-            title: 'Горизонтальный катет OB',
-            details: `Длина b = ${triangle.b.toFixed(3)} ед. · Проекция на гипотенузу c_b = ${triangle.projectionB.toFixed(3)}`,
+            title: t.hover.legOBTitle,
+            details: `${t.hover.lengthUnit} b = ${triangle.b.toFixed(3)} ${t.controls.unitShort} · ${t.hover.projHyp} c_b = ${triangle.projectionB.toFixed(3)}`,
             category: 'segment',
           })
         }
@@ -167,8 +170,8 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
         onPointerEnter={() =>
           onHoverObject?.({
             id: 'hypotenuse-c',
-            title: 'Гипотенуза AB',
-            details: `Длина c = √(a²+b²) = ${triangle.c.toFixed(3)} ед. · Сторона квадрата Q_c и диаметр круга K_c`,
+            title: t.hover.hypABTitle,
+            details: `${t.hover.lengthUnit} c = √(a²+b²) = ${triangle.c.toFixed(3)} ${t.controls.unitShort} · ${t.hover.hypDetailsSuffix}`,
             category: 'segment',
           })
         }

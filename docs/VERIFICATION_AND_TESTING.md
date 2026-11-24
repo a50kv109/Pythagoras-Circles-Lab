@@ -15,13 +15,16 @@ This document describes the automated and runtime verification layers implemente
 ## 2. Commands (Matching `package.json`)
 
 ```bash
+# 0. Verify deterministic dependencies from bun.lock
+bun install --frozen-lockfile
+
 # 1. Execute automated mathematical & synchronization unit tests
 npm test
 
 # 2. Run TypeScript static type checking
 npm run lint
 
-# 3. Build production Vite bundle
+# 3. Build production Vite bundle (bundles local KaTeX CSS/fonts into dist/)
 npm run build
 ```
 

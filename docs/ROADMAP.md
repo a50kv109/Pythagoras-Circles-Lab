@@ -26,14 +26,12 @@ The items below represent **proposed future directions** for the project. None o
 
 ---
 
-## 3. UI, Localization & Educational Features
+## 3. UI & Educational Features
 
-- **Complete Multi-Language Support (`EN` / `UK` / `RU`):**
-  - Move remaining Russian-only strings in `ControlsPanel.tsx`, `FourCirclesPanel.tsx`, `SpectralAnalysisPanel.tsx`, `InvariantsPanel.tsx`, and modals into `src/i18n/translations.ts` so switching to `EN` or `UK` translates 100% of the interface.
 - **Guided Interactive Experiments:**
   - Built-in step-by-step inquiry scenarios (e.g., *"Why does $K_a + K_b = K_c$ hold while $\sqrt{K_a} + \sqrt{K_b} = \sqrt{K_c} + \sqrt{K_i}$?"*, *"Finding the maximum of $K_i/K_c$ at $t = 1$"*).
-- **Self-Contained KaTeX & Font Bundling:**
-  - Bundle `katex/dist/katex.min.css` locally via Vite instead of relying on an external CDN so the app works completely offline.
+- **Fully Self-Contained Typography:**
+  - Bundle `Plus Jakarta Sans` and `JetBrains Mono` locally if strict air-gapped UI font matching is desired (`katex` CSS and math fonts are already bundled locally via Vite).
 
 ---
 
@@ -42,6 +40,6 @@ The items below represent **proposed future directions** for the project. None o
 - **Browser & Component Testing:**
   - Add Vitest + React Testing Library tests for `SpectralAnalysisPanel` and `GeometryBoard`, plus Playwright E2E visual regression checks.
 - **GitHub Actions CI Workflow:**
-  - Automate `npm ci`, `npm test`, `npm run lint`, and `npm run build` on pull requests.
-- **Repository Cleanup Before Tagging `v1.0.0`:**
-  - Optionally remove `docs/archive/legacy-pythagorean-pants/` if archival history is no longer needed in the standalone release, and prune unused template dependencies from `package.json` after manual review.
+  - Automate `bun install --frozen-lockfile`, `npm test`, `npm run lint`, and `npm run build` on pull requests.
+- **Archival Pruning (Optional):**
+  - Optionally remove `docs/archive/legacy-pythagorean-pants/` if archival history is no longer needed in a future release.

@@ -6,6 +6,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FourCirclesCalculations } from '../../types/geometry.ts';
 import { FOUR_CIRCLES_PRESETS } from '../../math/presets.ts';
+import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 import { Play, Pause, RotateCcw, Sliders } from 'lucide-react';
 
 interface ControlsPanelProps {
@@ -13,6 +14,7 @@ interface ControlsPanelProps {
   onChangeA: (newA: number, recordHistory?: boolean) => void;
   onChangeB: (newB: number, recordHistory?: boolean) => void;
   onSetBoth: (newA: number, newB: number, recordHistory?: boolean) => void;
+  t?: Translations;
 }
 
 export const ControlsPanel: React.FC<ControlsPanelProps> = ({
@@ -20,6 +22,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
   onChangeA,
   onChangeB,
   onSetBoth,
+  t = TRANSLATIONS.ru,
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [animSpeed, setAnimSpeed] = useState<number>(1);
@@ -65,13 +68,13 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="flex items-center gap-2">
           <Sliders className="w-4 h-4 text-indigo-600" />
           <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-            Параметры треугольника (a, b)
+            {t.controls.title}
           </h3>
         </div>
         <button
           onClick={() => onSetBoth(4, 4, true)}
           className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap shrink-0"
-          title="Установить равнобедренный треугольник a = b = 4"
+          title={t.controls.setIsoscelesTitle}
         >
           a = b = 4
         </button>
@@ -83,7 +86,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="slider-leg-a" className="text-xs font-semibold text-slate-700">
-              Катет <i className="text-blue-700 font-bold">a</i> (OA, ед.):
+              {t.controls.legALabel} <i className="text-blue-700 font-bold">a</i> (OA, {t.controls.unitShort}):
             </label>
             <input
               id="slider-leg-a"
@@ -117,7 +120,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="slider-leg-b" className="text-xs font-semibold text-slate-700">
-              Катет <i className="text-emerald-700 font-bold">b</i> (OB, ед.):
+              {t.controls.legBLabel} <i className="text-emerald-700 font-bold">b</i> (OB, {t.controls.unitShort}):
             </label>
             <input
               id="slider-leg-b"
@@ -150,7 +153,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
 
       {/* Control Triangles Presets */}
       <div className="space-y-1.5 pt-1">
-        <span className="text-[11px] font-semibold text-slate-500">Контрольные треугольники:</span>
+        <span className="text-[11px] font-semibold text-slate-500">{t.controls.presetsTitle}</span>
         <div className="flex flex-wrap gap-1.5">
           {FOUR_CIRCLES_PRESETS.map((preset) => {
             const isActive =
@@ -160,7 +163,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
               <button
                 key={preset.id}
                 onClick={() => onSetBoth(preset.a, preset.b, true)}
-                title={preset.description}
+                title={t.controls.presetDescriptions[preset.id] || preset.description}
                 className={`px-2.5 py-1 text-xs font-mono font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-xs'
@@ -187,11 +190,11 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
           >
             {isAnimating ? (
               <>
-                <Pause className="w-3.5 h-3.5" /> Пауза
+                <Pause className="w-3.5 h-3.5" /> {t.controls.pause}
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5" /> Плавное изменение (a, b)
+                <Play className="w-3.5 h-3.5" /> {t.controls.smoothSweep}
               </>
             )}
           </button>
@@ -218,7 +221,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
           }}
           className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 whitespace-nowrap shrink-0"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Сброс (3-4-5)
+          <RotateCcw className="w-3.5 h-3.5" /> {t.controls.reset345}
         </button>
       </div>
     </div>

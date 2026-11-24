@@ -13,4 +13,6 @@
 - Интерактивный параметрический анализ (`FourCirclesSpectralAnalysis.ts`, `SpectralAnalysisPanel.tsx`): график нормированных кривых от $t = b/a$ (площади, периметры, радиусы/диаметры), логарифмическая и линейная шкалы, проход через симметрию $t = 1$ и синхронизация с геометрической моделью.
 - Полная документация по методологии UMFP (`PCL-A01`–`PCL-F24`) в каталоге `docs/` (`FORMULA_PASSPORTS.md`, `FORMULA_DEPENDENCY_GRAPH.md`, `MATHEMATICAL_FOUNDATION.md`, `MATHEMATICAL_PROOFS.md`, `NUMERICAL_ANALYSIS.md`, `VERIFICATION_MATRIX.md`, `ARCHITECTURE.md`).
 - Лицензирование проекта под стандартной лицензией **MIT License** (`LICENSE`, `Copyright (c) 2026 Andrey Artsybashev`).
+- Полная трёхъязычная локализация интерфейса (`RU / UK / EN`) в `src/i18n/translations.ts` для всех панелей, модальных окон, всплывающих подсказок и элементов управления.
+- Локальная сборка `katex/dist/katex.min.css` и математических шрифтов средствами Vite (без зависимости от внешнего KaTeX CDN) и очистка неиспользуемых шаблонных зависимостей с выровненным `bun.lock`.
 - Автоматический тестовый сюит (`src/tests/geometry.test.ts`) со строгим входным контрактом, проверкой масштабов, дуальности, параметрической синхронизации и мутационными тестами.

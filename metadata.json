@@ -1,8 +1,5 @@
 {
-  "name": "Four-Circles Pythagorean Geometry Lab",
-  "description": "Interactive mathematical laboratory exploring the Pythagorean theorem through four circles and parametric geometric analysis.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "name": "Pythagoras-Circles-Lab — Four-Circles Pythagorean Geometry Lab",
+  "description": "Interactive exploration of the Pythagorean theorem through four circles, geometric relationships, and parametric visualization.",
+  "requestFramePermissions": []
 }

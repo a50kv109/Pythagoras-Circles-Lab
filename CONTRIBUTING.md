@@ -16,8 +16,9 @@
 3. Добавьте юнит-тесты в `src/tests/geometry.test.ts`.
 4. Запустите проверки:
    ```bash
+   bun install --frozen-lockfile
    npm test
    npm run lint
    npm run build
    ```
-5. Убедитесь, что все тесты проходят успешно, и создайте Pull Request.
+5. Убедитесь, что все тесты проходят успешно, UI-строки добавлены во все три локали (`ru`, `uk`, `en` в `src/i18n/translations.ts`), и создайте Pull Request.
