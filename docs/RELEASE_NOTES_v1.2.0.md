@@ -33,8 +33,8 @@ While previous versions successfully integrated Thales' circumcircle ($O_o = \fr
    - Includes reference scale line $\lambda = 1.0$, live coordinate readout, and a degree-of-homogeneity verification table.
 5. **Expanded Test Suite (Section 10):**
    - Comprehensive unit tests covering $\lambda = 1.0$ identity, $\lambda = 2.0$ (doubling lengths, quadrupling areas), $\lambda = 0.5$ (halving lengths, quartering areas), $t$ vs. $\lambda$ independence, 17-invariant preservation across $\lambda \in [0.1, 10.0]$, and input range validation (`10/10 test sections passing`).
-6. **Complete UMFP Passport Integration (`PCL-G30`):**
-   - Added formula passport `PCL-G30` for the Proportional Scaling Transformation and Homogeneity Law.
+6. **UMFP-aligned Formula Passport Documentation (`PCL-G30`):**
+   - Added formula passport `PCL-G30` for the Proportional Scaling Transformation and Homogeneity Law, documenting passports `PCL-A01`–`PCL-G30` strictly according to the UMFP methodology. Note that the UMFP software engine is not imported or executed in this application.
 
 ---
 
