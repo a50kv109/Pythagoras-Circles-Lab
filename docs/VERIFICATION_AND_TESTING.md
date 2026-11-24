@@ -7,8 +7,8 @@ This document describes the automated and runtime verification layers implemente
 ## 1. Test and Verification Files
 
 1. **Automated Unit & Synchronization Suite:** `src/tests/geometry.test.ts` (executed via Node `tsx` with `node:assert/strict`, tolerance `TOL = 1e-9`).
-2. **Runtime Invariant Validator:** `src/math/FourCirclesValidators.ts` (`validateFourCirclesInvariants(calc, tol = 1e-9)`), evaluated live on every state change inside `src/components/panels/InvariantsPanel.tsx` and across control benchmarks inside `src/components/panels/TestRunnerModal.tsx`.
-3. **UMFP Traceability & Precision Docs:** See [`VERIFICATION_MATRIX.md`](VERIFICATION_MATRIX.md) (`PCL-A01`–`PCL-F24`) and [`NUMERICAL_ANALYSIS.md`](NUMERICAL_ANALYSIS.md) for formula-level proof vs. test mapping and `float64` stability bounds.
+2. **Runtime Invariant Validators:** `src/math/FourCirclesValidators.ts` (8 core invariants) and `src/math/ThalesValidators.ts` (`validateThalesCircumcircleInvariants` for 9 Thales invariants; `validateAllFiveCirclesInvariants` for all 17 combined invariants), evaluated live on every state change inside `src/components/panels/InvariantsPanel.tsx` and across control benchmarks inside `src/components/panels/TestRunnerModal.tsx`.
+3. **UMFP Traceability & Precision Docs:** See [`VERIFICATION_MATRIX.md`](VERIFICATION_MATRIX.md) (`PCL-A01`–`PCL-G29`) and [`NUMERICAL_ANALYSIS.md`](NUMERICAL_ANALYSIS.md) for formula-level proof vs. test mapping and `float64` stability bounds.
 
 ---
 
@@ -82,6 +82,14 @@ For each reference ratio $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$:
 - Verifies reciprocal leg-swap symmetry $t \leftrightarrow 1/t$ across $t \in \{0.1, 0.25, 0.2989, 0.5, 2.0, 4.0, 10.0\}$ for areas, perimeters, and radii.
 - Verifies `isAtSymmetryAxis` and exact $t = 1$ fixed-point trajectory handling (`evaluateSymmetryTrajectoryT(1, p) === 1`) plus finite safe fallback on invalid inputs.
 - Verifies smooth monotonic log-space sweep $t_{\text{start}} \to 1/t_{\text{start}} \to t_{\text{start}}$ crossing $t = 1$ and maintaining all 8 geometry invariants across dense progress steps.
+
+### Section 9: Thales Circumcircle ($K_o$) & Five-Circle Integration Tests
+- **Control & Pythagorean Triples (`(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(8,15,17)`):** Verifies $D_o = c$, $R_o = c/2$, $K_o = \pi c^2/4$, $L_o = \pi c$, $O_o = (b/2, a/2)$, vertex equidistance $|O_o - A| = |O_o - B| = |O_o - O| = R_o$, $\angle AOB = 90^\circ$, and $K_o = K_c$ with distinct centers $|O_o - O_c| = c/2 > 0$.
+- **Shifted & Rotated General Right Triangle:** Verifies `calculateThalesCircumcircleFromVertices(A, B, C)` at $C = (10, -4)$ rotated by $\theta = 0.63\text{ rad}$, proving $O_o = \frac{A+B}{2}$ is computed from actual endpoints rather than hardcoded.
+- **Extreme Aspect & Scale Stability:** Runs all 9 Thales and 17 combined invariants on `(0.2, 15)`, `(15, 0.2)`, `(1e-4, 2e-4)`, `(1e6, 2e6)`, confirming `validateFourCirclesInvariants` stays unchanged at 8.
+- **Leg-Swap Symmetry:** Confirms $(3, 9) \leftrightarrow (9, 3)$ preserves $D_o, R_o, K_o, L_o$ and reflects $O_o$ coordinates ($x \leftrightarrow y$).
+- **Parametric Invariance & Monotonic Growth:** Verifies constant `thalesNorm` ratios across $t \in [0.05, 20]$, strict monotonicity of `thalesAbs` ($R_o^*, D_o^*, K_o^*, L_o^*$), 4-item core `spectral.items` backward compatibility + `circumcircleItem`, and `sampleThalesAbsoluteCurves`.
+- **Negative Input & Mutation Guards:** Confirms `RangeError` on `NaN` vertices, coincident $A = B$, and $t \le 0$ or `NaN`; confirms shifting $O_o$ fails `thales_dist_A`, `thales_dist_B`, and `thales_dist_C`.
 
 ---
 

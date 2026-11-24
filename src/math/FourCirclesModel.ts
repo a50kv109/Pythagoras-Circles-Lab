@@ -11,6 +11,7 @@ import {
 import { assertValidLegs } from './inputValidation.ts';
 import { calculateRightTriangle } from './RightTriangle.ts';
 import { calculateSquareA, calculateSquareB, calculateSquareC } from './SquareConstruction.ts';
+import { calculateThalesCircumcircle } from './ThalesCircumcircle.ts';
 
 const SQRT_PI = Math.sqrt(Math.PI);
 
@@ -137,6 +138,9 @@ export function calculateFourCircles(a: number, b: number): FourCirclesCalculati
   const areaMinusAll = areaKa + areaKb - areaKc - areaKi;
   const areaContrastExpected = -areaKi;
 
+  // Fifth circle: Thales circumcircle K_o around triangle OAB (D_o = c, R_o = c/2, center = (A+B)/2)
+  const circumcircle = calculateThalesCircumcircle(triangle, areaKc, circleC.center);
+
   return {
     triangle,
     squareA,
@@ -146,6 +150,7 @@ export function calculateFourCircles(a: number, b: number): FourCirclesCalculati
     circleB,
     circleC,
     incircle,
+    circumcircle,
     sqrtSumLegs,
     sqrtSumHypAndIn,
     identityResidualAbs,

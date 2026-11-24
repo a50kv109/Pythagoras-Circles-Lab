@@ -14,6 +14,7 @@ import { GeometryBoard } from './components/geometry/GeometryBoard.tsx';
 import { ControlsPanel } from './components/panels/ControlsPanel.tsx';
 import { FourCirclesPanel } from './components/panels/FourCirclesPanel.tsx';
 import { SpectralAnalysisPanel } from './components/panels/SpectralAnalysisPanel.tsx';
+import { ThalesCircumcirclePanel } from './components/panels/ThalesCircumcirclePanel.tsx';
 import { InvariantsPanel } from './components/panels/InvariantsPanel.tsx';
 import { ComparisonModal } from './components/panels/ComparisonModal.tsx';
 import { TestRunnerModal } from './components/panels/TestRunnerModal.tsx';
@@ -160,6 +161,26 @@ export default function App() {
     [pushHistory]
   );
 
+  const handleChangeLambda = useCallback(
+    (targetLambda: number, recordHistory = true) => {
+      if (!Number.isFinite(targetLambda) || targetLambda <= 0) return;
+      const currentC = latestGeomRef.current.c;
+      const currentLambda = currentC / 5.0;
+      if (currentLambda <= 0) return;
+      const factor = targetLambda / currentLambda;
+      const newA = clampVal(latestGeomRef.current.a * factor);
+      const newB = clampVal(latestGeomRef.current.b * factor);
+      setA(newA);
+      setB(newB);
+      setLegMutationToken((n) => n + 1);
+      setGraphMutationToken((n) => n + 1);
+      if (recordHistory) {
+        pushHistory(newA, newB);
+      }
+    },
+    [pushHistory]
+  );
+
   const handleCommitDrag = useCallback(() => {
     pushHistory(latestGeomRef.current.a, latestGeomRef.current.b);
   }, [pushHistory]);
@@ -212,12 +233,19 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleUndo, handleRedo]);
 
-  // Step-by-step Construction Animation: triangle_incircle -> squares -> square_circles -> all
+  // Step-by-step Construction Animation: triangle_incircle -> squares -> square_circles -> thales_only -> five_circles -> all
   useEffect(() => {
     if (!isStepAnimating) return;
 
     setActiveModule('four_circles');
-    const sequence: BoardLayerFilter[] = ['triangle_incircle', 'squares', 'square_circles', 'all'];
+    const sequence: BoardLayerFilter[] = [
+      'triangle_incircle',
+      'squares',
+      'square_circles',
+      'thales_only',
+      'five_circles',
+      'all',
+    ];
     let stepIdx = 0;
     setLayerFilter(sequence[0]);
 
@@ -334,6 +362,7 @@ export default function App() {
               onChangeA={handleChangeA}
               onChangeB={handleChangeB}
               onSetBoth={handleSetBoth}
+              onChangeLambda={handleChangeLambda}
               externalGraphMutationToken={graphMutationToken}
               t={t}
             />
@@ -342,7 +371,14 @@ export default function App() {
               <SpectralAnalysisPanel
                 calc={calc}
                 onChangeT={handleChangeT}
+                onChangeLambda={handleChangeLambda}
                 externalLegMutationToken={legMutationToken}
+                t={t}
+              />
+            ) : activeModule === 'thales_circumcircle' ? (
+              <ThalesCircumcirclePanel
+                calc={calc}
+                onChangeLambda={handleChangeLambda}
                 t={t}
               />
             ) : (

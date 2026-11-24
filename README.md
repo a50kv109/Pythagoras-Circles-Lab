@@ -12,8 +12,9 @@
 
 - A right triangle $OAB$ with legs $a, b > 0$ and hypotenuse $c = \sqrt{a^2 + b^2}$,
 - Three exterior squares constructed on its sides ($Q_a, Q_b, Q_c$),
-- Three circles inscribed in those squares ($K_a, K_b, K_c$), and
-- A fourth circle ($K_i$) inscribed directly inside the right triangle.
+- Three circles inscribed in those squares ($K_a, K_b, K_c$),
+- A fourth circle ($K_i$) inscribed directly inside the right triangle, and
+- A fifth dynamic geometric layer: **Thales Circumcircle ($K_o$)** circumscribed around right triangle $OAB$ with hypotenuse $AB$ as diameter.
 
 Every geometric parameter, SVG overlay, invariant check, and parametric curve is derived deterministically from a single shared state $(a, b)$.
 
@@ -41,6 +42,9 @@ In the standard orthonormal Cartesian coordinate system with right angle at $O(0
 | **$K_b$** | Inscribed in exterior square $Q_b$ on leg $OB$ | $\left(\frac{b}{2},\; -\frac{b}{2}\right)$ | $b$ | $\frac{b}{2}$ | $\frac{\pi b^2}{4}$ |
 | **$K_c$** | Inscribed in exterior square $Q_c$ on hypotenuse $AB$ | $\left(\frac{a+b}{2},\; \frac{a+b}{2}\right)$ | $c$ | $\frac{c}{2}$ | $\frac{\pi c^2}{4}$ |
 | **$K_i$** | Incircle inside right triangle $\triangle OAB$ | $(r,\; r)$ | $2r$ | $r = \frac{a + b - c}{2}$ | $\pi r^2$ |
+| **$K_o$** | Thales circumcircle of $\triangle OAB$ (diameter $AB$) | $\frac{A+B}{2} = \left(\frac{b}{2},\; \frac{a}{2}\right)$ | $c$ | $\frac{c}{2}$ | $\frac{\pi c^2}{4}$ |
+
+**Key Structural Relationship ($K_c$ vs. $K_o$):** Both $K_c$ (inscribed in hypotenuse square $Q_c$) and $K_o$ (circumscribed around $\triangle OAB$ by Thales' theorem) share the exact same diameter $c$, radius $c/2$, area $\frac{\pi c^2}{4}$, and circumference $\pi c$, while having distinct centers separated by $|O_o - O_c| = \frac{c}{2} > 0$.
 
 ---
 
@@ -54,46 +58,50 @@ Adding the hypotenuse and incircle terms yields:
 
 $$\sqrt{K_c} + \sqrt{K_i} = \frac{\sqrt{\pi}}{2}c + \frac{\sqrt{\pi}}{2}(a + b - c) = \frac{\sqrt{\pi}}{2}(a + b) = \sqrt{K_a} + \sqrt{K_b}$$
 
-Full step-by-step derivations, UMFP formula passports (`PCL-A01`–`PCL-F24`), and numerical stability proofs are documented in [`docs/MATHEMATICAL_FOUNDATION.md`](docs/MATHEMATICAL_FOUNDATION.md), [`docs/FORMULA_PASSPORTS.md`](docs/FORMULA_PASSPORTS.md), and [`docs/MATHEMATICAL_PROOFS.md`](docs/MATHEMATICAL_PROOFS.md).
+Full step-by-step derivations, UMFP formula passports (`PCL-A01`–`PCL-G30`), and numerical stability proofs are documented in [`docs/MATHEMATICAL_FOUNDATION.md`](docs/MATHEMATICAL_FOUNDATION.md), [`docs/FORMULA_PASSPORTS.md`](docs/FORMULA_PASSPORTS.md), and [`docs/MATHEMATICAL_PROOFS.md`](docs/MATHEMATICAL_PROOFS.md).
 
 ---
 
 ## 5. Key Application Features
 
-- **Interactive SVG Geometry Board (`GeometryBoard.tsx`):** Drag vertices $A(0,a)$ vertically or $B(b,0)$ horizontally, pan and zoom the coordinate canvas, toggle grid, labels, centers, radii, and angle arcs, and filter visibility layers (`all`, `triangle_incircle`, `squares`, `square_circles`).
-- **Four Analytical Workspace Views:**
-  1. `01. Four Circles` — Unified view of $\triangle OAB$, $Q_a, Q_b, Q_c$, and $K_a, K_b, K_c, K_i$.
+- **Interactive SVG Geometry Board (`GeometryBoard.tsx`):** Drag vertices $A(0,a)$ vertically or $B(b,0)$ horizontally, pan and zoom the coordinate canvas, toggle grid, labels, centers, radii, angle arcs, and the **`K_o` toggle**, and filter visibility layers (`all`, `triangle_incircle`, `squares`, `square_circles`, `four_circles_only`, `thales_only`, `five_circles`).
+- **Five Analytical Workspace Views:**
+  1. `01. Four Circles` — Unified view of $\triangle OAB$, $Q_a, Q_b, Q_c$, and $K_a, K_b, K_c, K_i$ (plus side-by-side $K_c$ vs. $K_o$ comparison).
   2. `02. √K Identity` — Algebraic proof context and real-time LHS vs. RHS residual observer.
   3. `03. Incircle Kᵢ` — Focused view of $\triangle OAB$ and $K_i$ with tangency points $T_a, T_b, T_c$.
-  4. `04. Spectral Analysis` — Interactive parametric function plotting over $t = b/a$.
-- **Live 8-Invariant Verification (`InvariantsPanel.tsx` & `TestRunnerModal.tsx`):** Scale-normalized validation of inradius positivity, square orthogonality, tangency of all four circles, area formulas, central $\sqrt{K}$ identity, Pythagorean area sum, and area contrast at tolerance $10^{-9}$.
-- **Experiment Controls & Exports:** Preset control triangles `(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(1,10,√101)`, `(10,1,√101)`, `(8,15,17)`; continuous leg sweep; Undo/Redo history; side-by-side comparison modal; JSON configuration save/load (`localStorage` + file export/import); PNG/SVG board export; step-by-step construction animation; full **`RU / UK / EN` localization** across top navigation, bottom toolbar (including Load/Save popovers), SVG hover tooltips, controls, analytical panels, invariant checkers, and modals (with synchronized `<html lang>`).
+  4. `04. Spectral Analysis` — Interactive parametric function plotting over $t = b/a$ and scale $\lambda = c / 5.0$, with optional `K_o` normalized overlay, `Abs. Growth K_o(t)` mode, and `Scale λ` Homogeneity Law mode.
+  5. `05. Thales Circle Kₒ` — Dedicated exploration of Thales' circumcircle $K_o$ ($O_o = \frac{A+B}{2}$, $\angle AOB = 90^\circ$, vertex equidistance, dynamic scale slider $\lambda \in [0.2, 2.5]$, 3-center comparison $I$ vs. $O_o$ vs. $O_c$, and $K_c$ vs. $K_o$).
+- **Two-Parameter Orthogonal Model ($t, \lambda$):** Decouples triangle shape ($t = b/a$) from absolute scale ($\lambda = c / 5.0$), demonstrating the Homogeneity Law ($[L^1] \sim \lambda$, $[L^2] \sim \lambda^2$) and universal invariance of the central identity $\sqrt{K_a} + \sqrt{K_b} = \sqrt{K_c} + \sqrt{K_i}$ for any $\lambda > 0$.
+- **Live 17-Invariant Verification (`InvariantsPanel.tsx` & `TestRunnerModal.tsx`):** Scale-normalized validation of 8 core four-circle invariants plus 9 Thales circumcircle invariants (`validateAllFiveCirclesInvariants`) at tolerance $10^{-9}$.
+- **Experiment Controls & Exports:** Preset control triangles `(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(1,10,√101)`, `(10,1,√101)`, `(8,15,17)`; continuous leg sweep; scale presets ($0.5x, 1.0x, 1.5x, 2.0x$); Undo/Redo history; side-by-side 5-circle comparison modal; JSON configuration save/load (`localStorage` + file export/import); PNG/SVG board export; step-by-step construction animation; full **`RU / UK / EN` localization** across top navigation, bottom toolbar (including Load/Save popovers), SVG hover tooltips, controls, analytical panels, invariant checkers, and modals (with synchronized `<html lang>`).
 
 ---
 
 ## 5.1 Mathematical Documentation & UMFP Methodology
 
-All 24 core formulas, geometric constructions, invariant guards, and parametric relations are documented in [`docs/FORMULA_PASSPORTS.md`](docs/FORMULA_PASSPORTS.md) (`PCL-A01`–`PCL-F24`), [`docs/FORMULA_DEPENDENCY_GRAPH.md`](docs/FORMULA_DEPENDENCY_GRAPH.md), [`docs/MATHEMATICAL_PROOFS.md`](docs/MATHEMATICAL_PROOFS.md), [`docs/NUMERICAL_ANALYSIS.md`](docs/NUMERICAL_ANALYSIS.md), and [`docs/VERIFICATION_MATRIX.md`](docs/VERIFICATION_MATRIX.md).
+All 30 formulas (24 core + 6 Thales circumcircle / scaling), geometric constructions, invariant guards, and parametric relations are documented in [`docs/FORMULA_PASSPORTS.md`](docs/FORMULA_PASSPORTS.md) (`PCL-A01`–`PCL-G30`), [`docs/FORMULA_DEPENDENCY_GRAPH.md`](docs/FORMULA_DEPENDENCY_GRAPH.md), [`docs/MATHEMATICAL_PROOFS.md`](docs/MATHEMATICAL_PROOFS.md), [`docs/NUMERICAL_ANALYSIS.md`](docs/NUMERICAL_ANALYSIS.md), and [`docs/VERIFICATION_MATRIX.md`](docs/VERIFICATION_MATRIX.md).
 
 - **Methodological Alignment (UMFP):** The passport registry adopts the **Universal Mathematical Formula Passport (UMFP)** schema (`RAW` vs. `NORMALIZED` representations, structural classification, variable scopes, domain constraints, diagnostic notes, and separated epistemic statuses `VERIFIED`, `DERIVED`, `CONJECTURE`, `ANALOGY`).
-- **Scope Honesty:** This project uses UMFP **strictly as a methodological documentation standard** — it does **not** import or execute runtime code (`FormulaPassport`, `generatePassport()`, `comparePassports()`, `compareExpressions()`, `Insight Bank`) from the external UMFP engine repository.
+- **Scope Honesty:** This project uses UMFP **strictly as a methodological documentation standard** — it does **not** import or execute runtime code (`FormulaPassport`, `generatePassport()`, `comparePassports()`, `compareExpressions()`, `Insight Bank`) from the external UMFP engine repository. Similarly, the fifth geometric layer implements classical Euclidean **Thales' theorem**.
 
 ---
 
 ## 6. Interactive Parametric Analysis
 
-> **Terminology Note:** Module 04 is labeled **"04. Спектральный анализ" (`spectral_analysis`)** in the interface. In the current codebase, it performs **parametric graphical ratio analysis** as a function of the dimensionless leg ratio $t = b/a$ (normalized relative to $K_c$), rather than Fourier/DFT frequency-domain decomposition.
+> **Terminology Note:** Module 04 is labeled **"04. Спектральный анализ" (`spectral_analysis`)** in the interface. In the current codebase, it performs **parametric graphical ratio and scale analysis** as a function of the dimensionless leg ratio $t = b/a$ and scale parameter $\lambda = c / 5.0$, rather than Fourier/DFT frequency-domain decomposition.
 
-Using the normalized triangle $a = 1,\; b = t,\; c(t) = \sqrt{1+t^2},\; r(t) = \frac{1+t-\sqrt{1+t^2}}{2}$ computed directly via `calculateFourCircles(1, t)`:
+Using the normalized triangle $a = 1,\; b = t,\; c(t) = \sqrt{1+t^2},\; r(t) = \frac{1+t-\sqrt{1+t^2}}{2}$ computed directly via `calculateFourCircles(1, t)` and scaled via `scaleTriangleGeometry`:
 
-- **Mode A — Areas:** $K_a(t)/K_c(t)$, $K_b(t)/K_c(t)$, $K_c(t)/K_c(t) = 1$, $K_i(t)/K_c(t)$
-- **Mode B — Perimeters ($P = 2\pi R = \pi D$):** $P_a(t)/P_c(t)$, $P_b(t)/P_c(t)$, $P_c(t)/P_c(t) = 1$, $P_i(t)/P_c(t)$
-- **Mode C — Radii & Diameters:** $R_x(t)/R_c(t)$ and $D_x(t)/D_c(t)$ with a `Radius | Diameter` switch (the normalized curves coincide because $D = 2R$)
+- **Mode A — Areas:** $K_a(t)/K_c(t)$, $K_b(t)/K_c(t)$, $K_c(t)/K_c(t) = 1$, $K_i(t)/K_c(t)$ (plus optional constant $K_o(t)/K_c(t) = 1$)
+- **Mode B — Perimeters ($P = 2\pi R = \pi D$):** $P_a(t)/P_c(t)$, $P_b(t)/P_c(t)$, $P_c(t)/P_c(t) = 1$, $P_i(t)/P_c(t)$ (plus optional constant $L_o(t)/L_c(t) = 1$)
+- **Mode C — Radii & Diameters:** $R_x(t)/R_c(t)$ and $D_x(t)/D_c(t)$ with a `Radius | Diameter` switch (the normalized curves coincide because $D = 2R$; when `K_o` overlay is enabled, displays $R_o/c = 0.5$ or $D_o/c = 1$)
+- **Mode D — Abs. Growth $K_o(t)$:** Unnormalized unit-leg ($a = 1, b = t$) monotonic curves $R_o^*(t), D_o^*(t), L_o^*(t), K_o^*(t)$ alongside a live `(a, b)` vs. unit `(1, t)` vs. invariant ratio comparison table.
+- **Mode E — Scale $\lambda$:** Plots linear growth $D_o, R_o, L_o \sim \lambda^1$ (dashed) alongside quadratic area growth $K_o, K_i \sim \lambda^2$ (solid) over $\lambda \in [0.2, 2.5]$, accompanied by the degree-of-homogeneity verification table and preset jumps.
 
 **Interactive Capabilities:**
-- Click or drag directly on the SVG Cartesian plot (`viewBox="0 0 640 300"`) to scrub $t$ and synchronously update the triangle $(a, b)$, four circles, and numerical table.
+- Click or drag directly on the SVG Cartesian plot (`viewBox="0 0 640 300"`) to scrub $t$ or $\lambda$ and synchronously update the triangle $(a, b)$, all five circles, and numerical tables.
 - Toggle between **Logarithmic ($\log_{10} t$)** (default, centering the symmetry axis $t = 1$) and **Linear ($t$)** horizontal axes.
-- Zoom in/out, reset to $[0.1, 10]$, jump to reference ratios (`t = 0.1, 0.5, 1.0, 2.0, 10.0`), or animate smoothly through the symmetry point $t = 1$.
+- Zoom in/out, reset to $[0.1, 10]$, jump to reference ratios (`t = 0.1, 0.5, 1.0, 2.0, 10.0`) or scale benchmarks ($\lambda = 0.5, 1.0, 1.5, 2.0$), or animate smoothly through the symmetry point $t = 1$.
 
 ---
 
@@ -101,9 +109,10 @@ Using the normalized triangle $a = 1,\; b = t,\; c(t) = \sqrt{1+t^2},\; r(t) = \
 
 The codebase separates pure mathematical logic (`src/math/`), coordinate transforms (`src/geometry/`), reactive UI state (`src/App.tsx`), and presentation components (`src/components/`):
 
-- `src/math/FourCirclesModel.ts` — Core parametric calculation engine (`calculateFourCircles(a, b)`).
-- `src/math/FourCirclesSpectralAnalysis.ts` — Parametric curve evaluation (`evaluateParametricFourCircles`, `sampleSpectralCurves`), ratio-to-leg mapping (`legsFromRatioAndHypotenuse`), and current-state breakdowns.
-- `src/math/FourCirclesValidators.ts` — Scale-normalized validation of 8 geometric/algebraic invariants.
+- `src/math/FourCirclesModel.ts` — Core parametric calculation engine (`calculateFourCircles(a, b)`), integrating `circumcircle` (`K_o`).
+- `src/math/ThalesCircumcircle.ts` — Pure vertex-based Thales circumcircle calculation (`calculateThalesCircumcircleFromVertices(A, B, C)` and `calculateThalesCircumcircle`).
+- `src/math/FourCirclesSpectralAnalysis.ts` — Parametric curve evaluation (`evaluateParametricFourCircles`, `sampleSpectralCurves`, `sampleThalesAbsoluteCurves`), ratio-to-leg mapping (`legsFromRatioAndHypotenuse`), and current-state breakdowns.
+- `src/math/FourCirclesValidators.ts` & `src/math/ThalesValidators.ts` — Scale-normalized validation of 8 core invariants + 9 Thales invariants (`17` total via `validateAllFiveCirclesInvariants`).
 - `src/App.tsx` — Single authoritative `(a, b)` state, Undo/Redo history, `handleChangeT` synchronization, and PNG/SVG export.
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full module map and Mermaid data-flow diagram.
@@ -189,19 +198,22 @@ See [`docs/VERIFICATION_AND_TESTING.md`](docs/VERIFICATION_AND_TESTING.md) for t
 │   │   ├── geometry/                    # CoordinateGrid, FourCirclesView, GeometryBoard,
 │   │   │                                # InteractivePoint, RightTriangleView
 │   │   └── panels/                      # ComparisonModal, ControlsPanel, FourCirclesPanel,
-│   │                                    # HelpModal, InvariantsPanel, SpectralAnalysisPanel,
-│   │                                    # TestRunnerModal
+│   │                                    # HelpModal, InvariantsPanel, KcVsKoComparison,
+│   │                                    # SpectralAnalysisPanel, TestRunnerModal,
+│   │                                    # ThalesCircumcirclePanel
 │   ├── geometry/transforms.ts           # Cartesian <-> SVG screen coordinate mapping
 │   ├── i18n/translations.ts             # RU / UK / EN translation dictionary
 │   ├── math/
-│   │   ├── FourCirclesModel.ts          # Authoritative 4-circle geometry calculation
+│   │   ├── FourCirclesModel.ts          # Authoritative 4-circle + K_o geometry calculation
 │   │   ├── FourCirclesSpectralAnalysis.ts # Parametric ratio curves & t -> (a, b) sync
-│   │   ├── FourCirclesValidators.ts     # 8 scale-normalized invariant validators
+│   │   ├── FourCirclesValidators.ts     # 8 core scale-normalized invariant validators
 │   │   ├── RightTriangle.ts             # Right triangle geometry
 │   │   ├── SquareConstruction.ts        # Exterior squares Qa, Qb, Qc
+│   │   ├── ThalesCircumcircle.ts        # Fifth circle K_o from actual endpoints A, B
+│   │   ├── ThalesValidators.ts          # 9 Thales invariants & 17-invariant combined validator
 │   │   ├── inputValidation.ts           # Strict positive finite leg assertions
 │   │   └── presets.ts                   # Control triangle presets
-│   ├── tests/geometry.test.ts           # Automated verification suite
+│   ├── tests/geometry.test.ts           # Automated verification suite (Sections 1–9)
 │   ├── types/geometry.ts                # Core TypeScript interfaces
 │   ├── App.tsx                          # Application root & state orchestration
 │   ├── index.css                        # Tailwind CSS v4 entry

@@ -14,6 +14,15 @@ import {
   evaluateSymmetryTrajectoryT,
   isAtSymmetryAxis,
 } from '../math/symmetryAnimation.ts';
+import {
+  calculateThalesCircumcircleFromVertices,
+  scaleTriangleGeometry,
+  sampleThalesScaleCurves,
+} from '../math/ThalesCircumcircle.ts';
+import {
+  validateAllFiveCirclesInvariants,
+  validateThalesCircumcircleInvariants,
+} from '../math/ThalesValidators.ts';
 
 const TOL = 1e-9;
 
@@ -205,8 +214,10 @@ import {
   computeFourCirclesSpectralAnalysis,
   evaluateParametricFourCircles,
   getNormalizedValuesForMode,
+  getThalesNormalizedValueForMode,
   legsFromRatioAndHypotenuse,
   sampleSpectralCurves,
+  sampleThalesAbsoluteCurves,
 } from '../math/FourCirclesSpectralAnalysis.ts';
 
 // ============================================================================
@@ -442,4 +453,326 @@ console.log('✓ Parametric spectral graph & synchronization tests (t = 0.1, 0.5
 }
 console.log('✓ Regression tests (symmetry t <-> 1/t, t=1 edge case, smooth log trajectory) passed.');
 
-console.log('\nALL PYTHAGORAS — FOUR CIRCLES TESTS PASSED SUCCESSFULLY!');
+// ============================================================================
+// 9. Thales Circumcircle (K_o) & Five-Circle Integration Tests
+// ============================================================================
+{
+  // 9a. Classical & symmetric triples: (3,4,5), (5,12,13), (4,4,4√2), (8,15,17)
+  const thalesTriples = [
+    { a: 3, b: 4, c: 5 },
+    { a: 5, b: 12, c: 13 },
+    { a: 4, b: 4, c: 4 * Math.SQRT2 },
+    { a: 8, b: 15, c: 17 },
+  ];
+
+  for (const tc of thalesTriples) {
+    const calc = calculateFourCircles(tc.a, tc.b);
+    const ko = calc.circumcircle;
+
+    assertClose(ko.diameter, tc.c, `Thales (${tc.a},${tc.b}): D_o = c`);
+    assertClose(ko.radius, tc.c / 2, `Thales (${tc.a},${tc.b}): R_o = c/2`);
+    assertClose(ko.area, (Math.PI * tc.c * tc.c) / 4, `Thales (${tc.a},${tc.b}): K_o = pi*c^2/4`);
+    assertClose(ko.circumference, Math.PI * tc.c, `Thales (${tc.a},${tc.b}): L_o = pi*c`);
+    assertClose(ko.center.x, tc.b / 2, `Thales (${tc.a},${tc.b}): O_o.x = b/2`);
+    assertClose(ko.center.y, tc.a / 2, `Thales (${tc.a},${tc.b}): O_o.y = a/2`);
+
+    // Equidistance from O_o to all 3 vertices A, B, O and inscribed 90-degree angle
+    assertClose(ko.vertexDistances.toA, ko.radius, `Thales (${tc.a},${tc.b}): |O_o-A| = R_o`);
+    assertClose(ko.vertexDistances.toB, ko.radius, `Thales (${tc.a},${tc.b}): |O_o-B| = R_o`);
+    assertClose(ko.vertexDistances.toC, ko.radius, `Thales (${tc.a},${tc.b}): |O_o-O| = R_o`);
+    assertClose(ko.angleAtRightVertexDeg, 90, `Thales (${tc.a},${tc.b}): angle AOB = 90 deg`);
+
+    // Structural theorem: K_o = K_c while O_o != O_c and |O_o - O_c| = c/2
+    assertClose(ko.area, calc.circleC.area, `Thales (${tc.a},${tc.b}): K_o === K_c`, 1e-12);
+    assertClose(ko.areaDiffWithKc, 0, `Thales (${tc.a},${tc.b}): areaDiffWithKc === 0`, 1e-12);
+    const centerDist = Math.hypot(ko.center.x - calc.circleC.center.x, ko.center.y - calc.circleC.center.y);
+    assertClose(centerDist, tc.c / 2, `Thales (${tc.a},${tc.b}): |O_o - O_c| = c/2`);
+    assertClose(ko.centerDistanceToKc, tc.c / 2, `Thales (${tc.a},${tc.b}): centerDistanceToKc = c/2`);
+    assert.ok(centerDist > 0, `Thales (${tc.a},${tc.b}): O_o != O_c`);
+  }
+
+  // 9b. General shifted & rotated right triangle (C != (0,0), arbitrary hypotenuse endpoints)
+  // Proves O_o = (A+B)/2 is computed from actual hypotenuse endpoints, not hardcoded
+  {
+    const C = { x: 10, y: -4 };
+    const theta = 0.63; // arbitrary rotation
+    const leg1 = 6;
+    const leg2 = 8; // hypotenuse = 10
+    const A = { x: C.x + leg1 * Math.cos(theta), y: C.y + leg1 * Math.sin(theta) };
+    const B = { x: C.x - leg2 * Math.sin(theta), y: C.y + leg2 * Math.cos(theta) };
+    const koRot = calculateThalesCircumcircleFromVertices(A, B, C);
+
+    assertClose(koRot.center.x, (A.x + B.x) / 2, 'Rotated Thales O_o.x = (Ax+Bx)/2');
+    assertClose(koRot.center.y, (A.y + B.y) / 2, 'Rotated Thales O_o.y = (Ay+By)/2');
+    assertClose(koRot.diameter, 10, 'Rotated Thales D_o = 10');
+    assertClose(koRot.radius, 5, 'Rotated Thales R_o = 5');
+    assertClose(koRot.vertexDistances.toA, 5, 'Rotated Thales |O_o-A| = 5');
+    assertClose(koRot.vertexDistances.toB, 5, 'Rotated Thales |O_o-B| = 5');
+    assertClose(koRot.vertexDistances.toC, 5, 'Rotated Thales |O_o-C| = 5');
+    assertClose(koRot.angleAtRightVertexDeg, 90, 'Rotated Thales angle ACB = 90 deg');
+  }
+
+  // 9c. Extreme aspect ratios & tiny/huge scales
+  const extremePairs: Array<[number, number]> = [
+    [0.2, 15],
+    [15, 0.2],
+    [1e-4, 2e-4],
+    [1e6, 2e6],
+  ];
+  for (const [ea, eb] of extremePairs) {
+    const calc = calculateFourCircles(ea, eb);
+    const thalesInvs = validateThalesCircumcircleInvariants(calc, TOL);
+    assert.equal(thalesInvs.length, 9, 'validateThalesCircumcircleInvariants must return 9 invariants');
+    for (const inv of thalesInvs) {
+      assert.ok(inv.isValid, `Extreme/scale (${ea}, ${eb}) failed ${inv.id}: delta=${inv.delta}`);
+    }
+    const allInvs = validateAllFiveCirclesInvariants(calc, TOL);
+    assert.equal(allInvs.length, 17, 'validateAllFiveCirclesInvariants must return 17 invariants');
+    for (const inv of allInvs) {
+      assert.ok(inv.isValid, `Combined 17-invariant check (${ea}, ${eb}) failed ${inv.id}: delta=${inv.delta}`);
+    }
+    // Original 4-circle validator unchanged at 8
+    assert.equal(validateFourCirclesInvariants(calc, TOL).length, 8);
+  }
+
+  // 9d. Leg-swap symmetry (a, b) <-> (b, a) preserves scalars and reflects O_o (x <-> y)
+  {
+    const c1 = calculateFourCircles(3, 9);
+    const c2 = calculateFourCircles(9, 3);
+    assertClose(c1.circumcircle.diameter, c2.circumcircle.diameter, 'Swap preserves D_o');
+    assertClose(c1.circumcircle.radius, c2.circumcircle.radius, 'Swap preserves R_o');
+    assertClose(c1.circumcircle.area, c2.circumcircle.area, 'Swap preserves K_o');
+    assertClose(c1.circumcircle.circumference, c2.circumcircle.circumference, 'Swap preserves L_o');
+    assertClose(c1.circumcircle.center.x, c2.circumcircle.center.y, 'Swap reflects O_o.x <-> O_o.y');
+    assertClose(c1.circumcircle.center.y, c2.circumcircle.center.x, 'Swap reflects O_o.y <-> O_o.x');
+  }
+
+  // 9e. Parametric spectral invariance & monotonic absolute growth of K_o(t)
+  {
+    const tGrid = [0.05, 0.1, 0.5, 1.0, 2.0, 10.0, 20.0];
+    let prevAbs = { Ro: 0, Do: 0, Ko: 0, Lo: 0 };
+    for (const t of tGrid) {
+      const p = evaluateParametricFourCircles(t);
+      assertClose(p.thalesNorm.RoOverC, 0.5, `t=${t}: R_o / c = 0.5`);
+      assertClose(p.thalesNorm.DoOverC, 1.0, `t=${t}: D_o / c = 1`);
+      assertClose(p.thalesNorm.KoOverKc, 1.0, `t=${t}: K_o / K_c = 1`);
+      assertClose(p.thalesNorm.LoOverLc, 1.0, `t=${t}: L_o / L_c = 1`);
+      assertClose(p.thalesNorm.RoOverRc, 1.0, `t=${t}: R_o / R_c = 1`);
+
+      assertClose(getThalesNormalizedValueForMode(p, 'areas'), 1.0, `t=${t}: normalized K_o/K_c`);
+      assertClose(getThalesNormalizedValueForMode(p, 'perimeters'), 1.0, `t=${t}: normalized L_o/L_c`);
+      assertClose(getThalesNormalizedValueForMode(p, 'radii_diameters', 'radius'), 0.5, `t=${t}: normalized R_o/c`);
+      assertClose(getThalesNormalizedValueForMode(p, 'radii_diameters', 'diameter'), 1.0, `t=${t}: normalized D_o/c`);
+
+      // Strict monotonic growth of absolute metrics for unit leg a=1, b=t
+      assert.ok(p.thalesAbs.Ro > prevAbs.Ro, `t=${t}: R_o*(t) strictly increasing`);
+      assert.ok(p.thalesAbs.Do > prevAbs.Do, `t=${t}: D_o*(t) strictly increasing`);
+      assert.ok(p.thalesAbs.Ko > prevAbs.Ko, `t=${t}: K_o*(t) strictly increasing`);
+      assert.ok(p.thalesAbs.Lo > prevAbs.Lo, `t=${t}: L_o*(t) strictly increasing`);
+      prevAbs = p.thalesAbs;
+    }
+
+    // Spectral summary keeps items.length === 4 and exposes circumcircleItem
+    const spec = computeFourCirclesSpectralAnalysis(calculateFourCircles(4, 3));
+    assert.equal(spec.items.length, 4, 'Spectral core items remains 4');
+    assert.equal(spec.circumcircleItem.id, 'Ko');
+    assertClose(spec.circumcircleItem.areaRatioToKc, 1.0, 'Spectral circumcircleItem Ko/Kc = 1');
+
+    // sampleThalesAbsoluteCurves matches evaluateParametricFourCircles
+    const absSamples = sampleThalesAbsoluteCurves({ tMin: 0.1, tMax: 10, steps: 40, scaleMode: 'log' });
+    const symPt = absSamples.find((pt) => Math.abs(pt.t - 1) < 1e-9);
+    assert.ok(symPt, 'sampleThalesAbsoluteCurves includes t = 1');
+    assertClose(symPt!.Do, Math.SQRT2, 't=1 absolute D_o* = sqrt(2)');
+    assertClose(symPt!.Ro, Math.SQRT2 / 2, 't=1 absolute R_o* = sqrt(2)/2');
+    assertClose(symPt!.Ko, Math.PI / 2, 't=1 absolute K_o* = pi/2');
+    assertClose(symPt!.Lo, Math.PI * Math.SQRT2, 't=1 absolute L_o* = pi*sqrt(2)');
+  }
+
+  // 9f. Negative/invalid input & mutation detection checks
+  assert.throws(
+    () => calculateThalesCircumcircleFromVertices({ x: NaN, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }),
+    RangeError,
+    'Rejects NaN vertex coordinate'
+  );
+  assert.throws(
+    () => calculateThalesCircumcircleFromVertices({ x: 2, y: 3 }, { x: 2, y: 3 }, { x: 0, y: 0 }),
+    RangeError,
+    'Rejects coincident hypotenuse endpoints A === B'
+  );
+  assert.throws(
+    () => evaluateParametricFourCircles(0),
+    RangeError,
+    'Rejects t = 0'
+  );
+  assert.throws(
+    () => evaluateParametricFourCircles(-2),
+    RangeError,
+    'Rejects negative t'
+  );
+  assert.throws(
+    () => evaluateParametricFourCircles(Number.NaN),
+    RangeError,
+    'Rejects NaN t'
+  );
+
+  // Mutation test on Thales validator
+  {
+    const base = calculateFourCircles(4, 3);
+    const brokenCenter = {
+      ...base,
+      circumcircle: { ...base.circumcircle, center: { x: base.circumcircle.center.x + 0.1, y: base.circumcircle.center.y } },
+    };
+    const m = Object.fromEntries(validateThalesCircumcircleInvariants(brokenCenter, TOL).map((i) => [i.id, i]));
+    assert.equal(m['thales_dist_A'].isValid, false, 'Shifted O_o must fail thales_dist_A');
+    assert.equal(m['thales_dist_B'].isValid, false, 'Shifted O_o must fail thales_dist_B');
+    assert.equal(m['thales_dist_C'].isValid, false, 'Shifted O_o must fail thales_dist_C');
+  }
+}
+console.log('✓ Section 9: Thales Circumcircle (K_o) & Five-Circle Integration Tests passed.');
+
+// ============================================================================
+// 10. Two-Parameter Model: Scale Parameter (lambda) & Homogeneity Law Tests
+// ============================================================================
+{
+  const baseA = 3;
+  const baseB = 4;
+
+  // 10a. Identity scaling lambda = 1.0
+  {
+    const idScale = scaleTriangleGeometry(baseA, baseB, 1.0);
+    assertClose(idScale.a, 3, 'lambda=1.0: a = 3');
+    assertClose(idScale.b, 4, 'lambda=1.0: b = 4');
+    assertClose(idScale.c, 5, 'lambda=1.0: c = 5');
+    assertClose(idScale.Do, 5, 'lambda=1.0: Do = 5');
+    assertClose(idScale.Ro, 2.5, 'lambda=1.0: Ro = 2.5');
+    assertClose(idScale.Lo, 5 * Math.PI, 'lambda=1.0: Lo = 5*pi');
+    assertClose(idScale.Ko, (25 * Math.PI) / 4, 'lambda=1.0: Ko = 25*pi/4');
+    assertClose(idScale.Kc, (25 * Math.PI) / 4, 'lambda=1.0: Kc = Ko = 25*pi/4');
+    assertClose(idScale.Ki, Math.PI, 'lambda=1.0: Ki = pi * 1^2');
+    assertClose(idScale.Sc, 25, 'lambda=1.0: Sc = 25');
+  }
+
+  // 10b. Doubled scale lambda = 2.0 (lengths double, areas quadruple)
+  {
+    const dblScale = scaleTriangleGeometry(baseA, baseB, 2.0);
+    assertClose(dblScale.a, 6, 'lambda=2.0: a = 6 (2x)');
+    assertClose(dblScale.b, 8, 'lambda=2.0: b = 8 (2x)');
+    assertClose(dblScale.c, 10, 'lambda=2.0: c = 10 (2x)');
+    // Linear metrics (degree 1)
+    assertClose(dblScale.Do, 10, 'lambda=2.0: Do = 10 (2^1)');
+    assertClose(dblScale.Ro, 5, 'lambda=2.0: Ro = 5 (2^1)');
+    assertClose(dblScale.Lo, 10 * Math.PI, 'lambda=2.0: Lo = 10*pi (2^1)');
+    // Quadratic metrics (degree 2)
+    assertClose(dblScale.Ko, 4 * ((25 * Math.PI) / 4), 'lambda=2.0: Ko = 4 * Ko(1) (2^2)');
+    assertClose(dblScale.Kc, 4 * ((25 * Math.PI) / 4), 'lambda=2.0: Kc = 4 * Kc(1) (2^2)');
+    assertClose(dblScale.Ki, 4 * Math.PI, 'lambda=2.0: Ki = 4 * Ki(1) (2^2)');
+    assertClose(dblScale.Sc, 100, 'lambda=2.0: Sc = 100 = 4 * 25 (2^2)');
+  }
+
+  // 10c. Halved scale lambda = 0.5 (lengths halve, areas quarter)
+  {
+    const halfScale = scaleTriangleGeometry(baseA, baseB, 0.5);
+    assertClose(halfScale.a, 1.5, 'lambda=0.5: a = 1.5 (0.5x)');
+    assertClose(halfScale.b, 2.0, 'lambda=0.5: b = 2.0 (0.5x)');
+    assertClose(halfScale.c, 2.5, 'lambda=0.5: c = 2.5 (0.5x)');
+    // Linear metrics (degree 1)
+    assertClose(halfScale.Do, 2.5, 'lambda=0.5: Do = 2.5 (0.5^1)');
+    assertClose(halfScale.Ro, 1.25, 'lambda=0.5: Ro = 1.25 (0.5^1)');
+    assertClose(halfScale.Lo, 2.5 * Math.PI, 'lambda=0.5: Lo = 2.5*pi (0.5^1)');
+    // Quadratic metrics (degree 2)
+    assertClose(halfScale.Ko, 0.25 * ((25 * Math.PI) / 4), 'lambda=0.5: Ko = 0.25 * Ko(1) (0.5^2)');
+    assertClose(halfScale.Kc, 0.25 * ((25 * Math.PI) / 4), 'lambda=0.5: Kc = 0.25 * Kc(1) (0.5^2)');
+    assertClose(halfScale.Ki, 0.25 * Math.PI, 'lambda=0.5: Ki = 0.25 * Ki(1) (0.5^2)');
+    assertClose(halfScale.Sc, 6.25, 'lambda=0.5: Sc = 6.25 = 0.25 * 25 (0.5^2)');
+  }
+
+  // 10d. Independence of t and lambda
+  {
+    // Varying t at constant c = 5 keeps circumcircle invariants unchanged
+    const tValues = [0.2, 0.5, 1.0, 2.0, 5.0];
+    for (const t of tValues) {
+      const a = 5 / Math.sqrt(1 + t * t);
+      const b = t * a;
+      const calc = calculateFourCircles(a, b);
+      assertClose(calc.circumcircle.diameter, 5, `Const c=5, t=${t}: Do = 5`);
+      assertClose(calc.circumcircle.radius, 2.5, `Const c=5, t=${t}: Ro = 2.5`);
+      assertClose(calc.circumcircle.area, (25 * Math.PI) / 4, `Const c=5, t=${t}: Ko = 25*pi/4`);
+      assertClose(calc.circumcircle.circumference, 5 * Math.PI, `Const c=5, t=${t}: Lo = 5*pi`);
+    }
+
+    // Varying lambda at fixed t = 4/3 scales strictly by lambda^1 and lambda^2
+    const lambdas = [0.2, 0.7, 1.0, 1.8, 2.5];
+    for (const l of lambdas) {
+      const scaled = scaleTriangleGeometry(3, 4, l);
+      assertClose(scaled.Do / 5, l, `Fixed t, l=${l}: Do(l)/Do(1) = l`);
+      assertClose(scaled.Ro / 2.5, l, `Fixed t, l=${l}: Ro(l)/Ro(1) = l`);
+      assertClose(scaled.Lo / (5 * Math.PI), l, `Fixed t, l=${l}: Lo(l)/Lo(1) = l`);
+      assertClose(scaled.Ko / ((25 * Math.PI) / 4), l * l, `Fixed t, l=${l}: Ko(l)/Ko(1) = l^2`);
+      assertClose(scaled.Ki / Math.PI, l * l, `Fixed t, l=${l}: Ki(l)/Ki(1) = l^2`);
+      assertClose(scaled.Sc / 25, l * l, `Fixed t, l=${l}: Sc(l)/Sc(1) = l^2`);
+    }
+  }
+
+  // 10e. Invariant preservation under scaling lambda
+  {
+    const testLambdas = [0.1, 0.25, 0.5, 1.0, 1.5, 2.0, 3.5, 10.0];
+    for (const l of testLambdas) {
+      const calc = calculateFourCircles(3 * l, 4 * l);
+      // All 17 invariants must pass
+      const allInvs = validateAllFiveCirclesInvariants(calc, TOL * Math.max(1, l * l));
+      assert.equal(allInvs.length, 17, `l=${l}: 17 invariants checked`);
+      for (const inv of allInvs) {
+        assert.ok(inv.isValid, `l=${l} failed invariant ${inv.id}: delta=${inv.delta}`);
+      }
+
+      // Central sqrt identity: sqrt(Ka) + sqrt(Kb) = sqrt(Kc) + sqrt(Ki)
+      const sqrtKa = Math.sqrt(calc.circleA.area);
+      const sqrtKb = Math.sqrt(calc.circleB.area);
+      const sqrtKc = Math.sqrt(calc.circleC.area);
+      const sqrtKi = Math.sqrt(calc.incircle.area);
+      assertClose(sqrtKa + sqrtKb, sqrtKc + sqrtKi, `l=${l}: central sqrt identity holds`, TOL * l);
+    }
+  }
+
+  // 10f. sampleThalesScaleCurves verification & input validation
+  {
+    const scaleCurveSamples = sampleThalesScaleCurves({
+      baseC: 5,
+      baseA: 3,
+      baseB: 4,
+      lambdaMin: 0.2,
+      lambdaMax: 2.5,
+      steps: 50,
+      scaleMode: 'linear',
+    });
+    assert.ok(scaleCurveSamples.length >= 50, 'Scale curves sampled at least 50 points');
+    const idPt = scaleCurveSamples.find((pt) => Math.abs(pt.lambda - 1.0) < 1e-9);
+    assert.ok(idPt, 'Scale curves include lambda = 1.0 identity point');
+    assertClose(idPt!.Do, 5, 'Scale curve at lambda=1: Do = 5');
+    assertClose(idPt!.Ro, 2.5, 'Scale curve at lambda=1: Ro = 2.5');
+    assertClose(idPt!.Ko, (25 * Math.PI) / 4, 'Scale curve at lambda=1: Ko = 25*pi/4');
+
+    // Rejection of invalid inputs
+    assert.throws(() => scaleTriangleGeometry(0, 4, 1), RangeError, 'Rejects baseA <= 0');
+    assert.throws(() => scaleTriangleGeometry(3, -1, 1), RangeError, 'Rejects baseB <= 0');
+    assert.throws(() => scaleTriangleGeometry(3, 4, 0), RangeError, 'Rejects lambda <= 0');
+    assert.throws(() => scaleTriangleGeometry(3, 4, -2), RangeError, 'Rejects negative lambda');
+    assert.throws(() => scaleTriangleGeometry(3, 4, Number.NaN), RangeError, 'Rejects NaN lambda');
+    assert.throws(
+      () => sampleThalesScaleCurves({ baseC: 0, lambdaMin: 0.2, lambdaMax: 2.5 }),
+      RangeError,
+      'Rejects baseC <= 0'
+    );
+    assert.throws(
+      () => sampleThalesScaleCurves({ baseC: 5, lambdaMin: 2.5, lambdaMax: 0.2 }),
+      RangeError,
+      'Rejects lambdaMin >= lambdaMax'
+    );
+  }
+}
+console.log('✓ Section 10: Scale Parameter (lambda) & Homogeneity Law Tests passed.');
+
+console.log('\n================================================================');
+console.log('ALL 10 SECTIONS OF PYTHAGORAS — FIVE CIRCLES GEOMETRY LAB PASSED!');
+console.log('================================================================');
+

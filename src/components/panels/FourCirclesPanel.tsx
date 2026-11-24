@@ -8,6 +8,7 @@ import { ActiveModuleId, DisplayMode, FourCirclesCalculations } from '../../type
 import { Translations } from '../../i18n/translations.ts';
 import { MetricCard } from '../common/MetricCard.tsx';
 import { MathFormula } from '../common/MathFormula.tsx';
+import { KcVsKoComparison } from './KcVsKoComparison.tsx';
 import { formatPoint } from '../../geometry/transforms.ts';
 import {
   GraduationCap,
@@ -35,7 +36,7 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
 }) => {
   const [showCoordinates, setShowCoordinates] = useState(false);
 
-  const { triangle, circleA, circleB, circleC, incircle } = calc;
+  const { triangle, circleA, circleB, circleC, incircle, circumcircle } = calc;
   const residualOk = calc.identityResidualRel < 1e-11;
 
   return (
@@ -230,6 +231,19 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
                 {incircle.sqrtArea.toFixed(4)}
               </td>
             </tr>
+            <tr className="hover:bg-slate-50/70 bg-violet-50/35">
+              <td className="py-2 px-3 font-bold text-violet-700">K_o</td>
+              <td className="py-2 px-3 font-sans text-slate-700">{t.panel.locCircumscribed}</td>
+              <td className="py-2 px-3 text-right text-slate-700">
+                D_o = {circumcircle.diameter.toFixed(3)}
+              </td>
+              <td className="py-2 px-3 text-right font-semibold text-slate-900">
+                {circumcircle.area.toFixed(4)}
+              </td>
+              <td className="py-2 px-3 text-right font-bold text-violet-800">
+                {circumcircle.sqrtArea.toFixed(4)}
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -269,6 +283,9 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
         )}
       </div>
 
+      {/* K_c vs K_o Comparison Block */}
+      <KcVsKoComparison calc={calc} t={t} />
+
       {/* Collapsible Centers & Tangency Points Coordinates */}
       <div className="pt-2 border-t border-slate-100">
         <button
@@ -284,10 +301,11 @@ export const FourCirclesPanel: React.FC<FourCirclesPanelProps> = ({
             <div>O_a = {formatPoint(circleA.center)}</div>
             <div>O_b = {formatPoint(circleB.center)}</div>
             <div>O_c = {formatPoint(circleC.center)}</div>
+            <div className="text-violet-800 font-semibold">O_o = {formatPoint(circumcircle.center)}</div>
             <div>I = {formatPoint(incircle.center)}</div>
             <div>T_a(OA) = {formatPoint(incircle.tangencyOA)}</div>
             <div>T_b(OB) = {formatPoint(incircle.tangencyOB)}</div>
-            <div className="col-span-2">T_c(AB) = {formatPoint(incircle.tangencyAB)}</div>
+            <div>T_c(AB) = {formatPoint(incircle.tangencyAB)}</div>
           </div>
         )}
       </div>

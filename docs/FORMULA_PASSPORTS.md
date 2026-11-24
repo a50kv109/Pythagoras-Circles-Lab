@@ -1,11 +1,11 @@
 # UMFP Formula Passports — Four-Circles Pythagorean Geometry Lab (PCL)
 
-This document defines the 24 **Universal Mathematical Formula Passports (UMFP)** (`PCL-A01`–`PCL-F24`) for all formulas, geometric constructions, validation invariants, and parametric relations implemented in the **Four-Circles Pythagorean Geometry Lab** (`src/math/`).
+This document defines the 29 **Universal Mathematical Formula Passports (UMFP)** (`PCL-A01`–`PCL-G29`) for all formulas, geometric constructions, validation invariants, and parametric relations implemented in the **Four-Circles Pythagorean Geometry Lab** (`src/math/`).
 
 > **UMFP Methodological Scope Notice:**
 > This registry follows the methodological architecture of the **Universal Mathematical Formula Passport (UMFP)** (`a50kv109/universal-Mathematical-formula-Passport`): separating **RAW** vs. **NORMALIZED** formula representations, **Structural Classification**, **Variable Scopes & Domain Constraints**, **Dependencies**, **Diagnostics / Insight Notes**, and **Epistemic Validity Statuses** (`VERIFIED`, `DERIVED`, `CONJECTURE`, `ANALOGY`).
 >
-> **No Runtime Engine Integration:** The external UMFP software engine (`FormulaPassport`, `generatePassport()`, `comparePassports()`, `compareExpressions()`, automated AST parser, and `Insight Bank` module) is **not** installed or imported into this codebase. All 24 passports below are authored manually in alignment with UMFP methodology and verified directly against the TypeScript implementation (`src/math/*`) and test suite (`src/tests/geometry.test.ts`).
+> **No Runtime Engine Integration:** The external UMFP software engine (`FormulaPassport`, `generatePassport()`, `comparePassports()`, `compareExpressions()`, automated AST parser, and `Insight Bank` module) is **not** installed or imported into this codebase. All 29 passports below are authored manually in alignment with UMFP methodology and verified directly against the TypeScript implementation (`src/math/*`) and test suite (`src/tests/geometry.test.ts`).
 
 ---
 
@@ -28,6 +28,7 @@ This document defines the 24 **Universal Mathematical Formula Passports (UMFP)**
 - **Group D — Fourth Circle: Triangle Incircle ($K_i$):** `PCL-D12` – `PCL-D15`
 - **Group E — Central Four-Circle Identity & Area Contrast:** `PCL-E16` – `PCL-E17`
 - **Group F — Parametric Model ($t = b/a$) & Normalized Curves:** `PCL-F18` – `PCL-F24`
+- **Group G — Fifth Geometric Layer: Thales Circumcircle ($K_o$):** `PCL-G25` – `PCL-G29`
 
 ---
 
@@ -461,4 +462,114 @@ This document defines the 24 **Universal Mathematical Formula Passports (UMFP)**
 - **Dependencies:** `PCL-A03`, `PCL-F18`.
 - **Implementation Location:** `legsFromRatioAndHypotenuse` (`src/math/FourCirclesSpectralAnalysis.ts`), invoked by `handleChangeT` (`src/App.tsx`).
 - **Verification Method:** Round-trip verification at $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$ (`c = 5`) asserting $b/a = t$ and exact match with `evaluateParametricFourCircles(t)` (`src/tests/geometry.test.ts`, Section 7).
-- **Diagnostics / Insight Notes:** `App.tsx` `clampVal` rounds legs to 4 decimal places (`1e-4`), introducing $\le 5 \times 10^{-5}$ quantization in $t$ during interactive UI scrubbing.
+- **Diagnostics / Insight Notes:** `App.tsx` `clampVal` rounds legs to 6 decimal places (`1e-6`), maintaining tight synchronization during interactive UI scrubbing.
+
+---
+
+## Group G. Fifth Geometric Layer: Thales Circumcircle ($K_o$)
+
+### `PCL-G25` — Thales Circumcenter from Hypotenuse Endpoints ($O_o$)
+- **ID:** `PCL-G25`
+- **Name:** Circumcenter of Right Triangle $\triangle ABC$ as Midpoint of Hypotenuse $AB$
+- **RAW Expression:** `center = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 }`
+- **NORMALIZED Expression:** $O_o = \frac{\mathbf{A} + \mathbf{B}}{2} \quad \xrightarrow{\mathbf{A}=(0,a),\,\mathbf{B}=(b,0)} \quad \left(\frac{b}{2},\; \frac{a}{2}\right)$
+- **UMFP Structural Classification:** `Coordinate Definition / Established Euclidean Theorem`
+- **UMFP Validity Status:** `VERIFIED` *(computed directly from vertex coordinates and tested on both canonical and rotated triangles)*
+- **Variables & Scope:** $\mathbf{A}, \mathbf{B}, \mathbf{C} \in \mathbb{R}^2$ with $\mathbf{A} \neq \mathbf{B}$ and $\angle ACB = 90^\circ$.
+- **Domain Constraints:** Finite coordinates with $|\mathbf{A} - \mathbf{B}| > 0$ (`RangeError` otherwise).
+- **Mathematical Foundation:** Classical Thales' theorem: the circumcenter of any Euclidean right triangle lies at the midpoint of its hypotenuse.
+- **Dependencies:** `PCL-A01`, `PCL-A02`.
+- **Implementation Location:** `calculateThalesCircumcircleFromVertices` in `src/math/ThalesCircumcircle.ts`.
+- **Verification Method:** Verified on `(3,4,5)`, `(5,12,13)`, `(4,4,4√2)`, `(8,15,17)` and on a shifted, rotated right triangle ($C=(10,-4), \theta=0.63$) in `src/tests/geometry.test.ts` (Section 9a–9b).
+- **Diagnostics / Insight Notes:** Explicitly uses endpoints `A, B` rather than hardcoding $(b/2, a/2)$.
+
+---
+
+### `PCL-G26` — Thales Diameter, Radius, Area, and Circumference ($D_o, R_o, K_o, L_o$)
+- **ID:** `PCL-G26`
+- **Name:** Scalar Dimensions of the Fifth Circle $K_o$
+- **RAW Expression:** `diameter = Math.hypot(B.x - A.x, B.y - A.y)`, `radius = diameter / 2`, `area = (Math.PI * diameter * diameter) / 4`, `circumference = Math.PI * diameter`
+- **NORMALIZED Expression:** $D_o = c, \qquad R_o = \frac{c}{2}, \qquad K_o = \frac{\pi c^2}{4}, \qquad L_o = \pi c$
+- **UMFP Structural Classification:** `Established Euclidean Theorem / Area & Circumference Formulas`
+- **UMFP Validity Status:** `VERIFIED` *(tested by 4 runtime invariants and multi-scale unit tests)*
+- **Variables & Scope:** $c = |\mathbf{A}-\mathbf{B}| > 0$.
+- **Domain Constraints:** Same `float64` quadratic area bounds as `PCL-C10` ($c \lesssim 1.51 \times 10^{154}$).
+- **Mathematical Foundation:** By Thales' theorem, hypotenuse $AB$ is a diameter of the circumcircle.
+- **Dependencies:** `PCL-A03`, `PCL-G25`.
+- **Implementation Location:** `calculateThalesCircumcircleFromVertices` (`src/math/ThalesCircumcircle.ts`) and `thales_diameter`, `thales_radius`, `thales_area`, `thales_circumference` (`src/math/ThalesValidators.ts`).
+- **Verification Method:** Verified across control triples, `(0.2, 15)`, `(1e-4, 2e-4)`, `(1e6, 2e6)`, and leg-swap symmetry (`src/tests/geometry.test.ts`, Section 9a–9d).
+- **Diagnostics / Insight Notes:** Uses `Math.hypot(B.x - A.x, B.y - A.y)` directly from vertices.
+
+---
+
+### `PCL-G27` — Equidistance to Vertices & Inscribed Right Angle ($\angle AOB = 90^\circ$)
+- **ID:** `PCL-G27`
+- **Name:** Three-Vertex Concyclicity and Thales Right-Angle Condition
+- **RAW Expression:** `toA = hypot(Oo - A)`, `toB = hypot(Oo - B)`, `toC = hypot(Oo - C)`, `angleAtRightVertexDeg = atan2(|(A-C) x (B-C)|, (A-C) . (B-C)) * 180 / Math.PI`
+- **NORMALIZED Expression:** $|O_o - \mathbf{A}| = |O_o - \mathbf{B}| = |O_o - \mathbf{C}| = R_o, \qquad \angle ACB = 90^\circ \iff \overrightarrow{CA}\cdot\overrightarrow{CB} = 0$
+- **UMFP Structural Classification:** `Established Euclidean Theorem`
+- **UMFP Validity Status:** `VERIFIED` *(checked by 4 runtime invariants + shifted-center mutation test)*
+- **Variables & Scope:** $\mathbf{A}, \mathbf{B}, \mathbf{C} \in \mathbb{R}^2$.
+- **Domain Constraints:** Non-degenerate right triangle (`PCL-A01`).
+- **Mathematical Foundation:** Every vertex of a right triangle lies on the circle with the hypotenuse as diameter; equivalently, the median to the hypotenuse equals $c/2$.
+- **Dependencies:** `PCL-G25`, `PCL-G26`.
+- **Implementation Location:** `ThalesCircumcircle.ts` and `thales_dist_A`, `thales_dist_B`, `thales_dist_C`, `thales_right_angle` (`ThalesValidators.ts`).
+- **Verification Method:** Verified at `tol = 1e-9` across all presets, extreme scales, rotated triangles, and center-perturbation mutation test (`src/tests/geometry.test.ts`, Section 9a–9f).
+- **Diagnostics / Insight Notes:** `thales_right_angle` validates both dot-product orthogonality and `atan2`-measured degree angle.
+
+---
+
+### `PCL-G28` — Area Equivalence vs. Center Separation ($K_o = K_c$, $O_o \neq O_c$)
+- **ID:** `PCL-G28`
+- **Name:** Structural Equivalence of $K_o$ and $K_c$ Metrics with Distinct Centers
+- **RAW Expression:** `areaDiffWithKc = area - circleCArea`, `centerDistanceToKc = Math.hypot(center.x - circleCCenter.x, center.y - circleCCenter.y)`
+- **NORMALIZED Expression:** $K_o = K_c = \frac{\pi c^2}{4}, \quad L_o = L_c = \pi c, \quad D_o = D_c = c, \qquad |O_o - O_c| = \left\|\left(\frac{b}{2}, \frac{a}{2}\right) - \left(\frac{a+b}{2}, \frac{a+b}{2}\right)\right\| = \frac{c}{2} > 0$
+- **UMFP Structural Classification:** `Derived Geometric Comparison Identity`
+- **UMFP Validity Status:** `DERIVED` & `VERIFIED`
+- **Variables & Scope:** $a, b > 0$, $c = \sqrt{a^2+b^2}$.
+- **Domain Constraints:** `PCL-C08`–`PCL-C10`, `PCL-G25`, `PCL-G26`.
+- **Mathematical Foundation:** Displacement vector $O_c - O_o = \left(\frac{a}{2}, \frac{b}{2}\right)$ has Euclidean norm $\frac{\sqrt{a^2+b^2}}{2} = \frac{c}{2} > 0$, proving $K_o$ and $K_c$ are congruent yet distinct circles.
+- **Dependencies:** `PCL-C08`, `PCL-C10`, `PCL-G25`, `PCL-G26`.
+- **Implementation Location:** `ThalesCircumcircle.ts`, `thales_area_eq_Kc` (`ThalesValidators.ts`), and `KcVsKoComparison.tsx`.
+- **Verification Method:** Verified at `1e-12` area diff and `1e-9` center-distance equality across control triples (`src/tests/geometry.test.ts`, Section 9a).
+- **Diagnostics / Insight Notes:** Visually clarifies why $K_o$ encloses $\triangle OAB$ while $K_c$ sits inside exterior square $Q_c$.
+
+---
+
+### `PCL-G29` — Parametric Thales Invariance & Absolute Growth ($t = b/a$)
+- **ID:** `PCL-G29`
+- **Name:** Constant Normalized Ratios and Monotonic Unit-Leg Growth of $K_o(t)$
+- **RAW Expression:** `thalesNorm = { RoOverC: 0.5, DoOverC: 1, KoOverKc: 1, LoOverLc: 1, RoOverRc: 1 }`, `thalesAbs = { Ro, Do, Ko, Lo }` at $(a=1, b=t)$
+- **NORMALIZED Expression:**
+  $$\frac{K_o(t)}{K_c(t)} = \frac{L_o(t)}{L_c(t)} = \frac{D_o(t)}{c(t)} = 1,\; \frac{R_o(t)}{c(t)} = \frac{1}{2}; \qquad R_o^*(t) = \frac{\sqrt{1+t^2}}{2},\; D_o^*(t) = \sqrt{1+t^2},\; L_o^*(t) = \pi\sqrt{1+t^2},\; K_o^*(t) = \frac{\pi(1+t^2)}{4}$$
+- **UMFP Structural Classification:** `Parametric Functional Relation`
+- **UMFP Validity Status:** `DERIVED` & `VERIFIED`
+- **Variables & Scope:** $t = b/a \in (0, +\infty)$.
+- **Domain Constraints:** `PCL-F18` ($t > 0$, finite).
+- **Mathematical Foundation:** Similarity invariance fixes $K_o/K_c = 1$ and $R_o/c = 1/2$, while fixing unit leg $a = 1, b = t$ makes $c^*(t) = \sqrt{1+t^2}$ strictly increasing on $(0, +\infty)$.
+- **Dependencies:** `PCL-F18`, `PCL-G26`, `PCL-G28`.
+- **Implementation Location:** `evaluateParametricFourCircles`, `getThalesNormalizedValueForMode`, `sampleThalesAbsoluteCurves` (`FourCirclesSpectralAnalysis.ts`), rendered in `SpectralAnalysisPanel.tsx`.
+- **Verification Method:** Tested across $t \in [0.05, 20]$ for constant ratios, strict monotonicity of `thalesAbs`, and `sampleThalesAbsoluteCurves` (`src/tests/geometry.test.ts`, Section 9e).
+- **Diagnostics / Insight Notes:** Rendered both as an optional normalized overlay and in the dedicated `Abs. Growth K_o(t)` tab.
+
+---
+
+### `PCL-G30` — Proportional Scaling Transformation and Homogeneity Law ($\lambda > 0$)
+- **ID:** `PCL-G30`
+- **Name:** Proportional Scaling Transformation & Homogeneity Law of Degrees 1 and 2
+- **RAW Expression:** `scaleTriangleGeometry(baseA, baseB, lambda)`, `sampleThalesScaleCurves(options)`
+- **NORMALIZED Expression:**
+  $$\mathbf{x}' = \lambda \mathbf{x} \implies a(\lambda) = \lambda a_0, \quad b(\lambda) = \lambda b_0, \quad c(\lambda) = \lambda c_0, \quad t = \frac{b(\lambda)}{a(\lambda)} \equiv \frac{b_0}{a_0} = \text{const}$$
+  $$\text{Linear Metrics (Degree 1): } D_o(\lambda) = \lambda D_o(1), \quad R_o(\lambda) = \lambda R_o(1), \quad L_o(\lambda) = \lambda L_o(1), \quad r(\lambda) = \lambda r(1)$$
+  $$\text{Area Metrics (Degree 2): } K_o(\lambda) = \lambda^2 K_o(1), \quad K_c(\lambda) = \lambda^2 K_c(1), \quad K_i(\lambda) = \lambda^2 K_i(1), \quad S_c(\lambda) = \lambda^2 S_c(1)$$
+  $$\text{Central Identity Invariance: } \sqrt{K_a(\lambda)} + \sqrt{K_b(\lambda)} = \lambda\left(\sqrt{K_a(1)} + \sqrt{K_b(1)}\right) \equiv \lambda\left(\sqrt{K_c(1)} + \sqrt{K_i(1)}\right) = \sqrt{K_c(\lambda)} + \sqrt{K_i(\lambda)}$$
+- **UMFP Structural Classification:** `Parametric Scaling Transformation & Homogeneity Law`
+- **UMFP Validity Status:** `VERIFIED` *(Section 10 of test suite)*
+- **Variables & Scope:** $\lambda > 0$, base triangle $(a_0, b_0, c_0) \in \mathbb{R}_{>0}^3$.
+- **Domain Constraints:** $a_0 > 0, b_0 > 0, \lambda \in (0, +\infty)$. Canonical baseline: $(a_0=3, b_0=4, c_0=5)$ with $\lambda = c / 5.0$.
+- **Mathematical Foundation:** Linear scaling is a homothety with scale factor $\lambda$. Any metric of dimension $[L^1]$ is a homogeneous function of degree 1 ($f(\lambda \mathbf{x}) = \lambda f(\mathbf{x})$), while any metric of dimension $[L^2]$ is homogeneous of degree 2 ($f(\lambda \mathbf{x}) = \lambda^2 f(\mathbf{x})$). The central identity is homogeneous of degree 1 because $\sqrt{K} \sim [L^1]$, rendering it invariant for all $\lambda > 0$.
+- **Dependencies:** `PCL-A01`, `PCL-C08`–`PCL-C10`, `PCL-D12`, `PCL-E16`, `PCL-G26`.
+- **Implementation Location:** `scaleTriangleGeometry` and `sampleThalesScaleCurves` in `ThalesCircumcircle.ts`; live interactive controls in `ControlsPanel.tsx`, `ThalesCircumcirclePanel.tsx`, and `SpectralAnalysisPanel.tsx` (Tab `Scale λ`).
+- **Verification Method:** Verified across identity ($\lambda = 1.0$), double ($\lambda = 2.0$), half ($\lambda = 0.5$), shape independence, invariant preservation, and invalid input rejection (`src/tests/geometry.test.ts`, Section 10a–10f).
+- **Diagnostics / Insight Notes:** Provides the orthogonal decomposition of triangle configurations into shape space ($t = b/a \in \mathbb{R}_{>0}$) and scale space ($\lambda = c / 5.0 \in \mathbb{R}_{>0}$).
+

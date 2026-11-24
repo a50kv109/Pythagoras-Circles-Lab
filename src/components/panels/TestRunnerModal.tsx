@@ -5,7 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { calculateFourCircles } from '../../math/FourCirclesModel.ts';
-import { validateFourCirclesInvariants } from '../../math/FourCirclesValidators.ts';
+import { validateAllFiveCirclesInvariants } from '../../math/ThalesValidators.ts';
 import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 import { X, CheckCircle, PlayCircle } from 'lucide-react';
 
@@ -32,7 +32,7 @@ export const TestRunnerModal: React.FC<TestRunnerModalProps> = ({
     ];
     return testCases.map((tc) => {
       const calc = calculateFourCircles(tc.a, tc.b);
-      const invariants = validateFourCirclesInvariants(calc);
+      const invariants = validateAllFiveCirclesInvariants(calc);
       const allPassed = invariants.every((inv) => inv.isValid);
       const maxDelta = Math.max(...invariants.map((inv) => inv.delta));
       return {
@@ -80,6 +80,7 @@ export const TestRunnerModal: React.FC<TestRunnerModalProps> = ({
                   <th className="py-2.5 px-3 text-left">{t.testModal.colTriangle}</th>
                   <th className="py-2.5 px-3 text-left">{t.testModal.colProfile}</th>
                   <th className="py-2.5 px-3 text-right">r</th>
+                  <th className="py-2.5 px-3 text-right">R_o</th>
                   <th className="py-2.5 px-3 text-right">√K_a + √K_b</th>
                   <th className="py-2.5 px-3 text-right">√K_c + √K_i</th>
                   <th className="py-2.5 px-3 text-right">{t.testModal.colChecks}</th>
@@ -94,6 +95,9 @@ export const TestRunnerModal: React.FC<TestRunnerModalProps> = ({
                     <td className="py-2.5 px-3 font-sans text-slate-600">{t.testModal.cases[res.key]}</td>
                     <td className="py-2.5 px-3 text-right text-amber-800 font-semibold">
                       {res.calc.incircle.radius.toFixed(4)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right text-violet-700 font-semibold">
+                      {res.calc.circumcircle.radius.toFixed(4)}
                     </td>
                     <td className="py-2.5 px-3 text-right text-slate-700">
                       {res.calc.sqrtSumLegs.toFixed(5)}

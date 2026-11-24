@@ -2,7 +2,7 @@
 
 This document presents the complete mathematical model, coordinate constructions, algebraic derivations, dimensionless parametric representation, and analytical observations implemented in the **Four-Circles Pythagorean Geometry Lab** (`src/math/`).
 
-Every formula below has been verified directly against the TypeScript implementation (`RightTriangle.ts`, `SquareConstruction.ts`, `FourCirclesModel.ts`, and `FourCirclesSpectralAnalysis.ts`) and cataloged in the UMFP registry ([`FORMULA_PASSPORTS.md`](FORMULA_PASSPORTS.md), [`FORMULA_DEPENDENCY_GRAPH.md`](FORMULA_DEPENDENCY_GRAPH.md)).
+Every formula below has been verified directly against the TypeScript implementation (`RightTriangle.ts`, `SquareConstruction.ts`, `ThalesCircumcircle.ts`, `FourCirclesModel.ts`, and `FourCirclesSpectralAnalysis.ts`) and cataloged in the UMFP registry ([`FORMULA_PASSPORTS.md`](FORMULA_PASSPORTS.md), [`FORMULA_DEPENDENCY_GRAPH.md`](FORMULA_DEPENDENCY_GRAPH.md)).
 
 ---
 
@@ -77,6 +77,22 @@ The circle $K_i$ is inscribed strictly inside $\triangle OAB$:
 - **Tangency Points:**
   $$T_a = (0, r) \text{ on } OA, \qquad T_b = (r, 0) \text{ on } OB, \qquad T_c = \left(r\left(1 + \frac{a}{c}\right),\; r\left(1 + \frac{b}{c}\right)\right) \text{ on } AB$$
 
+### 3.3 Fifth Geometric Layer — Thales Circumcircle $K_o$ (`ThalesCircumcircle.ts` — `PCL-G25`–`PCL-G28`)
+
+By the classical **Thales' theorem**, a right triangle inscribed in a circle always has its hypotenuse as a diameter of that circle. In `ThalesCircumcircle.ts`, $K_o$ is computed strictly from the actual hypotenuse endpoints $A, B$ and right-angle vertex $C = O$:
+
+- **Circumcenter ($O_o$):** Midpoint of hypotenuse $AB$:
+  $$O_o = \frac{A + B}{2} \quad \xrightarrow{\text{canonical }\triangle OAB} \quad \left(\frac{b}{2},\; \frac{a}{2}\right)$$
+- **Diameter & Radius:**
+  $$D_o = |A - B| = c = \sqrt{a^2 + b^2}, \qquad R_o = \frac{D_o}{2} = \frac{c}{2}$$
+- **Area & Circumference:**
+  $$K_o = \pi R_o^2 = \frac{\pi c^2}{4}, \qquad L_o = 2\pi R_o = \pi c$$
+- **Equidistance & Inscribed Right Angle:**
+  $$|O_o - A| = |O_o - B| = |O_o - O| = R_o = \frac{c}{2}, \qquad \angle AOB = 90^\circ \iff \overrightarrow{OA}\cdot\overrightarrow{OB} = 0$$
+  (Note that $O_o O$ is the median to the hypotenuse, which equals half the hypotenuse.)
+- **Comparison with $K_c$:** While $K_o$ and $K_c$ share identical scalar dimensions ($D_o = D_c = c$, $R_o = R_c = c/2$, $K_o = K_c = \frac{\pi c^2}{4}$, $L_o = L_c = \pi c$), they occupy distinct positions:
+  $$O_o = \left(\frac{b}{2},\; \frac{a}{2}\right) \neq O_c = \left(\frac{a+b}{2},\; \frac{a+b}{2}\right), \qquad |O_o - O_c| = \sqrt{\left(\frac{a}{2}\right)^2 + \left(\frac{b}{2}\right)^2} = \frac{c}{2} > 0$$
+
 ---
 
 ## 4. Step-by-Step Derivation of the Central Identity (`PCL-E16`, `PCL-E17`)
@@ -140,6 +156,12 @@ The implementation evaluates `calculateFourCircles(1, t)` (`evaluateParametricFo
    $$\frac{R_x(t)}{R_c(t)} \equiv \frac{D_x(t)}{D_c(t)} \equiv \frac{P_x(t)}{P_c(t)} \qquad \forall x \in \{a, b, c, i\}$$
    The UI provides a `Radius | Diameter` switch that updates labels and absolute readouts ($R$ vs. $D$) while plotting identical normalized curves without artificial distortion.
 
+4. **Thales Circumcircle Normalized Invariance & Absolute Growth (`PCL-G29`):**
+   - **Normalized ratios (`thalesNorm`):** $\frac{K_o(t)}{K_c(t)} \equiv 1$, $\frac{L_o(t)}{L_c(t)} \equiv 1$, $\frac{D_o(t)}{c(t)} \equiv 1$, $\frac{R_o(t)}{R_c(t)} \equiv 1$, and $\frac{R_o(t)}{c(t)} \equiv \frac{1}{2}$ remain constant for all $t > 0$.
+   - **Unit-leg absolute growth (`thalesAbs`, Tab `Abs. Growth K_o(t)`):** Setting $a = 1, b = t$:
+     $$D_o^*(t) = \sqrt{1+t^2}, \quad R_o^*(t) = \frac{\sqrt{1+t^2}}{2}, \quad L_o^*(t) = \pi\sqrt{1+t^2}, \quad K_o^*(t) = \frac{\pi(1+t^2)}{4}$$
+     all increase strictly monotonically on $t \in (0, +\infty)$.
+
 ---
 
 ## 7. Analytical Observations from Parametric Analysis
@@ -162,3 +184,28 @@ The implementation evaluates `calculateFourCircles(1, t)` (`evaluateParametricFo
 
 - **Deductive Proofs** (Section 4 and [`MATHEMATICAL_PROOFS.md`](MATHEMATICAL_PROOFS.md)) hold identically for **all** real $a, b > 0$ without tolerance bounds.
 - **Numerical Computation & Interactive Plots** operate in IEEE-754 `float64` precision (~15–17 decimal digits, detailed in [`NUMERICAL_ANALYSIS.md`](NUMERICAL_ANALYSIS.md)), evaluated over discrete sampled points (`steps = 220` plus explicit inclusion of $t = 1$ in `sampleSpectralCurves`), and verified against analytical formulas within tolerance $\text{tol} = 10^{-9}$ (`FourCirclesValidators.ts`, `src/tests/geometry.test.ts`, [`VERIFICATION_MATRIX.md`](VERIFICATION_MATRIX.md)). Visualization confirms behavior over the inspected domain but does not replace algebraic proof.
+
+---
+
+## 9. Two-Parameter Model: Shape Parameter $t$ and Scale Parameter $\lambda$ (`PCL-G30`)
+
+The laboratory implements an orthogonal mathematical decomposition of every right triangle configuration into two decoupled parameters:
+
+1. **Shape Parameter $t = b / a \in (0, +\infty)$:** Determines the internal angle $\alpha = \arctan(t)$, aspect ratio, and dimensionless invariants $\frac{K_a}{K_c}, \frac{K_b}{K_c}, \frac{K_i}{K_c}, \frac{K_o}{K_c} \equiv 1$.
+2. **Scale Parameter $\lambda = c / c_0 \in (0, +\infty)$:** Governs the dimensional size of the system relative to the canonical Egyptian triple benchmark $(a_0=3, b_0=4, c_0=5.0)$.
+
+### 9.1 Homogeneity Law of Degrees 1 and 2
+
+Under proportional dilation $\mathbf{x} \mapsto \lambda \mathbf{x}$ ($\lambda > 0$):
+
+- **Linear lengths (degree 1):**
+  $$a(\lambda) = \lambda a_0, \quad b(\lambda) = \lambda b_0, \quad c(\lambda) = \lambda c_0, \quad D_o(\lambda) = \lambda c_0, \quad R_o(\lambda) = \frac{\lambda c_0}{2}, \quad L_o(\lambda) = \pi \lambda c_0, \quad r(\lambda) = \lambda r_0$$
+- **Quadratic areas (degree 2):**
+  $$K_o(\lambda) = \lambda^2 \frac{\pi c_0^2}{4} = \lambda^2 K_o(1), \quad K_c(\lambda) = \lambda^2 K_c(1), \quad K_i(\lambda) = \lambda^2 K_i(1), \quad S_c(\lambda) = \lambda^2 S_c(1)$$
+
+### 9.2 Strict Invariance of the Central Identity and Invariants
+
+Because each circle area scales quadratically ($K_x(\lambda) = \lambda^2 K_x(1)$), taking square roots extracts $\lambda$ linearly:
+$$\sqrt{K_a(\lambda)} + \sqrt{K_b(\lambda)} = \lambda\left(\sqrt{K_a(1)} + \sqrt{K_b(1)}\right) = \lambda\left(\sqrt{K_c(1)} + \sqrt{K_i(1)}\right) = \sqrt{K_c(\lambda)} + \sqrt{K_i(\lambda)}$$
+All 17 invariants (`validateAllFiveCirclesInvariants`) remain strictly valid for every positive scale $\lambda > 0$, verified by Section 10 of `src/tests/geometry.test.ts`.
+

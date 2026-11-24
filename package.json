@@ -1,7 +1,7 @@
 {
   "name": "pythagoras-circles-lab",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Interactive exploration of the Pythagorean theorem through four circles, geometric relationships, and parametric visualization.",
   "license": "MIT",
   "author": "Andrey Artsybashev",

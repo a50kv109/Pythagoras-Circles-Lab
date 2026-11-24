@@ -30,11 +30,12 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'identity_proof', label: t.modules.identityProof },
     { id: 'incircle_focus', label: t.modules.incircleFocus },
     { id: 'spectral_analysis', label: t.modules.spectralAnalysis },
+    { id: 'thales_circumcircle', label: t.modules.thalesCircumcircle },
   ];
 
   return (
     <header className="bg-white border-b border-slate-200 shrink-0">
-      <div className="flex items-center justify-between gap-4 lg:gap-8 px-4 lg:px-6 py-3">
+      <div className="flex items-center justify-between gap-3 lg:gap-5 px-4 lg:px-6 py-3">
         {/* Zone 1: Single text element wordmark */}
         <div className="flex items-center whitespace-nowrap shrink-0">
           <span className="text-base font-bold tracking-tight text-slate-900 font-sans">
@@ -43,14 +44,16 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Zone 2: Concise single-line navigation tabs (desktop) */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
+        <nav className="hidden md:flex items-center gap-3 lg:gap-5 text-xs font-semibold text-slate-600 overflow-x-auto">
           {modules.map((m) => (
             <button
               key={m.id}
               onClick={() => setActiveModule(m.id)}
               className={`transition-colors whitespace-nowrap shrink-0 py-1 border-b-2 ${
                 activeModule === m.id
-                  ? 'border-indigo-600 text-indigo-900 font-bold'
+                  ? m.id === 'thales_circumcircle'
+                    ? 'border-violet-600 text-violet-900 font-bold'
+                    : 'border-indigo-600 text-indigo-900 font-bold'
                   : 'border-transparent hover:text-slate-900'
               }`}
             >

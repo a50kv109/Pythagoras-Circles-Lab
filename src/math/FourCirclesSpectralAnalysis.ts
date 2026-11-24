@@ -7,12 +7,20 @@ import { FourCirclesCalculations } from '../types/geometry.ts';
 import { calculateFourCircles } from './FourCirclesModel.ts';
 
 export type CircleKey = 'Ka' | 'Kb' | 'Kc' | 'Ki';
-export type SpectralGraphMode = 'areas' | 'perimeters' | 'radii_diameters';
+export type FiveCircleKey = CircleKey | 'Ko';
+export type SpectralGraphMode = 'areas' | 'perimeters' | 'radii_diameters' | 'thales_abs' | 'scale_lambda';
 export type LinearMeasureKind = 'radius' | 'diameter';
 export type AxisScaleMode = 'log' | 'linear';
 
+export {
+  sampleThalesScaleCurves,
+  scaleTriangleGeometry,
+  type ScaleTransformationResult,
+  type ThalesScaleSamplePoint,
+} from './ThalesCircumcircle.ts';
+
 export interface CircleSeriesMeta {
-  id: CircleKey;
+  id: FiveCircleKey;
   label: string;
   shortTitle: string;
   fullName: string;
@@ -60,10 +68,25 @@ export const CIRCLE_SERIES_META: Record<CircleKey, CircleSeriesMeta> = {
   },
 };
 
+export const THALES_SERIES_META: CircleSeriesMeta = {
+  id: 'Ko',
+  label: 'K_o',
+  shortTitle: 'Kₒ',
+  fullName: 'Описанная окружность Фалеса K_o',
+  color: '#7c3aed',
+  colorBg: 'bg-violet-600',
+  textClass: 'text-violet-700',
+};
+
+export const FIVE_CIRCLE_SERIES_META: Record<FiveCircleKey, CircleSeriesMeta> = {
+  ...CIRCLE_SERIES_META,
+  Ko: THALES_SERIES_META,
+};
+
 export const REFERENCE_T_VALUES = [0.1, 0.5, 1.0, 2.0, 10.0] as const;
 
 export interface SpectralItem {
-  id: CircleKey;
+  id: FiveCircleKey;
   label: string;
   fullName: string;
   color: string;
@@ -84,9 +107,25 @@ export interface SpectralItem {
 }
 
 export interface SpectralAnalysisResult {
-  items: SpectralItem[];
+  items: SpectralItem[]; // Strictly the 4 core circles (preserves 100% share sum invariant)
+  circumcircleItem: SpectralItem; // 5th circle K_o (Thales circumcircle)
   totalArea: number;
   totalPerimeter: number;
+}
+
+export interface ThalesNormalizedRatios {
+  RoOverC: number;  // R_o / c = 1/2
+  DoOverC: number;  // D_o / c = 1
+  KoOverKc: number; // K_o / K_c = 1
+  LoOverLc: number; // L_o / L_c = 1
+  RoOverRc: number; // R_o / R_c = 1
+}
+
+export interface ThalesAbsoluteMetrics {
+  Ro: number; // sqrt(1 + t^2) / 2
+  Do: number; // sqrt(1 + t^2)
+  Ko: number; // pi * (1 + t^2) / 4
+  Lo: number; // pi * sqrt(1 + t^2)
 }
 
 export interface ParametricCircleRatios {
@@ -103,6 +142,8 @@ export interface ParametricCircleRatios {
   perimetersAbs: Record<CircleKey, number>;
   radiiAbs: Record<CircleKey, number>;
   diametersAbs: Record<CircleKey, number>;
+  thalesNorm: ThalesNormalizedRatios;
+  thalesAbs: ThalesAbsoluteMetrics;
   identityResidualAbs: number;
 }
 
@@ -112,6 +153,15 @@ export interface CurveSamplePoint {
   Kb: number;
   Kc: number;
   Ki: number;
+  Ko: number;
+}
+
+export interface ThalesAbsoluteSamplePoint {
+  t: number;
+  Ro: number;
+  Do: number;
+  Ko: number;
+  Lo: number;
 }
 
 /**
@@ -212,8 +262,27 @@ export function computeFourCirclesSpectralAnalysis(
     },
   ];
 
+  const circumcircleItem: SpectralItem = {
+    id: 'Ko',
+    label: THALES_SERIES_META.label,
+    fullName: THALES_SERIES_META.fullName,
+    color: THALES_SERIES_META.color,
+    colorBg: THALES_SERIES_META.colorBg,
+    area: calc.circumcircle.area,
+    areaSharePercent: totalArea > 0 ? (calc.circumcircle.area / totalArea) * 100 : 0,
+    areaRatioToKc: Kc > 0 ? calc.circumcircle.area / Kc : 1,
+    perimeter: calc.circumcircle.circumference,
+    perimeterSharePercent: totalPerimeter > 0 ? (calc.circumcircle.circumference / totalPerimeter) * 100 : 0,
+    perimeterRatioToKc: Pc > 0 ? calc.circumcircle.circumference / Pc : 1,
+    radius: calc.circumcircle.radius,
+    diameter: calc.circumcircle.diameter,
+    radiusRatioToC: rC > 0 ? calc.circumcircle.radius / rC : 1,
+    diameterRatioToC: dC > 0 ? calc.circumcircle.diameter / dC : 1,
+  };
+
   return {
     items,
+    circumcircleItem,
     totalArea,
     totalPerimeter,
   };
@@ -290,6 +359,19 @@ export function evaluateParametricFourCircles(t: number): ParametricCircleRatios
       Kc: byId.Kc.diameter,
       Ki: byId.Ki.diameter,
     },
+    thalesNorm: {
+      RoOverC: calc.triangle.c > 0 ? calc.circumcircle.radius / calc.triangle.c : 0.5,
+      DoOverC: calc.triangle.c > 0 ? calc.circumcircle.diameter / calc.triangle.c : 1,
+      KoOverKc: byId.Kc.area > 0 ? calc.circumcircle.area / byId.Kc.area : 1,
+      LoOverLc: byId.Kc.perimeter > 0 ? calc.circumcircle.circumference / byId.Kc.perimeter : 1,
+      RoOverRc: byId.Kc.radius > 0 ? calc.circumcircle.radius / byId.Kc.radius : 1,
+    },
+    thalesAbs: {
+      Ro: calc.circumcircle.radius,
+      Do: calc.circumcircle.diameter,
+      Ko: calc.circumcircle.area,
+      Lo: calc.circumcircle.circumference,
+    },
     identityResidualAbs: calc.identityResidualAbs,
   };
 }
@@ -304,9 +386,19 @@ export function getNormalizedValuesForMode(
   return linearKind === 'radius' ? ratios.radii : ratios.diameters;
 }
 
+export function getThalesNormalizedValueForMode(
+  ratios: ParametricCircleRatios,
+  mode: SpectralGraphMode,
+  linearKind: LinearMeasureKind = 'radius'
+): number {
+  if (mode === 'areas') return ratios.thalesNorm.KoOverKc; // 1
+  if (mode === 'perimeters') return ratios.thalesNorm.LoOverLc; // 1
+  return linearKind === 'radius' ? ratios.thalesNorm.RoOverC : ratios.thalesNorm.DoOverC; // 0.5 or 1
+}
+
 /**
- * Samples the four parametric function curves over [tMin, tMax] directly from the model.
- * Ensures the symmetry point t = 1 is explicitly included whenever 1 falls inside [tMin, tMax].
+ * Samples the four parametric function curves plus the constant normalized K_o line
+ * over [tMin, tMax] directly from the unified model.
  */
 export function sampleSpectralCurves(options: {
   tMin: number;
@@ -353,12 +445,57 @@ export function sampleSpectralCurves(options: {
   return tValues.map((t) => {
     const ratios = evaluateParametricFourCircles(t);
     const vals = getNormalizedValuesForMode(ratios, mode, linearKind);
+    const koVal = getThalesNormalizedValueForMode(ratios, mode, linearKind);
     return {
       t,
       Ka: vals.Ka,
       Kb: vals.Kb,
       Kc: vals.Kc,
       Ki: vals.Ki,
+      Ko: koVal,
+    };
+  });
+}
+
+/**
+ * Samples unnormalized (a = 1, b = t) absolute Thales circumcircle growth curves
+ * Ro(t), Do(t), Ko(t), Lo(t) over [tMin, tMax].
+ */
+export function sampleThalesAbsoluteCurves(options: {
+  tMin: number;
+  tMax: number;
+  steps?: number;
+  scaleMode?: AxisScaleMode;
+}): ThalesAbsoluteSamplePoint[] {
+  const { tMin, tMax, steps = 200, scaleMode = 'log' } = options;
+
+  if (!Number.isFinite(tMin) || !Number.isFinite(tMax) || tMin <= 0 || tMax <= tMin) {
+    throw new RangeError(`Invalid t range [${tMin}, ${tMax}]`);
+  }
+
+  const tValues: number[] = [];
+  if (scaleMode === 'log') {
+    const logMin = Math.log10(tMin);
+    const logMax = Math.log10(tMax);
+    for (let i = 0; i <= steps; i++) {
+      tValues.push(Math.pow(10, logMin + (i / steps) * (logMax - logMin)));
+    }
+  } else {
+    for (let i = 0; i <= steps; i++) {
+      tValues.push(tMin + (i / steps) * (tMax - tMin));
+    }
+  }
+
+  if (tMin <= 1 && 1 <= tMax && !tValues.some((v) => Math.abs(v - 1) < 1e-9)) {
+    tValues.push(1);
+    tValues.sort((x, y) => x - y);
+  }
+
+  return tValues.map((t) => {
+    const ratios = evaluateParametricFourCircles(t);
+    return {
+      t,
+      ...ratios.thalesAbs,
     };
   });
 }

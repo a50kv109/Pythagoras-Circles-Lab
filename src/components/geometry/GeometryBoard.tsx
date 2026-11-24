@@ -78,6 +78,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
   const [showCenters, setShowCenters] = useState(true);
   const [showRadii, setShowRadii] = useState(true);
   const [showAngles, setShowAngles] = useState(false);
+  const [showCircumcircle, setShowCircumcircle] = useState(true);
 
   // Hovered object inspection
   const [hoveredObj, setHoveredObj] = useState<HoveredObject | null>(null);
@@ -100,11 +101,26 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
     const a = calc.triangle.a;
     const b = calc.triangle.b;
     const focusTriangleOnly = activeModule === 'incircle_focus';
+    const focusThalesOnly =
+      activeModule === 'thales_circumcircle' || layerFilter === 'thales_only';
 
-    const minX = focusTriangleOnly ? -0.8 : -a - 1;
-    const maxX = focusTriangleOnly ? b + 1 : b + a + 1;
-    const minY = focusTriangleOnly ? -0.8 : -b - 1;
-    const maxY = focusTriangleOnly ? a + 1 : a + b + 1;
+    let minX = -a - 1;
+    let maxX = b + a + 1;
+    let minY = -b - 1;
+    let maxY = a + b + 1;
+
+    if (focusThalesOnly) {
+      const { center, radius } = calc.circumcircle;
+      minX = Math.min(-0.8, center.x - radius - 0.9);
+      maxX = Math.max(b + 0.9, center.x + radius + 0.9);
+      minY = Math.min(-0.8, center.y - radius - 0.9);
+      maxY = Math.max(a + 0.9, center.y + radius + 1.1);
+    } else if (focusTriangleOnly) {
+      minX = -0.8;
+      maxX = b + 1;
+      minY = -0.8;
+      maxY = a + 1;
+    }
 
     const mathWidth = maxX - minX;
     const mathHeight = maxY - minY;
@@ -121,7 +137,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
     const newOriginY = dimensions.height / 2 + centerMathY * newScale;
 
     setOriginOffset({ x: newOriginX, y: newOriginY });
-  }, [calc, dimensions, activeModule]);
+  }, [calc, dimensions, activeModule, layerFilter]);
 
   // Fit on initial mount / container ready
   const didInitialFitRef = useRef(false);
@@ -223,7 +239,17 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
     { id: 'triangle_incircle', label: t.board.triIncircle },
     { id: 'squares', label: t.board.squares },
     { id: 'square_circles', label: t.board.squareCircles },
+    { id: 'four_circles_only', label: t.board.fourCirclesOnly },
+    { id: 'thales_only', label: t.board.thalesOnly },
+    { id: 'five_circles', label: t.board.fiveCircles },
   ];
+
+  const handleSelectLayer = (id: BoardLayerFilter) => {
+    setLayerFilter(id);
+    if (id === 'thales_only' || id === 'five_circles') {
+      setShowCircumcircle(true);
+    }
+  };
 
   return (
     <div
@@ -240,10 +266,12 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           {layerOptions.map((opt) => (
             <button
               key={opt.id}
-              onClick={() => setLayerFilter(opt.id)}
-              className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
+              onClick={() => handleSelectLayer(opt.id)}
+              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                 layerFilter === opt.id
-                  ? 'bg-slate-900 text-white shadow-xs'
+                  ? opt.id === 'thales_only' || opt.id === 'five_circles'
+                    ? 'bg-violet-700 text-white shadow-xs'
+                    : 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
@@ -254,6 +282,17 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
 
         {/* Visibility Toggles & Zoom Deck */}
         <div className="flex flex-wrap items-center gap-1 p-1 bg-white/92 backdrop-blur-md rounded-lg border border-slate-200/90 shadow-xs pointer-events-auto ml-auto max-w-full">
+          <button
+            onClick={() => setShowCircumcircle(!showCircumcircle)}
+            className={`px-2 py-1 text-xs font-mono font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+              showCircumcircle || layerFilter === 'thales_only'
+                ? 'bg-violet-50 text-violet-700'
+                : 'text-slate-500 hover:bg-slate-100'
+            }`}
+            title={t.board.circumcircleToggleTitle}
+          >
+            {t.board.circumcircleToggle}
+          </button>
           <button
             onClick={() => setShowGrid(!showGrid)}
             className={`px-2 py-1 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
@@ -367,7 +406,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showAxes={true}
         />
 
-        {/* Four Circles + Three Squares Layer */}
+        {/* Five Circles (Ka, Kb, Kc, Ki, Ko) + Three Squares Layer */}
         <FourCirclesView
           calc={calc}
           origin={originOffset}
@@ -377,6 +416,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showLabels={showLabels}
           showCenters={showCenters}
           showRadii={showRadii}
+          showCircumcircle={showCircumcircle}
           onHoverObject={setHoveredObj}
           t={t}
         />
@@ -389,7 +429,9 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showLabels={showLabels}
           showAngles={showAngles}
           showAltitude={false}
-          hasExteriorSquares={layerFilter !== 'triangle_incircle'}
+          hasExteriorSquares={
+            layerFilter !== 'triangle_incircle' && layerFilter !== 'thales_only'
+          }
           onHoverObject={setHoveredObj}
           t={t}
         />

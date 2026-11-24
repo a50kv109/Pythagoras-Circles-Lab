@@ -81,6 +81,25 @@ export interface TriangleIncircleGeometry {
   tangencyAB: Point2D; // (r * (1 + a/c), r * (1 + b/c))
 }
 
+export interface ThalesCircumcircleGeometry {
+  id: 'Ko';
+  label: string;
+  center: Point2D; // O_o = (A + B) / 2 computed from hypotenuse endpoints A and B
+  radius: number;  // R_o = c / 2
+  diameter: number; // D_o = c
+  area: number;    // K_o = pi * R_o^2 = pi * c^2 / 4
+  circumference: number; // L_o = 2 * pi * R_o = pi * c
+  sqrtArea: number; // sqrt(K_o) = sqrt(pi) * c / 2
+  vertexDistances: {
+    toA: number; // |O_o - A|
+    toB: number; // |O_o - B|
+    toC: number; // |O_o - O| (right-angle vertex)
+  };
+  angleAtRightVertexDeg: number; // verified angle at right-angle vertex (= 90°)
+  areaDiffWithKc: number;        // K_o - K_c (0 up to float64 rounding)
+  centerDistanceToKc: number;    // |O_o - O_c| (= c / 2 > 0)
+}
+
 export interface FourCirclesCalculations {
   triangle: RightTriangleCalculations;
   squareA: SquareVertices; // Qa on vertical leg OA
@@ -91,6 +110,7 @@ export interface FourCirclesCalculations {
   circleB: CircleInSquareGeometry; // Kb in Qb
   circleC: CircleInSquareGeometry; // Kc in Qc
   incircle: TriangleIncircleGeometry; // Ki inside triangle OAB
+  circumcircle: ThalesCircumcircleGeometry; // Ko circumscribed around triangle OAB (Thales theorem)
 
   // Central identity: sqrt(Ka) + sqrt(Kb) = sqrt(Kc) + sqrt(Ki)
   sqrtSumLegs: number;       // sqrt(Ka) + sqrt(Kb)
@@ -127,11 +147,23 @@ export interface PresetConfiguration {
   category: 'symmetry' | 'classical' | 'extreme' | 'benchmark';
 }
 
-export type ActiveModuleId = 'four_circles' | 'identity_proof' | 'incircle_focus' | 'spectral_analysis';
+export type ActiveModuleId =
+  | 'four_circles'
+  | 'identity_proof'
+  | 'incircle_focus'
+  | 'spectral_analysis'
+  | 'thales_circumcircle';
 
 export type DisplayMode = 'school' | 'research';
 
-export type BoardLayerFilter = 'all' | 'triangle_incircle' | 'squares' | 'square_circles';
+export type BoardLayerFilter =
+  | 'all'
+  | 'triangle_incircle'
+  | 'squares'
+  | 'square_circles'
+  | 'four_circles_only'
+  | 'thales_only'
+  | 'five_circles';
 
 export interface HoveredObject {
   id: string;

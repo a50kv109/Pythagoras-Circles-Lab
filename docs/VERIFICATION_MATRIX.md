@@ -1,10 +1,10 @@
 # Verification Matrix — Four-Circles Pythagorean Geometry Lab (PCL)
 
-This matrix maps every UMFP formula passport (`PCL-A01`–`PCL-F24`) and open research direction to its analytical basis, unit/runtime verification, UMFP validity status (`VERIFIED`, `DERIVED`, `CONJECTURE`, `ANALOGY`), and known limitations.
+This matrix maps every UMFP formula passport (`PCL-A01`–`PCL-G29`) and open research direction to its analytical basis, unit/runtime verification, UMFP validity status (`VERIFIED`, `DERIVED`, `CONJECTURE`, `ANALOGY`), and known limitations.
 
 ---
 
-## 1. Traceability Matrix (`PCL-A01` – `PCL-F24`)
+## 1. Traceability Matrix (`PCL-A01` – `PCL-G29`)
 
 | Formula ID | Property Verified | Analytical Basis | Numerical Test / Runtime Validator | Code & Test Location | UMFP Validity Status | Known Limitations |
 |---|---|---|---|---|---|---|
@@ -31,7 +31,12 @@ This matrix maps every UMFP formula passport (`PCL-A01`–`PCL-F24`) and open re
 | `PCL-F21` | Modes B & C linear ratios $P_x/P_c \equiv R_x/R_c \equiv D_x/D_c$ | `MATHEMATICAL_PROOFS.md` (Identity 5) | Equality of `perimeters`, `radii`, `diameters` + `getNormalizedValuesForMode` | `FourCirclesSpectralAnalysis.ts`; `geometry.test.ts` (Sec. 7) | `DERIVED`, `VERIFIED` | `Radius \| Diameter` switch updates labels & raw values only |
 | `PCL-F22` | Reciprocal leg-swap duality $t \leftrightarrow 1/t$ | `MATHEMATICAL_PROOFS.md` (Identity 6) | `(3,7)/(7,3)`, `(3,4)/(4,3)`, `(0.1, 10)`, `(0.5, 2.0)` | `FourCirclesSpectralAnalysis.ts`; `geometry.test.ts` (Sec. 2, 6, 7) | `DERIVED`, `VERIFIED` | Plot mirror symmetry applies on `'log'` scale |
 | `PCL-F23` | Symmetry at $t=1$ & global max $K_i/K_c = 3 - 2\sqrt{2}$ | `MATHEMATICAL_PROOFS.md` (Prop. 7) | Asserted at `t = 1.0` and inside `sampleSpectralCurves` | `FourCirclesSpectralAnalysis.ts`; `geometry.test.ts` (Sec. 7) | `DERIVED`, `VERIFIED` | Global maximum proven analytically; sampled at discrete points |
-| `PCL-F24` | Ratio-to-leg sync `legsFromRatioAndHypotenuse` | `Computational Mapping` | Round-trip sync at $t \in \{0.1, 0.5, 1, 2, 10\}$ (`c = 5`) | `FourCirclesSpectralAnalysis.ts`, `App.tsx`; `geometry.test.ts` (Sec. 7) | `VERIFIED` | Ratio clips if $t \notin [1/75, 75]$; `App.tsx` rounds legs to $10^{-4}$ |
+| `PCL-F24` | Ratio-to-leg sync `legsFromRatioAndHypotenuse` | `Computational Mapping` | Round-trip sync at $t \in \{0.1, 0.5, 1, 2, 10\}$ (`c = 5`) | `FourCirclesSpectralAnalysis.ts`, `App.tsx`; `geometry.test.ts` (Sec. 7) | `VERIFIED` | Ratio clips if $t \notin [1/75, 75]$; `App.tsx` rounds legs to $10^{-6}$ |
+| `PCL-G25` | Thales circumcenter $O_o = \frac{A+B}{2}$ from endpoints | `Established Euclidean Theorem` | Canonical triples + shifted/rotated right triangle + swap reflection | `ThalesCircumcircle.ts`; `geometry.test.ts` (Sec. 9a, 9b, 9d) | `VERIFIED` | Throws `RangeError` on non-finite or coincident `A === B` |
+| `PCL-G26` | Thales $D_o=c, R_o=c/2, K_o=\pi c^2/4, L_o=\pi c$ | `Established Euclidean Theorem` | 4 runtime validators (`tol = 1e-9`) + extreme/scale tests | `ThalesCircumcircle.ts`, `ThalesValidators.ts`; `geometry.test.ts` (Sec. 9a, 9c) | `VERIFIED` | Same `float64` quadratic area bounds as `PCL-C10` |
+| `PCL-G27` | Vertex equidistance $|O_o-V|=R_o$ & $\angle AOB=90^\circ$ | `Established Euclidean Theorem` | `thales_dist_A/B/C`, `thales_right_angle` + center-shift mutation test | `ThalesCircumcircle.ts`, `ThalesValidators.ts`; `geometry.test.ts` (Sec. 9a, 9b, 9f) | `VERIFIED` | — |
+| `PCL-G28` | Area identity $K_o = K_c$ with $|O_o - O_c| = c/2 > 0$ | `Derived Geometric Comparison` | `thales_area_eq_Kc` (`tol = 1e-9`) + `1e-12` area diff check | `ThalesCircumcircle.ts`, `ThalesValidators.ts`, `KcVsKoComparison.tsx`; `geometry.test.ts` (Sec. 9a) | `DERIVED`, `VERIFIED` | — |
+| `PCL-G29` | Constant `thalesNorm` & monotonic `thalesAbs` growth | `MATHEMATICAL_FOUNDATION.md` (Sec. 6.4) | $t \in [0.05, 20]$ ratios, strict monotonicity & `sampleThalesAbsoluteCurves` | `FourCirclesSpectralAnalysis.ts`, `SpectralAnalysisPanel.tsx`; `geometry.test.ts` (Sec. 9e) | `DERIVED`, `VERIFIED` | Graph polyline uses discrete sampling (`steps = 220`) |
 
 ---
 
@@ -47,6 +52,6 @@ This matrix maps every UMFP formula passport (`PCL-A01`–`PCL-F24`) and open re
 
 ## 3. Verification Boundaries
 
-1. **Automated Unit Tests (`npm test`):** Pure mathematical & synchronization checks in `src/tests/geometry.test.ts` (`tol = 1e-9`).
-2. **Runtime Monitors:** `validateFourCirclesInvariants` evaluates 8 invariants live inside `InvariantsPanel.tsx` and `TestRunnerModal.tsx`.
+1. **Automated Unit Tests (`npm test`):** Pure mathematical & synchronization checks across Sections 1–9 in `src/tests/geometry.test.ts` (`tol = 1e-9`).
+2. **Runtime Monitors:** `validateAllFiveCirclesInvariants` evaluates all 17 invariants (8 core Four-Circle + 9 Thales Circumcircle) live inside `InvariantsPanel.tsx` and `TestRunnerModal.tsx`.
 3. **Not Covered by Automated Tests:** Browser DOM/pointer rendering, CSS responsiveness across viewports, and CDN availability (no Playwright/RTL harness is installed).

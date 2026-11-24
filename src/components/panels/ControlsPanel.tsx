@@ -14,6 +14,7 @@ interface ControlsPanelProps {
   onChangeA: (newA: number, recordHistory?: boolean) => void;
   onChangeB: (newB: number, recordHistory?: boolean) => void;
   onSetBoth: (newA: number, newB: number, recordHistory?: boolean) => void;
+  onChangeLambda?: (newLambda: number, recordHistory?: boolean) => void;
   externalGraphMutationToken?: number;
   t?: Translations;
 }
@@ -23,6 +24,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
   onChangeA,
   onChangeB,
   onSetBoth,
+  onChangeLambda,
   externalGraphMutationToken = 0,
   t = TRANSLATIONS.ru,
 }) => {
@@ -171,6 +173,78 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             <span>12.0</span>
           </div>
         </div>
+      </div>
+
+      {/* Proportional Scale Parameter λ (c = λ · 5) */}
+      <div className="p-2.5 rounded-lg bg-indigo-50/50 border border-indigo-100 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-indigo-900">{t.controls.scaleTitle}</span>
+            <span className="text-[11px] font-mono text-indigo-700 font-semibold">
+              λ = {(calc.triangle.c / 5.0).toFixed(3)}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              setIsAnimating(false);
+              onChangeLambda?.(1.0, true);
+            }}
+            className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap shrink-0"
+            title={t.controls.scaleReset}
+          >
+            {t.controls.scaleReset}
+          </button>
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-slate-600">
+              c = λ · 5.0 = <span className="font-mono font-bold text-slate-800">{calc.triangle.c.toFixed(3)}</span>
+            </span>
+            <div className="flex items-center gap-1">
+              {[0.5, 1.0, 1.5, 2.0].map((quickLambda) => {
+                const isQuickActive = Math.abs(calc.triangle.c / 5.0 - quickLambda) < 0.03;
+                return (
+                  <button
+                    key={quickLambda}
+                    onClick={() => {
+                      setIsAnimating(false);
+                      onChangeLambda?.(quickLambda, true);
+                    }}
+                    className={`px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded transition-colors ${
+                      isQuickActive
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-100/70'
+                    }`}
+                  >
+                    {quickLambda}x
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <input
+            type="range"
+            min="0.2"
+            max="2.5"
+            step="0.05"
+            value={calc.triangle.c / 5.0}
+            onChange={(e) => {
+              setIsAnimating(false);
+              onChangeLambda?.(parseFloat(e.target.value) || 1.0, false);
+            }}
+            onPointerUp={() => onChangeLambda?.(calc.triangle.c / 5.0, true)}
+            className="w-full accent-indigo-600 cursor-pointer"
+          />
+          <div className="flex justify-between text-[10px] text-slate-400 font-mono tabular-nums">
+            <span>0.2x</span>
+            <span>1.0x (Эталон)</span>
+            <span>2.5x</span>
+          </div>
+        </div>
+        <p className="text-[10px] text-indigo-700/80 leading-snug">
+          {t.controls.scaleDesc}
+        </p>
       </div>
 
       {/* Control Triangles Presets */}

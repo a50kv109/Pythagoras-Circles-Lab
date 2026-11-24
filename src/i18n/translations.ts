@@ -21,6 +21,7 @@ export interface Translations {
     identityProof: string;
     incircleFocus: string;
     spectralAnalysis: string;
+    thalesCircumcircle: string;
   };
   actions: {
     compare: string;
@@ -58,6 +59,11 @@ export interface Translations {
     triIncircle: string;
     squares: string;
     squareCircles: string;
+    fourCirclesOnly: string;
+    thalesOnly: string;
+    fiveCircles: string;
+    circumcircleToggle: string;
+    circumcircleToggleTitle: string;
     grid: string;
     labels: string;
     centers: string;
@@ -96,6 +102,10 @@ export interface Translations {
     circleKbTitle: string;
     circleKcTitle: string;
     circleKiTitle: string;
+    circleKoTitle: string;
+    circumcenterTitle: string;
+    thalesRadiusTitle: string;
+    thalesDiameterTitle: string;
     tanOATitle: string;
     tanOBTitle: string;
     tanABTitle: string;
@@ -111,6 +121,9 @@ export interface Translations {
     pause: string;
     smoothSweep: string;
     reset345: string;
+    scaleTitle: string;
+    scaleDesc: string;
+    scaleReset: string;
     presetDescriptions: Record<string, string>;
   };
   panel: {
@@ -140,12 +153,59 @@ export interface Translations {
     locSquareQb: string;
     locSquareQc: string;
     locInsideTri: string;
+    locCircumscribed: string;
     areaContrastTitle: string;
     equalsMinusKi: string;
     contrastNoteBefore: string;
     contrastNoteMiddle: string;
     contrastNoteAfter: string;
     coordinatesTitle: string;
+    kcVsKo: {
+      title: string;
+      badgeEq: string;
+      badgeDiffCenter: string;
+      colParam: string;
+      rowRole: string;
+      roleKc: string;
+      roleKo: string;
+      rowCenter: string;
+      rowDiameter: string;
+      rowRadius: string;
+      rowArea: string;
+      rowCircumference: string;
+      rowVertices: string;
+      verticesKc: string;
+      verticesKo: string;
+      rowAreaDiff: string;
+      rowCenterDist: string;
+    };
+  };
+  thalesPanel: {
+    title: string;
+    subtitle: string;
+    theoremTitle: string;
+    theoremSummary: string;
+    metricDo: string;
+    metricRo: string;
+    metricKo: string;
+    metricLo: string;
+    checksTitle: string;
+    angleCheckLabel: string;
+    centerCoordLabel: string;
+    distALabel: string;
+    distBLabel: string;
+    distOLabel: string;
+    centersComparisonTitle: string;
+    incenterRole: string;
+    circumcenterRole: string;
+    kcCenterRole: string;
+    scaleCardTitle: string;
+    scaleCardSubtitle: string;
+    scaleSliderLabel: string;
+    scaleMetricLinear: string;
+    scaleMetricArea: string;
+    scaleTableTitle: string;
+    scaleInvariantNote: string;
   };
   spectral: {
     title: string;
@@ -154,6 +214,25 @@ export interface Translations {
     tabAreas: string;
     tabPerimeters: string;
     tabRadiiDiameters: string;
+    tabThalesAbs: string;
+    tabScaleLambda: string;
+    scaleTitle: string;
+    scaleSubtitle: string;
+    scaleFormulaTitle: string;
+    colScale: string;
+    scaleDeg1: string;
+    scaleDeg2: string;
+    scaleLawLinear: string;
+    scaleLawQuadratic: string;
+    koOverlayToggle: string;
+    thalesNormNote: string;
+    thalesAbsTitle: string;
+    thalesAbsDesc: string;
+    thalesAbsFormulaTitle: string;
+    thalesLiveReadoutTitle: string;
+    colDimensional: string;
+    colNormalizedUnit: string;
+    colRatioNorm: string;
     linearNoteBefore: string;
     linearNoteMiddle: string;
     linearNoteAnd: string;
@@ -210,6 +289,8 @@ export interface Translations {
     subtitle: string;
     calcLabel: string;
     expectedLabel: string;
+    groupFourCircles: string;
+    groupThales: string;
     items: Record<string, InvariantText>;
   };
   compareModal: {
@@ -227,10 +308,12 @@ export interface Translations {
       legB: string;
       hypC: string;
       inradiusR: string;
+      radiusRo: string;
       areaKa: string;
       areaKb: string;
       areaKc: string;
       areaKi: string;
+      areaKo: string;
     };
   };
   testModal: {
@@ -268,10 +351,14 @@ export interface Translations {
     kiDesc1: string;
     kiDesc2: string;
     kiDesc3: string;
+    koDesc1: string;
+    koDesc2: string;
+    koDesc3: string;
     kaColor: string;
     kbColor: string;
     kcColor: string;
     kiColor: string;
+    koColor: string;
     sec2Title: string;
     sec2Text1: string;
     sec2TextAnd: string;
@@ -281,6 +368,8 @@ export interface Translations {
     sec3Bullet1: string;
     sec3Bullet2Before: string;
     sec3Bullet2After: string;
+    sec4Title: string;
+    sec4Text: string;
     gotItBtn: string;
   };
 }
@@ -297,10 +386,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       identityProof: '02. Тождество √K',
       incircleFocus: '03. Вписанный круг Kᵢ',
       spectralAnalysis: '04. Спектральный анализ',
+      thalesCircumcircle: '05. Окружность Фалеса Kₒ',
     },
     actions: {
       compare: 'Сравнить',
-      tests: 'Тесты 8/8',
+      tests: 'Тесты 17/17',
       help: 'Справка',
       undo: 'Отменить',
       redo: 'Вернуть',
@@ -334,6 +424,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       triIncircle: '△ и Kᵢ',
       squares: 'Квадраты Q',
       squareCircles: 'Круги K_a,b,c',
+      fourCirclesOnly: '4 круга',
+      thalesOnly: 'Описанная K_o',
+      fiveCircles: 'Все 5 кругов',
+      circumcircleToggle: 'K_o',
+      circumcircleToggleTitle: 'Показать или скрыть описанную окружность Фалеса K_o',
       grid: 'Сетка',
       labels: 'Подписи',
       centers: 'Центры',
@@ -362,7 +457,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       lengthUnit: 'Длина',
       projHyp: 'Проекция на гипотенузу',
       hypABTitle: 'Гипотенуза AB',
-      hypDetailsSuffix: 'Сторона квадрата Q_c и диаметр круга K_c',
+      hypDetailsSuffix: 'Сторона квадрата Q_c и диаметр кругов K_c и K_o',
       squareQaTitle: 'Квадрат Q_a на катете a',
       squareQbTitle: 'Квадрат Q_b на катете b',
       squareQcTitle: 'Квадрат Q_c на гипотенузе c',
@@ -372,6 +467,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       circleKbTitle: 'Круг K_b (вписан в квадрат Q_b)',
       circleKcTitle: 'Круг K_c (вписан в квадрат Q_c)',
       circleKiTitle: 'Вписанный круг K_i (внутри треугольника OAB)',
+      circleKoTitle: 'Описанная окружность Фалеса K_o (вокруг △OAB)',
+      circumcenterTitle: 'Центр описанной окружности O_o = (A + B)/2',
+      thalesRadiusTitle: 'Радиус описанной окружности R_o = c / 2',
+      thalesDiameterTitle: 'Диаметр D_o = гипотенуза AB',
       tanOATitle: 'Точка касания на катете OA',
       tanOBTitle: 'Точка касания на катете OB',
       tanABTitle: 'Точка касания на гипотенузе AB',
@@ -387,6 +486,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pause: 'Пауза',
       smoothSweep: 'Плавное изменение (a, b)',
       reset345: 'Сброс (3-4-5)',
+      scaleTitle: 'Масштаб треугольника λ',
+      scaleDesc: 'Пропорциональное масштабирование (c = λ·5): длины ~ λ, площади ~ λ²',
+      scaleReset: 'λ = 1 (Эталон 3-4-5)',
       presetDescriptions: {
         classic_3_4_5: 'Классический египетский треугольник: целые стороны и целочисленный вписанный радиус r = 1.',
         classic_5_12_13: 'Пифагорова тройка с целым радиусом вписанной окружности r = (5 + 12 - 13)/2 = 2.',
@@ -398,7 +500,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     },
     panel: {
       title: 'Числовая панель четырёх кругов',
-      subtitle: 'Синхронный пересчёт площадей, корней и невязки',
+      subtitle: 'Синхронный пересчёт площадей, корней, невязки и K_o',
       identityTitle: 'Центральное четырёхкруговое тождество',
       identityHold: 'Тождество выполняется точно',
       identityFail: 'Обнаружена невязка',
@@ -423,20 +525,86 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       locSquareQb: 'Квадрат Q_b',
       locSquareQc: 'Квадрат Q_c',
       locInsideTri: 'Внутри △OAB',
+      locCircumscribed: 'Описана вокруг △OAB',
       areaContrastTitle: 'Соотношение самих площадей (контраст)',
       equalsMinusKi: 'равняется -K_i',
       contrastNoteBefore: 'Прямое равенство площадей',
       contrastNoteMiddle: 'неверно, так как по теореме Пифагора',
       contrastNoteAfter: ', а площадь вписанной окружности',
       coordinatesTitle: 'Координаты центров и точек касания',
+      kcVsKo: {
+        title: 'Сравнение гипотенузного круга K_c и описанной окружности K_o',
+        badgeEq: 'K_o = K_c (равные величины)',
+        badgeDiffCenter: 'O_o ≠ O_c (разные центры)',
+        colParam: 'Параметр',
+        rowRole: 'Геометрическая роль',
+        roleKc: 'Вписана в квадрат Q_c на гипотенузе',
+        roleKo: 'Описана вокруг треугольника OAB',
+        rowCenter: 'Координаты центра',
+        rowDiameter: 'Диаметр',
+        rowRadius: 'Радиус',
+        rowArea: 'Площадь',
+        rowCircumference: 'Длина окружности',
+        rowVertices: 'Прохождение через вершины',
+        verticesKc: 'Нет (касание сторон квадрата Q_c)',
+        verticesKo: 'Да: O, A, B',
+        rowAreaDiff: 'Разность |K_o − K_c|',
+        rowCenterDist: 'Расстояние между центрами |O_o − O_c|',
+      },
+    },
+    thalesPanel: {
+      title: '05. Описанная окружность Фалеса K_o',
+      subtitle: 'Теорема Фалеса: вписанный угол ∠AOB = 90° опирается на диаметр AB',
+      theoremTitle: 'Теорема Фалеса и равноудалённость вершин',
+      theoremSummary: 'Середина гипотенузы O_o = (A + B)/2 равноудалена от вершин A, B и вершины прямого угла O. Поэтому окружность радиуса R_o = c/2 проходит через O, A и B, а вписанный угол ∠AOB = 90° опирается на диаметр D_o = c.',
+      metricDo: 'Диаметр D_o',
+      metricRo: 'Радиус R_o',
+      metricKo: 'Площадь K_o',
+      metricLo: 'Длина L_o',
+      checksTitle: 'Верификация геометрии Фалеса в реальном времени',
+      angleCheckLabel: 'Угол при вершине O (∠AOB)',
+      centerCoordLabel: 'Центр описанной O_o = (A + B)/2',
+      distALabel: 'Расстояние |O_o − A|',
+      distBLabel: 'Расстояние |O_o − B|',
+      distOLabel: 'Расстояние |O_o − O| (медиана)',
+      centersComparisonTitle: 'Три ключевых центра треугольника',
+      incenterRole: 'Центр вписанной окружности K_i',
+      circumcenterRole: 'Центр описанной окружности K_o (середина AB)',
+      kcCenterRole: 'Центр круга K_c внутри квадрата Q_c',
+      scaleCardTitle: 'Динамическое масштабирование окружности Фалеса K_o(λ)',
+      scaleCardSubtitle: 'Исследование двухпараметрической модели: форма t = b/a и масштаб λ = c / c₀',
+      scaleSliderLabel: 'Масштаб треугольника λ:',
+      scaleMetricLinear: 'Линейный рост (степень 1): D_o(λ) = λ·c₀, R_o(λ) = λ·c₀/2, L_o(λ) = π·λ·c₀',
+      scaleMetricArea: 'Квадратичный рост (степень 2): K_o(λ) = λ²·(πc₀²/4) = λ²·K_o(1)',
+      scaleTableTitle: 'Закон подобия для характеристик окружности Фалеса K_o',
+      scaleInvariantNote: 'Тождества K_o(λ) ≡ K_c(λ) и K_a(λ) + K_b(λ) = K_o(λ) сохраняются строго при любом значении масштаба λ > 0',
     },
     spectral: {
-      title: 'Параметрический спектральный анализ четырёх кругов',
+      title: 'Параметрический спектральный анализ',
       subtitleBefore: 'Безразмерный параметр',
       subtitleAfter: 'нормировка на гипотенузный круг',
       tabAreas: 'Площади',
       tabPerimeters: 'Периметры',
       tabRadiiDiameters: 'Радиусы / Диаметры',
+      tabThalesAbs: 'Абс. рост K_o(t)',
+      tabScaleLambda: 'Масштаб λ',
+      scaleTitle: 'Динамические функции масштабирования от параметра λ',
+      scaleSubtitle: 'Сравнение квадратичного роста площадей (K_o, K_c, K_i ~ λ²) и линейного роста размеров (D_o, R_o, L_o ~ λ)',
+      scaleFormulaTitle: 'Степенные законы масштабирования Евклидовой геометрии',
+      colScale: 'Масштаб λ',
+      scaleDeg1: 'Степень 1 (длины)',
+      scaleDeg2: 'Степень 2 (площади)',
+      scaleLawLinear: 'D_o(λ) = λ·c₀,  R_o(λ) = λ·c₀/2,  L_o(λ) = π·λ·c₀',
+      scaleLawQuadratic: 'K_o(λ) = λ²·(π·c₀²/4) = λ²·K_o(1)',
+      koOverlayToggle: 'Показать K_o',
+      thalesNormNote: 'Постоянная линия Фалеса:',
+      thalesAbsTitle: 'Абсолютный рост характеристик K_o(t) при нормировке катета a_norm = 1, b_norm = t',
+      thalesAbsDesc: 'При росте t = b/a абсолютные величины R_o*(t), D_o*(t), K_o*(t), L_o*(t) монотонно возрастают, тогда как нормированные отношения R_o/c = 1/2, D_o/c = 1, K_o/K_c = 1 и L_o/L_c = 1 строго постоянны.',
+      thalesAbsFormulaTitle: 'Абсолютные параметрические функции K_o (a_norm = 1) и постоянные отношения',
+      thalesLiveReadoutTitle: 'Текущий треугольник (размерные a, b, c) и нормировка a_norm = 1',
+      colDimensional: 'Текущий (a, b)',
+      colNormalizedUnit: 'Нормир. *(1, t)',
+      colRatioNorm: 'Отношение',
       linearNoteBefore: 'Линейный масштаб:',
       linearNoteMiddle: 'нормированные кривые',
       linearNoteAnd: 'и',
@@ -458,7 +626,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       outOfRangeBefore: 'Текущее значение',
       outOfRangeMiddle: 'вне видимого диапазона',
       fitRangeBtn: 'Включить в диапазон',
-      svgAriaLabel: 'Декартовый график нормированных характеристик четырёх кругов в зависимости от t = b/a',
+      svgAriaLabel: 'Декартовый график характеристик окружностей в зависимости от t = b/a',
       axisLogLabel: '(логарифмическая шкала)',
       axisLinearLabel: '(линейная шкала)',
       symmetryTag: 'Симметрия',
@@ -483,16 +651,18 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       formulaSecBNormalizedDiameters: 'B. Нормированные диаметры (a_norm = 1)',
       formulaSecCRatioAreas: 'C. Отношения площадей (функции на графике)',
       formulaSecCRatioPerimeters: 'C. Отношения периметров (функции на графике)',
-      formulaSecCRatioRadii: 'C. Отношения радиусов (функции на графике)',
+      formulaSecCRatioRadii: 'C. Отношения радиусных величин (функции на графике)',
       formulaSecCRatioDiameters: 'C. Отношения диаметров (функции на графике)',
       atSymmetryNotice: 'Треугольник уже на оси симметрии t = 1 (a = b, 1/t = t).',
     },
     invariants: {
       title: 'Верификация геометрии и тождеств',
       confirmedSuffix: 'подтверждены',
-      subtitle: 'Проверка евклидовых условий касания, площадей и четырёхкругового тождества (допуск 10⁻⁹):',
+      subtitle: 'Проверка евклидовых условий касания, площадей, четырёхкругового тождества и теоремы Фалеса (допуск 10⁻⁹):',
       calcLabel: 'Расчёт',
       expectedLabel: 'Эталон',
+      groupFourCircles: 'Четыре базовые окружности (8)',
+      groupThales: 'Описанная окружность Фалеса K_o (9)',
       items: {
         incircle_positive: {
           name: 'Положительность вписанного радиуса r',
@@ -526,10 +696,46 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
           name: 'Отличие тождества от суммы площадей',
           description: 'Прямая сумма площадей не равна K_c + K_i: расхождение строго равно -K_i < 0.',
         },
+        thales_diameter: {
+          name: 'Диаметр K_o равен гипотенузе (D_o = c)',
+          description: 'По теореме Фалеса диаметр описанной окружности прямоугольного треугольника равен гипотенузе.',
+        },
+        thales_radius: {
+          name: 'Радиус K_o равен половине гипотенузы (R_o = c/2)',
+          description: 'Радиус описанной окружности составляет ровно половину длины гипотенузы.',
+        },
+        thales_area: {
+          name: 'Площадь описанной окружности (K_o = πc²/4)',
+          description: 'Площадь круга K_o согласована с его радиусом R_o = c/2.',
+        },
+        thales_circumference: {
+          name: 'Длина описанной окружности (L_o = πc)',
+          description: 'Длина окружности K_o пропорциональна гипотенузе с коэффициентом π.',
+        },
+        thales_dist_A: {
+          name: 'Принадлежность вершины A окружности K_o',
+          description: 'Расстояние от середины гипотенузы O_o до вершины A равно радиусу R_o.',
+        },
+        thales_dist_B: {
+          name: 'Принадлежность вершины B окружности K_o',
+          description: 'Расстояние от середины гипотенузы O_o до вершины B равно радиусу R_o.',
+        },
+        thales_dist_C: {
+          name: 'Принадлежность вершины прямого угла окружности K_o',
+          description: 'Вершина прямого угла лежит на окружности K_o (медиана к гипотенузе равна c/2).',
+        },
+        thales_area_eq_Kc: {
+          name: 'Равенство площадей K_o = K_c при разных центрах',
+          description: 'Окружность в квадрате на гипотенузе и описанная окружность имеют равные площади и разные центры.',
+        },
+        thales_right_angle: {
+          name: 'Прямой угол напротив диаметра (∠AOB = 90°)',
+          description: 'Угол, опирающийся на диаметр AB окружности K_o, остаётся равным 90° при любых катетах.',
+        },
       },
     },
     compareModal: {
-      title: 'Сравнение четырёхкруговых конфигураций',
+      title: 'Сравнение пятикруговых конфигураций',
       subtitle: 'Сопоставление эталонного треугольника и текущей конструкции',
       captureBtn: 'Зафиксировать текущую в Конфигурацию 1',
       loadBtn: 'Загрузить Конфигурацию 1',
@@ -543,15 +749,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         legB: 'Катет b',
         hypC: 'Гипотенуза c',
         inradiusR: 'Вписанный радиус r',
+        radiusRo: 'Радиус описанной R_o',
         areaKa: 'Площадь K_a',
         areaKb: 'Площадь K_b',
         areaKc: 'Площадь K_c',
         areaKi: 'Площадь K_i',
+        areaKo: 'Площадь K_o',
       },
     },
     testModal: {
-      title: 'Контрольные треугольники и проверка тождества',
-      subtitle: 'Автоматическая верификация 8 геометрических и алгебраических инвариантов четырёх кругов',
+      title: 'Контрольные треугольники и проверка тождеств',
+      subtitle: 'Автоматическая верификация 17 инвариантов (8 базовых + 9 инвариантов Фалеса K_o)',
       colTriangle: 'Треугольник',
       colProfile: 'Геометрический профиль',
       colChecks: 'Проверки',
@@ -561,20 +769,20 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       failStatus: 'ОШИБКА',
       openBtn: 'Открыть',
       openTitle: 'Загрузить этот треугольник на планшет',
-      allPassBanner: 'Все контрольные треугольники подтвердили построение квадратов, касание четырёх окружностей, положительность вписанного радиуса r > 0 и тождество √K_a + √K_b = √K_c + √K_i.',
+      allPassBanner: 'Все контрольные треугольники подтвердили 17/17 инвариантов: квадраты и четыре круга, тождество √K_a + √K_b = √K_c + √K_i, а также все свойства описанной окружности Фалеса K_o (D_o = c, K_o = K_c, O_o ≠ O_c, ∠AOB = 90°).',
       failBanner: 'Обнаружено расхождение инвариантов в одной или нескольких конфигурациях.',
       cases: {
-        '3_4': 'Египетский треугольник: c = 5, r = 1',
-        '5_12': 'Пифагорова тройка: c = 13, r = 2',
-        '4_4': 'Симметрия a = b: K_a = K_b, r ≈ 1.1716',
+        '3_4': 'Египетский треугольник: c = 5, r = 1, R_o = 2.5',
+        '5_12': 'Пифагорова тройка: c = 13, r = 2, R_o = 6.5',
+        '4_4': 'Симметрия a = b: K_a = K_b, r ≈ 1.1716, R_o = 2√2',
         '1_10': 'Вытянутый треугольник: c ≈ 10.0499, r ≈ 0.4751',
-        '10_1': 'Зеркальный вытянутый: K_a ↔ K_b, K_i неизменен',
+        '10_1': 'Зеркальный вытянутый: K_a ↔ K_b, K_i и K_o неизменны',
       },
     },
     helpModal: {
-      title: 'Справка: Лаборатория Пифагора — четыре круга',
-      subtitle: 'Геометрическая модель четырёх окружностей, порождённых прямоугольным треугольником',
-      sec1Title: 'Четыре окружности единой параметрической системы',
+      title: 'Справка: Лаборатория Пифагора — четыре круга и круг Фалеса',
+      subtitle: 'Геометрическая модель пяти окружностей, порождённых прямоугольным треугольником',
+      sec1Title: 'Пять окружностей единой параметрической системы',
       sec1IntroBefore: 'Все объекты конструкции вычисляются детерминированно из двух независимых параметров — катетов',
       sec1IntroAnd: 'и',
       sec1IntroTriangle: 'прямоугольного треугольника',
@@ -594,6 +802,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       kiDesc1: 'обычная вписанная окружность строго внутри треугольника',
       kiDesc2: 'касающаяся всех трёх его сторон. Радиус',
       kiDesc3: 'площадь',
+      koColor: 'фиолетовый',
+      koDesc1: 'описанная окружность Фалеса, проходящая через все три вершины',
+      koDesc2: 'с центром в середине гипотенузы',
+      koDesc3: 'диаметром',
       sec2Title: 'Центральное четырёхкруговое тождество:',
       sec2Text1: 'Так как',
       sec2TextAnd: 'и',
@@ -603,6 +815,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       sec3Bullet1: 'По теореме Пифагора для трёх квадратных кругов выполняется',
       sec3Bullet2Before: 'Поскольку вписанный круг имеет положительную площадь',
       sec3Bullet2After: ', выражение',
+      sec4Title: 'Теорема Фалеса и равенство K_o = K_c:',
+      sec4Text: 'Окружность K_o с диаметром на гипотенузе AB и окружность K_c внутри квадрата Q_c имеют одинаковый диаметр c, радиус c/2, длину πc и площадь πc²/4, но расположены вокруг разных центров: O_o = (b/2, a/2) и O_c = ((a+b)/2, (a+b)/2).',
       gotItBtn: 'Понятно',
     },
   },
@@ -617,10 +831,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       identityProof: '02. Тотожність √K',
       incircleFocus: '03. Вписане коло Kᵢ',
       spectralAnalysis: '04. Спектральний аналіз',
+      thalesCircumcircle: '05. Коло Фалеса Kₒ',
     },
     actions: {
       compare: 'Порівняти',
-      tests: 'Тести 8/8',
+      tests: 'Тести 17/17',
       help: 'Довідка',
       undo: 'Скасувати',
       redo: 'Повернути',
@@ -654,6 +869,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       triIncircle: '△ та Kᵢ',
       squares: 'Квадрати Q',
       squareCircles: 'Кола K_a,b,c',
+      fourCirclesOnly: '4 кола',
+      thalesOnly: 'Описане K_o',
+      fiveCircles: 'Усі 5 кіл',
+      circumcircleToggle: 'K_o',
+      circumcircleToggleTitle: 'Показати або приховати описане коло Фалеса K_o',
       grid: 'Сітка',
       labels: 'Підписи',
       centers: 'Центри',
@@ -682,7 +902,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       lengthUnit: 'Довжина',
       projHyp: 'Проєкція на гіпотенузу',
       hypABTitle: 'Гіпотенуза AB',
-      hypDetailsSuffix: 'Сторона квадрата Q_c і діаметр кола K_c',
+      hypDetailsSuffix: 'Сторона квадрата Q_c і діаметр кіл K_c та K_o',
       squareQaTitle: 'Квадрат Q_a на катеті a',
       squareQbTitle: 'Квадрат Q_b на катеті b',
       squareQcTitle: 'Квадрат Q_c на гіпотенузі c',
@@ -692,6 +912,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       circleKbTitle: 'Коло K_b (вписане у квадрат Q_b)',
       circleKcTitle: 'Коло K_c (вписане у квадрат Q_c)',
       circleKiTitle: 'Вписане коло K_i (усередині трикутника OAB)',
+      circleKoTitle: 'Описане коло Фалеса K_o (навколо △OAB)',
+      circumcenterTitle: 'Центр описаного кола O_o = (A + B)/2',
+      thalesRadiusTitle: 'Радіус описаного кола R_o = c / 2',
+      thalesDiameterTitle: 'Діаметр D_o = гіпотенуза AB',
       tanOATitle: 'Точка дотику на катеті OA',
       tanOBTitle: 'Точка дотику на катеті OB',
       tanABTitle: 'Точка дотику на гіпотенузі AB',
@@ -707,6 +931,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pause: 'Пауза',
       smoothSweep: 'Плавна зміна (a, b)',
       reset345: 'Скидання (3-4-5)',
+      scaleTitle: 'Масштаб трикутника λ',
+      scaleDesc: 'Пропорційне масштабування (c = λ·5): довжини ~ λ, площі ~ λ²',
+      scaleReset: 'λ = 1 (Еталон 3-4-5)',
       presetDescriptions: {
         classic_3_4_5: 'Класичний єгипетський трикутник: цілі сторони та цілочисловий вписаний радіус r = 1.',
         classic_5_12_13: 'Піфагорова трійка з цілим радіусом вписаного кола r = (5 + 12 - 13)/2 = 2.',
@@ -718,7 +945,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     },
     panel: {
       title: 'Числова панель чотирьох кіл',
-      subtitle: 'Синхронний перерахунок площ, коренів та нев’язки',
+      subtitle: 'Синхронний перерахунок площ, коренів, нев’язки та K_o',
       identityTitle: 'Центральна тотожність чотирьох кіл',
       identityHold: 'Тотожність виконується точно',
       identityFail: 'Виявлено нев’язку',
@@ -743,20 +970,86 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       locSquareQb: 'Квадрат Q_b',
       locSquareQc: 'Квадрат Q_c',
       locInsideTri: 'Всередині △OAB',
+      locCircumscribed: 'Описане навколо △OAB',
       areaContrastTitle: 'Співвідношення самих площ (контраст)',
       equalsMinusKi: 'дорівнює -K_i',
       contrastNoteBefore: 'Пряма рівність площ',
       contrastNoteMiddle: 'хибна, оскільки за теоремою Піфагора',
       contrastNoteAfter: ', а площа вписаного кола',
       coordinatesTitle: 'Координати центрів та точок дотику',
+      kcVsKo: {
+        title: 'Порівняння гіпотенузного кола K_c та описаного кола K_o',
+        badgeEq: 'K_o = K_c (рівні величини)',
+        badgeDiffCenter: 'O_o ≠ O_c (різні центри)',
+        colParam: 'Параметр',
+        rowRole: 'Геометрична роль',
+        roleKc: 'Вписане у квадрат Q_c на гіпотенузі',
+        roleKo: 'Описане навколо трикутника OAB',
+        rowCenter: 'Координати центра',
+        rowDiameter: 'Діаметр',
+        rowRadius: 'Радіус',
+        rowArea: 'Площа',
+        rowCircumference: 'Довжина кола',
+        rowVertices: 'Проходження через вершини',
+        verticesKc: 'Ні (дотик до сторін квадрата Q_c)',
+        verticesKo: 'Так: O, A, B',
+        rowAreaDiff: 'Різниця |K_o − K_c|',
+        rowCenterDist: 'Відстань між центрами |O_o − O_c|',
+      },
+    },
+    thalesPanel: {
+      title: '05. Описане коло Фалеса K_o',
+      subtitle: 'Теорема Фалеса: вписаний кут ∠AOB = 90° спирається на діаметр AB',
+      theoremTitle: 'Теорема Фалеса та рівновіддаленість вершин',
+      theoremSummary: 'Середина гіпотенузи O_o = (A + B)/2 рівновіддалена від вершин A, B і вершини прямого кута O. Тому коло радіуса R_o = c/2 проходить через O, A та B, а вписаний кут ∠AOB = 90° спирається на діаметр D_o = c.',
+      metricDo: 'Діаметр D_o',
+      metricRo: 'Радіус R_o',
+      metricKo: 'Площа K_o',
+      metricLo: 'Довжина L_o',
+      checksTitle: 'Верифікація геометрії Фалеса в реальному часі',
+      angleCheckLabel: 'Кут при вершині O (∠AOB)',
+      centerCoordLabel: 'Центр описаного O_o = (A + B)/2',
+      distALabel: 'Відстань |O_o − A|',
+      distBLabel: 'Відстань |O_o − B|',
+      distOLabel: 'Відстань |O_o − O| (медіана)',
+      centersComparisonTitle: 'Три ключові центри трикутника',
+      incenterRole: 'Центр вписаного кола K_i',
+      circumcenterRole: 'Центр описаного кола K_o (середина AB)',
+      kcCenterRole: 'Центр кола K_c усередині квадрата Q_c',
+      scaleCardTitle: 'Динамічне масштабування кола Фалеса K_o(λ)',
+      scaleCardSubtitle: 'Дослідження двопараметричної моделі: форма t = b/a та масштаб λ = c / c₀',
+      scaleSliderLabel: 'Масштаб трикутника λ:',
+      scaleMetricLinear: 'Лінійний ріст (степінь 1): D_o(λ) = λ·c₀, R_o(λ) = λ·c₀/2, L_o(λ) = π·λ·c₀',
+      scaleMetricArea: 'Квадратичний ріст (степінь 2): K_o(λ) = λ²·(πc₀²/4) = λ²·K_o(1)',
+      scaleTableTitle: 'Закон подібності для характеристик кола Фалеса K_o',
+      scaleInvariantNote: 'Тотожності K_o(λ) ≡ K_c(λ) та K_a(λ) + K_b(λ) = K_o(λ) зберігаються суворо за будь-якого масштабу λ > 0',
     },
     spectral: {
-      title: 'Параметричний спектральний аналіз чотирьох кіл',
+      title: 'Параметричний спектральний аналіз',
       subtitleBefore: 'Безрозмірний параметр',
       subtitleAfter: 'нормування на гіпотенузне коло',
       tabAreas: 'Площі',
       tabPerimeters: 'Периметри',
       tabRadiiDiameters: 'Радіуси / Діаметри',
+      tabThalesAbs: 'Абс. ріст K_o(t)',
+      tabScaleLambda: 'Масштаб λ',
+      scaleTitle: 'Динамічні функції масштабування від параметра λ',
+      scaleSubtitle: 'Порівняння квадратичного зростання площ (K_o, K_c, K_i ~ λ²) та лінійного зростання розмірів (D_o, R_o, L_o ~ λ)',
+      scaleFormulaTitle: 'Степеневі закони масштабування Евклідової геометрії',
+      colScale: 'Масштаб λ',
+      scaleDeg1: 'Степінь 1 (довжини)',
+      scaleDeg2: 'Степінь 2 (площі)',
+      scaleLawLinear: 'D_o(λ) = λ·c₀,  R_o(λ) = λ·c₀/2,  L_o(λ) = π·λ·c₀',
+      scaleLawQuadratic: 'K_o(λ) = λ²·(π·c₀²/4) = λ²·K_o(1)',
+      koOverlayToggle: 'Показати K_o',
+      thalesNormNote: 'Стала лінія Фалеса:',
+      thalesAbsTitle: 'Абсолютний ріст характеристик K_o(t) при нормуванні катета a_norm = 1, b_norm = t',
+      thalesAbsDesc: 'При зростанні t = b/a абсолютні величини R_o*(t), D_o*(t), K_o*(t), L_o*(t) монотонно зростають, тоді як нормовані відношення R_o/c = 1/2, D_o/c = 1, K_o/K_c = 1 та L_o/L_c = 1 суворо сталі.',
+      thalesAbsFormulaTitle: 'Абсолютні параметричні функції K_o (a_norm = 1) та сталі відношення',
+      thalesLiveReadoutTitle: 'Поточний трикутник (розмірні a, b, c) та нормування a_norm = 1',
+      colDimensional: 'Поточний (a, b)',
+      colNormalizedUnit: 'Нормов. *(1, t)',
+      colRatioNorm: 'Відношення',
       linearNoteBefore: 'Лінійний масштаб:',
       linearNoteMiddle: 'нормовані криві',
       linearNoteAnd: 'та',
@@ -778,7 +1071,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       outOfRangeBefore: 'Поточне значення',
       outOfRangeMiddle: 'поза видимим діапазоном',
       fitRangeBtn: 'Включити в діапазон',
-      svgAriaLabel: 'Декартовий графік нормованих характеристик чотирьох кіл залежно від t = b/a',
+      svgAriaLabel: 'Декартовий графік характеристик кіл залежно від t = b/a',
       axisLogLabel: '(логарифмічна шкала)',
       axisLinearLabel: '(лінійна шкала)',
       symmetryTag: 'Симетрія',
@@ -803,16 +1096,18 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       formulaSecBNormalizedDiameters: 'B. Нормовані діаметри (a_norm = 1)',
       formulaSecCRatioAreas: 'C. Відношення площ (функції на графіку)',
       formulaSecCRatioPerimeters: 'C. Відношення периметрів (функції на графіку)',
-      formulaSecCRatioRadii: 'C. Відношення радіусів (функції на графіку)',
+      formulaSecCRatioRadii: 'C. Відношення радіусних величин (функції на графіку)',
       formulaSecCRatioDiameters: 'C. Відношення діаметрів (функції на графіку)',
       atSymmetryNotice: 'Трикутник уже на осі симетрії t = 1 (a = b, 1/t = t).',
     },
     invariants: {
       title: 'Верифікація геометрії та тотожностей',
       confirmedSuffix: 'підтверджені',
-      subtitle: 'Перевірка евклідових умов дотику, площ та тотожності чотирьох кіл (допуск 10⁻⁹):',
+      subtitle: 'Перевірка евклідових умов дотику, площ, тотожності чотирьох кіл та теореми Фалеса (допуск 10⁻⁹):',
       calcLabel: 'Розрахунок',
       expectedLabel: 'Еталон',
+      groupFourCircles: 'Чотири базові кола (8)',
+      groupThales: 'Описане коло Фалеса K_o (9)',
       items: {
         incircle_positive: {
           name: 'Додатність вписаного радіуса r',
@@ -846,10 +1141,46 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
           name: 'Відмінність тотожності від суми площ',
           description: 'Пряма сума площ не дорівнює K_c + K_i: розбіжність суворо дорівнює -K_i < 0.',
         },
+        thales_diameter: {
+          name: 'Діаметр K_o дорівнює гіпотенузі (D_o = c)',
+          description: 'За теоремою Фалеса діаметр описаного кола прямокутного трикутника дорівнює гіпотенузі.',
+        },
+        thales_radius: {
+          name: 'Радіус K_o дорівнює половині гіпотенузи (R_o = c/2)',
+          description: 'Радіус описаного кола становить рівно половину довжини гіпотенузи.',
+        },
+        thales_area: {
+          name: 'Площа описаного кола (K_o = πc²/4)',
+          description: 'Площа кола K_o узгоджена з його радіусом R_o = c/2.',
+        },
+        thales_circumference: {
+          name: 'Довжина описаного кола (L_o = πc)',
+          description: 'Довжина кола K_o пропорційна гіпотенузі з коефіцієнтом π.',
+        },
+        thales_dist_A: {
+          name: 'Належність вершини A колу K_o',
+          description: 'Відстань від середини гіпотенузи O_o до вершини A дорівнює радіусу R_o.',
+        },
+        thales_dist_B: {
+          name: 'Належність вершини B колу K_o',
+          description: 'Відстань від середини гіпотенузи O_o до вершини B дорівнює радіусу R_o.',
+        },
+        thales_dist_C: {
+          name: 'Належність вершини прямого кута колу K_o',
+          description: 'Вершина прямого кута лежить на колі K_o (медіана до гіпотенузи дорівнює c/2).',
+        },
+        thales_area_eq_Kc: {
+          name: 'Рівність площ K_o = K_c при різних центрах',
+          description: 'Коло у квадраті на гіпотенузі та описане коло мають рівні площі й різні центри.',
+        },
+        thales_right_angle: {
+          name: 'Прямий кут навпроти діаметра (∠AOB = 90°)',
+          description: 'Кут, що спирається на діаметр AB кола K_o, залишається рівним 90° за будь-яких катетів.',
+        },
       },
     },
     compareModal: {
-      title: 'Порівняння чотириколових конфігурацій',
+      title: 'Порівняння п’ятиколових конфігурацій',
       subtitle: 'Зіставлення еталонного трикутника та поточної конструкції',
       captureBtn: 'Зафіксувати поточну в Конфігурацію 1',
       loadBtn: 'Завантажити Конфігурацію 1',
@@ -863,15 +1194,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         legB: 'Катет b',
         hypC: 'Гіпотенуза c',
         inradiusR: 'Вписаний радіус r',
+        radiusRo: 'Радіус описаного R_o',
         areaKa: 'Площа K_a',
         areaKb: 'Площа K_b',
         areaKc: 'Площа K_c',
         areaKi: 'Площа K_i',
+        areaKo: 'Площа K_o',
       },
     },
     testModal: {
-      title: 'Контрольні трикутники та перевірка тотожності',
-      subtitle: 'Автоматична верифікація 8 геометричних та алгебраїчних інваріантів чотирьох кіл',
+      title: 'Контрольні трикутники та перевірка тотожностей',
+      subtitle: 'Автоматична верифікація 17 інваріантів (8 базових + 9 інваріантів Фалеса K_o)',
       colTriangle: 'Трикутник',
       colProfile: 'Геометричний профіль',
       colChecks: 'Перевірки',
@@ -881,20 +1214,20 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       failStatus: 'ПОМИЛКА',
       openBtn: 'Відкрити',
       openTitle: 'Завантажити цей трикутник на полотно',
-      allPassBanner: 'Усі контрольні трикутники підтвердили побудову квадратів, дотик чотирьох кіл, додатність вписаного радіуса r > 0 та тотожність √K_a + √K_b = √K_c + √K_i.',
+      allPassBanner: 'Усі контрольні трикутники підтвердили 17/17 інваріантів: квадрати й чотири кола, тотожність √K_a + √K_b = √K_c + √K_i, а також усі властивості описаного кола Фалеса K_o (D_o = c, K_o = K_c, O_o ≠ O_c, ∠AOB = 90°).',
       failBanner: 'Виявлено розбіжність інваріантів в одній або кількох конфігураціях.',
       cases: {
-        '3_4': 'Єгипетський трикутник: c = 5, r = 1',
-        '5_12': 'Піфагорова трійка: c = 13, r = 2',
-        '4_4': 'Симетрія a = b: K_a = K_b, r ≈ 1.1716',
+        '3_4': 'Єгипетський трикутник: c = 5, r = 1, R_o = 2.5',
+        '5_12': 'Піфагорова трійка: c = 13, r = 2, R_o = 6.5',
+        '4_4': 'Симетрія a = b: K_a = K_b, r ≈ 1.1716, R_o = 2√2',
         '1_10': 'Витягнутий трикутник: c ≈ 10.0499, r ≈ 0.4751',
-        '10_1': 'Дзеркальний витягнутий: K_a ↔ K_b, K_i незмінний',
+        '10_1': 'Дзеркальний витягнутий: K_a ↔ K_b, K_i та K_o незмінні',
       },
     },
     helpModal: {
-      title: 'Довідка: Лабораторія Піфагора — чотири кола',
-      subtitle: 'Геометрична модель чотирьох кіл, породжених прямокутним трикутником',
-      sec1Title: 'Чотири кола єдиної параметричної системи',
+      title: 'Довідка: Лабораторія Піфагора — чотири кола та коло Фалеса',
+      subtitle: 'Геометрична модель п’яти кіл, породжених прямокутним трикутником',
+      sec1Title: 'П’ять кіл єдиної параметричної системи',
       sec1IntroBefore: 'Усі об’єкти конструкції обчислюються детерміновано з двох незалежних параметрів — катетів',
       sec1IntroAnd: 'і',
       sec1IntroTriangle: 'прямокутного трикутника',
@@ -914,6 +1247,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       kiDesc1: 'звичайне вписане коло суворо всередині трикутника',
       kiDesc2: 'що торкається всіх трьох його сторін. Радіус',
       kiDesc3: 'площа',
+      koColor: 'фіолетовий',
+      koDesc1: 'описане коло Фалеса, що проходить крізь усі три вершини',
+      koDesc2: 'із центром у середині гіпотенузи',
+      koDesc3: 'діаметром',
       sec2Title: 'Центральна тотожність чотирьох кіл:',
       sec2Text1: 'Оскільки',
       sec2TextAnd: 'та',
@@ -923,6 +1260,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       sec3Bullet1: 'За теоремою Піфагора для трьох квадратних кіл виконується',
       sec3Bullet2Before: 'Оскільки вписане коло має додатну площу',
       sec3Bullet2After: ', вираз',
+      sec4Title: 'Теорема Фалеса та рівність K_o = K_c:',
+      sec4Text: 'Коло K_o з діаметром на гіпотенузі AB і коло K_c усередині квадрата Q_c мають однаковий діаметр c, радіус c/2, довжину πc та площу πc²/4, проте розташовані навколо різних центрів: O_o = (b/2, a/2) і O_c = ((a+b)/2, (a+b)/2).',
       gotItBtn: 'Зрозуміло',
     },
   },
@@ -937,10 +1276,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       identityProof: '02. √K Identity',
       incircleFocus: '03. Incircle Kᵢ',
       spectralAnalysis: '04. Spectral Analysis',
+      thalesCircumcircle: '05. Thales Circle Kₒ',
     },
     actions: {
       compare: 'Compare',
-      tests: 'Tests 8/8',
+      tests: 'Tests 17/17',
       help: 'Help',
       undo: 'Undo',
       redo: 'Redo',
@@ -974,6 +1314,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       triIncircle: '△ & Kᵢ',
       squares: 'Squares Q',
       squareCircles: 'Circles K_a,b,c',
+      fourCirclesOnly: '4 Circles',
+      thalesOnly: 'Circumcircle K_o',
+      fiveCircles: 'All 5 Circles',
+      circumcircleToggle: 'K_o',
+      circumcircleToggleTitle: 'Show or hide Thales circumcircle K_o',
       grid: 'Grid',
       labels: 'Labels',
       centers: 'Centers',
@@ -1002,7 +1347,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       lengthUnit: 'Length',
       projHyp: 'Projection onto hypotenuse',
       hypABTitle: 'Hypotenuse AB',
-      hypDetailsSuffix: 'Side of square Q_c and diameter of circle K_c',
+      hypDetailsSuffix: 'Side of square Q_c and diameter of circles K_c and K_o',
       squareQaTitle: 'Square Q_a on leg a',
       squareQbTitle: 'Square Q_b on leg b',
       squareQcTitle: 'Square Q_c on hypotenuse c',
@@ -1012,6 +1357,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       circleKbTitle: 'Circle K_b (inscribed in square Q_b)',
       circleKcTitle: 'Circle K_c (inscribed in square Q_c)',
       circleKiTitle: 'Incircle K_i (inside triangle OAB)',
+      circleKoTitle: 'Thales Circumcircle K_o (circumscribed around △OAB)',
+      circumcenterTitle: 'Circumcenter O_o = (A + B)/2',
+      thalesRadiusTitle: 'Circumradius R_o = c / 2',
+      thalesDiameterTitle: 'Diameter D_o = hypotenuse AB',
       tanOATitle: 'Tangency point on leg OA',
       tanOBTitle: 'Tangency point on leg OB',
       tanABTitle: 'Tangency point on hypotenuse AB',
@@ -1027,6 +1376,9 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       pause: 'Pause',
       smoothSweep: 'Smooth sweep (a, b)',
       reset345: 'Reset (3-4-5)',
+      scaleTitle: 'Triangle Scale λ',
+      scaleDesc: 'Proportional scaling (c = λ·5): lengths ~ λ, areas ~ λ²',
+      scaleReset: 'λ = 1 (Reference 3-4-5)',
       presetDescriptions: {
         classic_3_4_5: 'Classic Egyptian right triangle: integer sides and integer inradius r = 1.',
         classic_5_12_13: 'Pythagorean triple with integer incircle radius r = (5 + 12 - 13)/2 = 2.',
@@ -1038,7 +1390,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     },
     panel: {
       title: 'Four Circles Numeric Observer',
-      subtitle: 'Synchronized areas, square roots, and identity residual',
+      subtitle: 'Synchronized areas, square roots, residual, and K_o',
       identityTitle: 'Central Four-Circle Identity',
       identityHold: 'Identity holds exactly',
       identityFail: 'Residual detected',
@@ -1063,20 +1415,86 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       locSquareQb: 'Square Q_b',
       locSquareQc: 'Square Q_c',
       locInsideTri: 'Inside △OAB',
+      locCircumscribed: 'Circumscribed △OAB',
       areaContrastTitle: 'Direct Area Contrast (Non-Equality)',
       equalsMinusKi: 'equals -K_i',
       contrastNoteBefore: 'Direct area equality',
       contrastNoteMiddle: 'is false because by the Pythagorean theorem',
       contrastNoteAfter: ', while the incircle area is',
       coordinatesTitle: 'Centers & Tangency Coordinates',
+      kcVsKo: {
+        title: 'Hypotenuse Circle K_c vs. Thales Circumcircle K_o',
+        badgeEq: 'K_o = K_c (equal measure)',
+        badgeDiffCenter: 'O_o ≠ O_c (distinct centers)',
+        colParam: 'Parameter',
+        rowRole: 'Geometric role',
+        roleKc: 'Inscribed in hypotenuse square Q_c',
+        roleKo: 'Circumscribed around triangle OAB',
+        rowCenter: 'Center coordinates',
+        rowDiameter: 'Diameter',
+        rowRadius: 'Radius',
+        rowArea: 'Area',
+        rowCircumference: 'Circumference',
+        rowVertices: 'Passes through A, B, O',
+        verticesKc: 'No (tangent to Q_c sides)',
+        verticesKo: 'Yes: O, A, B',
+        rowAreaDiff: 'Area difference |K_o − K_c|',
+        rowCenterDist: 'Center separation |O_o − O_c|',
+      },
+    },
+    thalesPanel: {
+      title: '05. Thales Circumcircle K_o',
+      subtitle: 'Thales Theorem: inscribed right angle ∠AOB = 90° subtends diameter AB',
+      theoremTitle: 'Thales Theorem & Vertex Equidistance',
+      theoremSummary: 'The hypotenuse midpoint O_o = (A + B)/2 is equidistant from vertices A, B, and the right-angle vertex O. Thus the circle of radius R_o = c/2 passes through O, A, and B, and ∠AOB = 90° subtends diameter D_o = c.',
+      metricDo: 'Diameter D_o',
+      metricRo: 'Radius R_o',
+      metricKo: 'Area K_o',
+      metricLo: 'Circumference L_o',
+      checksTitle: 'Live Thales Geometry Verification',
+      angleCheckLabel: 'Angle at right vertex O (∠AOB)',
+      centerCoordLabel: 'Circumcenter O_o = (A + B)/2',
+      distALabel: 'Distance |O_o − A|',
+      distBLabel: 'Distance |O_o − B|',
+      distOLabel: 'Distance |O_o − O| (median)',
+      centersComparisonTitle: 'Three Key Centers Around Triangle OAB',
+      incenterRole: 'Incenter of incircle K_i',
+      circumcenterRole: 'Circumcenter of K_o (midpoint of AB)',
+      kcCenterRole: 'Center of circle K_c in square Q_c',
+      scaleCardTitle: 'Dynamic Scaling of Thales Circumcircle K_o(λ)',
+      scaleCardSubtitle: 'Two-parameter exploration model: shape t = b/a and scale λ = c / c₀',
+      scaleSliderLabel: 'Triangle scale λ:',
+      scaleMetricLinear: 'Linear growth (degree 1): D_o(λ) = λ·c₀, R_o(λ) = λ·c₀/2, L_o(λ) = π·λ·c₀',
+      scaleMetricArea: 'Quadratic growth (degree 2): K_o(λ) = λ²·(πc₀²/4) = λ²·K_o(1)',
+      scaleTableTitle: 'Similarity law for Thales circumcircle metrics',
+      scaleInvariantNote: 'Identities K_o(λ) ≡ K_c(λ) and K_a(λ) + K_b(λ) = K_o(λ) hold strictly for every scale factor λ > 0',
     },
     spectral: {
-      title: 'Four-Circles Parametric Spectral Analysis',
+      title: 'Parametric Spectral Analysis',
       subtitleBefore: 'Dimensionless ratio',
       subtitleAfter: 'normalized to hypotenuse circle',
       tabAreas: 'Areas',
       tabPerimeters: 'Perimeters',
       tabRadiiDiameters: 'Radii / Diameters',
+      tabThalesAbs: 'Abs. Growth K_o(t)',
+      tabScaleLambda: 'Scale λ',
+      scaleTitle: 'Dynamic Scaling Functions vs. Scale Parameter λ',
+      scaleSubtitle: 'Contrasting quadratic area growth (K_o, K_c, K_i ~ λ²) with linear length growth (D_o, R_o, L_o ~ λ)',
+      scaleFormulaTitle: 'Euclidean Geometry Power Laws of Scaling',
+      colScale: 'Scale λ',
+      scaleDeg1: 'Degree 1 (lengths)',
+      scaleDeg2: 'Degree 2 (areas)',
+      scaleLawLinear: 'D_o(λ) = λ·c₀,  R_o(λ) = λ·c₀/2,  L_o(λ) = π·λ·c₀',
+      scaleLawQuadratic: 'K_o(λ) = λ²·(π·c₀²/4) = λ²·K_o(1)',
+      koOverlayToggle: 'Show K_o',
+      thalesNormNote: 'Constant Thales line:',
+      thalesAbsTitle: 'Absolute K_o(t) Growth under Unit-Leg Normalization a_norm = 1, b_norm = t',
+      thalesAbsDesc: 'As t = b/a increases, absolute metrics R_o*(t), D_o*(t), K_o*(t), L_o*(t) grow monotonically, while normalized ratios R_o/c = 1/2, D_o/c = 1, K_o/K_c = 1, and L_o/L_c = 1 remain strictly constant.',
+      thalesAbsFormulaTitle: 'Absolute Parametric Functions for K_o (a_norm = 1) & Constant Ratios',
+      thalesLiveReadoutTitle: 'Current Triangle (dimensional a, b, c) vs. Unit-Leg Normalization a_norm = 1',
+      colDimensional: 'Live (a, b)',
+      colNormalizedUnit: 'Unit *(1, t)',
+      colRatioNorm: 'Constant Ratio',
       linearNoteBefore: 'Linear scale:',
       linearNoteMiddle: 'normalized curves',
       linearNoteAnd: 'and',
@@ -1098,7 +1516,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       outOfRangeBefore: 'Current value',
       outOfRangeMiddle: 'is outside visible range',
       fitRangeBtn: 'Include in range',
-      svgAriaLabel: 'Cartesian plot of normalized four-circle metrics vs. t = b/a',
+      svgAriaLabel: 'Cartesian plot of circle metrics vs. t = b/a',
       axisLogLabel: '(logarithmic scale)',
       axisLinearLabel: '(linear scale)',
       symmetryTag: 'Symmetry',
@@ -1130,9 +1548,11 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
     invariants: {
       title: 'Geometry & Identity Verification',
       confirmedSuffix: 'verified',
-      subtitle: 'Live Euclidean tangency, area, and four-circle identity checks (tolerance 10⁻⁹):',
+      subtitle: 'Live Euclidean tangency, area, four-circle identity, and Thales theorem checks (tolerance 10⁻⁹):',
       calcLabel: 'Computed',
       expectedLabel: 'Expected',
+      groupFourCircles: 'Four Core Circles (8)',
+      groupThales: 'Thales Circumcircle K_o (9)',
       items: {
         incircle_positive: {
           name: 'Inradius Positivity (r > 0)',
@@ -1166,10 +1586,46 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
           name: 'Direct Area Contrast (Non-Equality)',
           description: 'Direct area sum differs from K_c + K_i by exactly -K_i < 0.',
         },
+        thales_diameter: {
+          name: 'K_o Diameter Equals Hypotenuse (D_o = c)',
+          description: 'By Thales theorem, the diameter of the circumcircle of a right triangle equals the hypotenuse.',
+        },
+        thales_radius: {
+          name: 'K_o Radius Equals Half Hypotenuse (R_o = c/2)',
+          description: 'The circumradius equals exactly half of the hypotenuse length.',
+        },
+        thales_area: {
+          name: 'Circumcircle Area Consistency (K_o = πc²/4)',
+          description: 'Circumcircle area K_o matches its analytical formula from radius R_o = c/2.',
+        },
+        thales_circumference: {
+          name: 'Circumcircle Perimeter Consistency (L_o = πc)',
+          description: 'Circumference L_o equals π times the hypotenuse.',
+        },
+        thales_dist_A: {
+          name: 'Vertex A Lies on K_o (|O_o - A| = R_o)',
+          description: 'Distance from hypotenuse midpoint O_o to vertex A equals circumradius R_o.',
+        },
+        thales_dist_B: {
+          name: 'Vertex B Lies on K_o (|O_o - B| = R_o)',
+          description: 'Distance from hypotenuse midpoint O_o to vertex B equals circumradius R_o.',
+        },
+        thales_dist_C: {
+          name: 'Right-Angle Vertex O Lies on K_o (|O_o - O| = R_o)',
+          description: 'The right-angle vertex lies directly on circumcircle K_o (median to hypotenuse is c/2).',
+        },
+        thales_area_eq_Kc: {
+          name: 'Area Equality K_o = K_c with Distinct Centers',
+          description: 'Hypotenuse square circle K_c and circumcircle K_o have equal area while O_o ≠ O_c.',
+        },
+        thales_right_angle: {
+          name: 'Right Angle Subtending Diameter AB (∠AOB = 90°)',
+          description: 'The inscribed angle opposite diameter AB remains 90° across all valid legs.',
+        },
       },
     },
     compareModal: {
-      title: 'Compare Four-Circles Configurations',
+      title: 'Compare Five-Circle Configurations',
       subtitle: 'Side-by-side comparison of reference triangle and current construction',
       captureBtn: 'Capture current as Config 1',
       loadBtn: 'Load Config 1',
@@ -1183,15 +1639,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
         legB: 'Leg b',
         hypC: 'Hypotenuse c',
         inradiusR: 'Inradius r',
+        radiusRo: 'Circumradius R_o',
         areaKa: 'Area K_a',
         areaKb: 'Area K_b',
         areaKc: 'Area K_c',
         areaKi: 'Area K_i',
+        areaKo: 'Area K_o',
       },
     },
     testModal: {
       title: 'Control Triangles & Identity Verification',
-      subtitle: 'Automated verification of 8 geometric and algebraic four-circle invariants',
+      subtitle: 'Automated verification of 17 invariants (8 Four-Circles + 9 Thales Circumcircle K_o)',
       colTriangle: 'Triangle',
       colProfile: 'Geometric Profile',
       colChecks: 'Checks',
@@ -1201,20 +1659,20 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       failStatus: 'FAIL',
       openBtn: 'Open',
       openTitle: 'Load this triangle onto the board',
-      allPassBanner: 'All control triangles verified square construction, four-circle tangency, inradius positivity r > 0, and identity √K_a + √K_b = √K_c + √K_i.',
+      allPassBanner: 'All control triangles verified 17/17 invariants: squares and four circles, √K_a + √K_b = √K_c + √K_i, and all Thales circumcircle K_o properties (D_o = c, K_o = K_c, O_o ≠ O_c, ∠AOB = 90°).',
       failBanner: 'Invariant discrepancy detected in one or more configurations.',
       cases: {
-        '3_4': 'Egyptian triangle: c = 5, r = 1',
-        '5_12': 'Pythagorean triple: c = 13, r = 2',
-        '4_4': 'Symmetry a = b: K_a = K_b, r ≈ 1.1716',
+        '3_4': 'Egyptian triangle: c = 5, r = 1, R_o = 2.5',
+        '5_12': 'Pythagorean triple: c = 13, r = 2, R_o = 6.5',
+        '4_4': 'Symmetry a = b: K_a = K_b, r ≈ 1.1716, R_o = 2√2',
         '1_10': 'Elongated triangle: c ≈ 10.0499, r ≈ 0.4751',
-        '10_1': 'Mirrored elongated: K_a ↔ K_b, K_i unchanged',
+        '10_1': 'Mirrored elongated: K_a ↔ K_b, K_i and K_o unchanged',
       },
     },
     helpModal: {
-      title: 'Help: Pythagoras — Four Circles Laboratory',
-      subtitle: 'Geometric model of four circles generated by a right triangle',
-      sec1Title: 'Four Circles in a Single Parametric System',
+      title: 'Help: Pythagoras — Four Circles & Thales Circumcircle',
+      subtitle: 'Geometric model of five circles generated by a right triangle',
+      sec1Title: 'Five Circles in a Single Parametric System',
       sec1IntroBefore: 'Every object in the construction is computed deterministically from two independent parameters — legs',
       sec1IntroAnd: 'and',
       sec1IntroTriangle: 'of right triangle',
@@ -1234,6 +1692,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       kiDesc1: 'the triangle incircle strictly inside',
       kiDesc2: 'tangent to all three sides. Radius',
       kiDesc3: 'area',
+      koColor: 'violet',
+      koDesc1: 'Thales circumcircle passing through all three vertices',
+      koDesc2: 'centered at hypotenuse midpoint',
+      koDesc3: 'diameter',
       sec2Title: 'Central Four-Circle Identity:',
       sec2Text1: 'Since',
       sec2TextAnd: 'and',
@@ -1243,6 +1705,8 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       sec3Bullet1: 'By the Pythagorean theorem on the three square circles:',
       sec3Bullet2Before: 'Since the incircle has strictly positive area',
       sec3Bullet2After: ', we obtain',
+      sec4Title: 'Thales Theorem & K_o = K_c Equality:',
+      sec4Text: 'Circumcircle K_o on diameter AB and square-inscribed circle K_c inside Q_c share the same diameter c, radius c/2, circumference πc, and area πc²/4, while having distinct centers O_o = (b/2, a/2) and O_c = ((a+b)/2, (a+b)/2).',
       gotItBtn: 'Got it',
     },
   },

@@ -78,6 +78,12 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, t = TRANS
                 <MathFormula tex="r = \frac{a + b - c}{2}" />, {t.helpModal.kiDesc3}{' '}
                 <MathFormula tex="K_i = \pi r^2" />.
               </li>
+              <li>
+                <strong><MathFormula tex="K_o" /> ({t.helpModal.koColor}):</strong> {t.helpModal.koDesc1}{' '}
+                <MathFormula tex="OAB" />, {t.helpModal.koDesc2} <MathFormula tex="O_o = \frac{A+B}{2}" />{' '}
+                {t.helpModal.koDesc3} <MathFormula tex="D_o = c" />,{' '}
+                <MathFormula tex="R_o = \frac{c}{2}" />, <MathFormula tex="K_o = \frac{\pi c^2}{4}" />.
+              </li>
             </ul>
           </section>
 
@@ -113,6 +119,15 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose, t = TRANS
                 </span>
               </div>
             </div>
+          </section>
+
+          <section className="space-y-1.5 bg-violet-50/70 p-3.5 rounded-xl border border-violet-200/70">
+            <h4 className="font-bold text-violet-950">{t.helpModal.sec4Title}</h4>
+            <p className="text-slate-700">
+              {t.helpModal.sec4Text} <MathFormula tex="K_o = K_c" />,{' '}
+              <MathFormula tex="O_o = \left(\frac{b}{2}, \frac{a}{2}\right) \neq O_c" />,{' '}
+              <MathFormula tex="|O_o - O_c| = \frac{c}{2}" />.
+            </p>
           </section>
         </div>
 

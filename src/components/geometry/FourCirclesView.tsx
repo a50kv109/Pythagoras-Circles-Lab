@@ -23,6 +23,7 @@ interface FourCirclesViewProps {
   showLabels?: boolean;
   showCenters?: boolean;
   showRadii?: boolean;
+  showCircumcircle?: boolean;
   onHoverObject?: (obj: HoveredObject | null) => void;
   t?: Translations;
 }
@@ -36,10 +37,21 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
   showLabels = true,
   showCenters = true,
   showRadii = true,
+  showCircumcircle = true,
   onHoverObject,
   t = TRANSLATIONS.ru,
 }) => {
-  const { squareA, squareB, squareC, circleA, circleB, circleC, incircle, triangle } = calc;
+  const {
+    squareA,
+    squareB,
+    squareC,
+    circleA,
+    circleB,
+    circleC,
+    incircle,
+    circumcircle,
+    triangle,
+  } = calc;
 
   // Screen coordinates of squares
   const pO = toScreen(squareA.O, origin, scale);
@@ -54,30 +66,61 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
   const pBc = toScreen(squareC.Bc, origin, scale);
   const pAc = toScreen(squareC.Ac, origin, scale);
 
-  // Screen coordinates of 4 circle centers & radii in pixels
+  // Screen coordinates of 5 circle centers & radii in pixels
   const pOa = toScreen(circleA.center, origin, scale);
   const pOb = toScreen(circleB.center, origin, scale);
   const pOc = toScreen(circleC.center, origin, scale);
   const pI = toScreen(incircle.center, origin, scale);
+  const pOo = toScreen(circumcircle.center, origin, scale);
 
   const pxRa = circleA.radius * scale;
   const pxRb = circleB.radius * scale;
   const pxRc = circleC.radius * scale;
   const pxRi = incircle.radius * scale;
+  const pxRo = circumcircle.radius * scale;
 
   // Screen coordinates of tangency points
   const pTa = toScreen(incircle.tangencyOA, origin, scale);
   const pTb = toScreen(incircle.tangencyOB, origin, scale);
   const pTc = toScreen(incircle.tangencyAB, origin, scale);
 
-  // Layer visibility logic
-  const showSquares = layerFilter === 'all' || layerFilter === 'squares' || layerFilter === 'square_circles';
-  const showSquareCircles = layerFilter === 'all' || layerFilter === 'square_circles';
-  const showIncircle = layerFilter === 'all' || layerFilter === 'triangle_incircle';
+  // Layer visibility logic (preserves existing 4 filters + 3 new 5-circle filters)
+  const showSquares =
+    layerFilter === 'all' || layerFilter === 'squares' || layerFilter === 'square_circles';
+  const showSquareCircles =
+    layerFilter === 'all' ||
+    layerFilter === 'square_circles' ||
+    layerFilter === 'four_circles_only' ||
+    layerFilter === 'five_circles';
+  const showIncircle =
+    layerFilter === 'all' ||
+    layerFilter === 'triangle_incircle' ||
+    layerFilter === 'four_circles_only' ||
+    layerFilter === 'five_circles';
+  const showThales =
+    layerFilter === 'thales_only' ||
+    (showCircumcircle && (layerFilter === 'all' || layerFilter === 'five_circles'));
 
   // Module emphasis opacities
-  const exteriorOpacity = activeModule === 'incircle_focus' ? 0.25 : 1;
+  const exteriorOpacity =
+    activeModule === 'incircle_focus' || activeModule === 'thales_circumcircle' ? 0.26 : 1;
   const incircleFocusGlow = activeModule === 'incircle_focus';
+  const thalesFocusGlow =
+    activeModule === 'thales_circumcircle' || layerFilter === 'thales_only';
+
+  // Radial anchor on top arc of K_o between vertex A and O_c: math direction (a - b, a + b) / (sqrt(2) * c)
+  const thalesAnchorMath: Point2D = {
+    x: circumcircle.center.x + (triangle.a - triangle.b) / (2 * Math.SQRT2),
+    y: circumcircle.center.y + (triangle.a + triangle.b) / (2 * Math.SQRT2),
+  };
+  const pThalesArc = toScreen(thalesAnchorMath, origin, scale);
+  const arcVecLen = Math.hypot(pThalesArc.x - pOo.x, pThalesArc.y - pOo.y) || 1;
+  const arcUnitX = (pThalesArc.x - pOo.x) / arcVecLen;
+  const arcUnitY = (pThalesArc.y - pOo.y) / arcVecLen;
+
+  // Inward normal from midpoint O_o of AB toward triangle interior (opposite to c label)
+  const inNx = -triangle.a / triangle.c;
+  const inNy = triangle.b / triangle.c;
 
   return (
     <g className="four-circles-view-group">
@@ -478,7 +521,15 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
       {/* 3. Fourth Circle Ki: Standard Incircle Strictly Inside Triangle   */}
       {/* ================================================================= */}
       {showIncircle && (
-        <g className="incircle-Ki-group">
+        <g
+          className="incircle-Ki-group transition-opacity duration-150"
+          style={{
+            opacity:
+              activeModule === 'thales_circumcircle' && layerFilter !== 'five_circles'
+                ? 0.35
+                : 1,
+          }}
+        >
           <circle
             cx={pI.x}
             cy={pI.y}
@@ -687,6 +738,204 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                     T_c
                   </text>
                 </>
+              )}
+            </>
+          )}
+        </g>
+      )}
+
+      {/* ================================================================= */}
+      {/* 4. Fifth Circle Ko: Thales Circumcircle Around Right Triangle OAB */}
+      {/* ================================================================= */}
+      {showThales && (
+        <g className="thales-circumcircle-Ko-group">
+          {/* Subtle area tint (pointer-events-none so inner circles remain inspectable) */}
+          <circle
+            cx={pOo.x}
+            cy={pOo.y}
+            r={pxRo}
+            fill="#7c3aed"
+            fillOpacity={thalesFocusGlow ? '0.09' : '0.04'}
+            stroke="#7c3aed"
+            strokeWidth={thalesFocusGlow ? '2.6' : '2.1'}
+            strokeDasharray={thalesFocusGlow ? '7,4' : '6,3'}
+            className="pointer-events-none"
+          />
+
+          {/* Interactive perimeter hit-ring for K_o hover inspection */}
+          <circle
+            cx={pOo.x}
+            cy={pOo.y}
+            r={pxRo}
+            fill="none"
+            stroke="transparent"
+            strokeWidth="11"
+            pointerEvents="stroke"
+            className="cursor-pointer"
+            onPointerEnter={() =>
+              onHoverObject?.({
+                id: 'circle-Ko',
+                title: t.hover.circleKoTitle,
+                details: `D_o = c = ${circumcircle.diameter.toFixed(3)} · R_o = ${circumcircle.radius.toFixed(3)} · K_o = ${circumcircle.area.toFixed(3)} · L_o = ${circumcircle.circumference.toFixed(3)}`,
+                category: 'circle',
+              })
+            }
+            onPointerLeave={() => onHoverObject?.(null)}
+          />
+
+          {/* Diameter AB highlight & equal-radius segments to vertices A, B, O when focused */}
+          {thalesFocusGlow && (
+            <>
+              <line
+                x1={pA.x}
+                y1={pA.y}
+                x2={pB.x}
+                y2={pB.y}
+                stroke="#6d28d9"
+                strokeWidth="2.8"
+                strokeOpacity="0.65"
+                className="cursor-pointer"
+                onPointerEnter={() =>
+                  onHoverObject?.({
+                    id: 'thales-diameter-AB',
+                    title: t.hover.thalesDiameterTitle,
+                    details: `D_o = |AB| = c = ${circumcircle.diameter.toFixed(3)} · O_o = (${circumcircle.center.x.toFixed(2)}, ${circumcircle.center.y.toFixed(2)})`,
+                    category: 'segment',
+                  })
+                }
+                onPointerLeave={() => onHoverObject?.(null)}
+              />
+              {/* Median / circumradius from O_o to right-angle vertex O */}
+              <line
+                x1={pOo.x}
+                y1={pOo.y}
+                x2={pO.x}
+                y2={pO.y}
+                stroke="#7c3aed"
+                strokeWidth="1.5"
+                strokeDasharray="4,3"
+                strokeOpacity="0.85"
+                className="pointer-events-none"
+              />
+              {/* Vertex coincidence rings on O, A, B */}
+              {[pO, pA, pB].map((vPt, idx) => (
+                <circle
+                  key={`ko-vertex-ring-${idx}`}
+                  cx={vPt.x}
+                  cy={vPt.y}
+                  r="7"
+                  fill="none"
+                  stroke="#7c3aed"
+                  strokeWidth="1.6"
+                  strokeOpacity="0.85"
+                  className="pointer-events-none"
+                />
+              ))}
+            </>
+          )}
+
+          {/* Circumradius segment R_o toward clear top-arc point P_thalesArc */}
+          {(showRadii || thalesFocusGlow) && (
+            <>
+              <line
+                x1={pOo.x}
+                y1={pOo.y}
+                x2={pThalesArc.x}
+                y2={pThalesArc.y}
+                stroke="#6d28d9"
+                strokeWidth="1.6"
+                strokeDasharray="4,3"
+                className="pointer-events-none"
+              />
+              <line
+                x1={pOo.x}
+                y1={pOo.y}
+                x2={pThalesArc.x}
+                y2={pThalesArc.y}
+                stroke="transparent"
+                strokeWidth="9"
+                className="cursor-pointer"
+                onPointerEnter={() =>
+                  onHoverObject?.({
+                    id: 'radius-Ro',
+                    title: t.hover.thalesRadiusTitle,
+                    details: `R_o = c/2 = ${circumcircle.radius.toFixed(3)}`,
+                    category: 'segment',
+                  })
+                }
+                onPointerLeave={() => onHoverObject?.(null)}
+              />
+            </>
+          )}
+
+          {/* Circumcenter O_o = (A + B) / 2 */}
+          {showCenters && (
+            <circle
+              cx={pOo.x}
+              cy={pOo.y}
+              r="4.2"
+              fill="#6d28d9"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+              className="cursor-pointer"
+              onPointerEnter={() =>
+                onHoverObject?.({
+                  id: 'circumcenter-Oo',
+                  title: t.hover.circumcenterTitle,
+                  details: `O_o = (${circumcircle.center.x.toFixed(3)}, ${circumcircle.center.y.toFixed(3)}) · |O_o-O_c| = ${circumcircle.centerDistanceToKc.toFixed(3)}`,
+                  category: 'vertex',
+                })
+              }
+              onPointerLeave={() => onHoverObject?.(null)}
+            />
+          )}
+
+          {/* Labels for K_o, O_o, R_o positioned strictly clear of c, Q_c, K_c, K_a, K_b, K_i */}
+          {showLabels && (
+            <>
+              <text
+                x={pThalesArc.x + arcUnitX * 14}
+                y={pThalesArc.y + arcUnitY * 14}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                stroke="#f8fafc"
+                strokeWidth="3.2"
+                style={{ paintOrder: 'stroke' }}
+                className="text-xs font-mono font-bold fill-violet-800 select-none pointer-events-none"
+              >
+                {thalesFocusGlow
+                  ? `K_o (D_o = c = ${circumcircle.diameter.toFixed(2)})`
+                  : 'K_o'}
+              </text>
+
+              {(showRadii || thalesFocusGlow) && pxRo >= 32 && (
+                <text
+                  x={pOo.x + (pThalesArc.x - pOo.x) * 0.56 + 10}
+                  y={pOo.y + (pThalesArc.y - pOo.y) * 0.56}
+                  textAnchor="start"
+                  dominantBaseline="middle"
+                  stroke="#f8fafc"
+                  strokeWidth="3"
+                  style={{ paintOrder: 'stroke' }}
+                  className="text-[10px] font-mono font-bold fill-violet-800 select-none pointer-events-none"
+                >
+                  R_o={circumcircle.radius.toFixed(2)}
+                </text>
+              )}
+
+              {showCenters && (
+                <text
+                  x={pOo.x + inNx * 13}
+                  y={pOo.y + inNy * 13}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  stroke="#f8fafc"
+                  strokeWidth="2.8"
+                  style={{ paintOrder: 'stroke' }}
+                  className="text-[10px] font-mono font-bold fill-violet-900 select-none pointer-events-none"
+                >
+                  O_o
+                </text>
               )}
             </>
           )}

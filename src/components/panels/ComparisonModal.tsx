@@ -22,7 +22,7 @@ const MiniFourCirclesPreview: React.FC<{
   label: string;
   accent: string;
 }> = ({ calc, label, accent }) => {
-  const { triangle, squareA, squareB, squareC, circleA, circleB, circleC, incircle } = calc;
+  const { triangle, squareA, squareB, squareC, circleA, circleB, circleC, incircle, circumcircle } = calc;
   const minX = -triangle.a - 0.8;
   const maxX = triangle.b + triangle.a + 0.8;
   const minY = -triangle.b - 0.8;
@@ -101,6 +101,18 @@ const MiniFourCirclesPreview: React.FC<{
           strokeWidth="1.3"
         />
 
+        {/* Thales Circumcircle Ko */}
+        <circle
+          cx={sx(circumcircle.center)}
+          cy={sy(circumcircle.center)}
+          r={circumcircle.radius * scale}
+          fill="#7c3aed"
+          fillOpacity="0.06"
+          stroke="#7c3aed"
+          strokeWidth="1.2"
+          strokeDasharray="3,2"
+        />
+
         {/* Incircle Ki */}
         <circle
           cx={sx(incircle.center)}
@@ -145,9 +157,11 @@ export const ComparisonModal: React.FC<ComparisonModalProps> = ({
     { label: t.compareModal.metrics.legB, v1: config1.triangle.b.toFixed(2), v2: config2.triangle.b.toFixed(2) },
     { label: t.compareModal.metrics.hypC, v1: config1.triangle.c.toFixed(4), v2: config2.triangle.c.toFixed(4) },
     { label: t.compareModal.metrics.inradiusR, v1: config1.incircle.radius.toFixed(4), v2: config2.incircle.radius.toFixed(4) },
+    { label: t.compareModal.metrics.radiusRo, v1: config1.circumcircle.radius.toFixed(4), v2: config2.circumcircle.radius.toFixed(4) },
     { label: t.compareModal.metrics.areaKa, v1: config1.circleA.area.toFixed(4), v2: config2.circleA.area.toFixed(4) },
     { label: t.compareModal.metrics.areaKb, v1: config1.circleB.area.toFixed(4), v2: config2.circleB.area.toFixed(4) },
     { label: t.compareModal.metrics.areaKc, v1: config1.circleC.area.toFixed(4), v2: config2.circleC.area.toFixed(4) },
+    { label: t.compareModal.metrics.areaKo, v1: config1.circumcircle.area.toFixed(4), v2: config2.circumcircle.area.toFixed(4) },
     { label: t.compareModal.metrics.areaKi, v1: config1.incircle.area.toFixed(4), v2: config2.incircle.area.toFixed(4) },
     { label: '√K_a + √K_b', v1: config1.sqrtSumLegs.toFixed(5), v2: config2.sqrtSumLegs.toFixed(5) },
     { label: '√K_c + √K_i', v1: config1.sqrtSumHypAndIn.toFixed(5), v2: config2.sqrtSumHypAndIn.toFixed(5) },
