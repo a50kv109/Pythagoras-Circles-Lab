@@ -29,9 +29,18 @@ export default function App() {
   const [a, setA] = useState<number>(4);
   const [b, setB] = useState<number>(3);
 
-  // History stack for Undo / Redo
-  const [history, setHistory] = useState<HistoryEntry[]>([{ a: 4, b: 3 }]);
-  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  // History stack for Undo / Redo (unified state keeps pushHistory callback identity stable)
+  const [historyState, setHistoryState] = useState<{
+    entries: HistoryEntry[];
+    index: number;
+  }>({
+    entries: [{ a: 4, b: 3 }],
+    index: 0,
+  });
+
+  // Mutation tokens coordinate clean interruption between manual/controls edits and graph animation
+  const [legMutationToken, setLegMutationToken] = useState<number>(0);
+  const [graphMutationToken, setGraphMutationToken] = useState<number>(0);
 
   // Language state (Russian default, Ukrainian & English supported)
   const [lang, setLang] = useState<LanguageCode>('ru');
@@ -63,48 +72,50 @@ export default function App() {
     return calculateFourCircles(a, b);
   }, [a, b]);
 
+  // Latest authoritative (a, b, c) ref so callbacks never recreate on every animation frame
+  const latestGeomRef = useRef({ a, b, c: calc.triangle.c });
+  latestGeomRef.current = { a, b, c: calc.triangle.c };
+
   // Push a discrete configuration snapshot to Undo/Redo history
-  const pushHistory = useCallback(
-    (nextA: number, nextB: number) => {
-      setHistory((prev) => {
-        const sliced = prev.slice(0, historyIndex + 1);
-        const last = sliced[sliced.length - 1];
-        if (last && Math.abs(last.a - nextA) < 1e-4 && Math.abs(last.b - nextB) < 1e-4) {
-          return sliced;
-        }
-        const updated = [...sliced, { a: nextA, b: nextB }].slice(-40);
-        setHistoryIndex(updated.length - 1);
-        return updated;
-      });
-    },
-    [historyIndex]
-  );
+  const pushHistory = useCallback((nextA: number, nextB: number) => {
+    setHistoryState((prev) => {
+      const sliced = prev.entries.slice(0, prev.index + 1);
+      const last = sliced[sliced.length - 1];
+      if (last && Math.abs(last.a - nextA) < 1e-5 && Math.abs(last.b - nextB) < 1e-5) {
+        return prev;
+      }
+      const entries = [...sliced, { a: nextA, b: nextB }].slice(-40);
+      return { entries, index: entries.length - 1 };
+    });
+  }, []);
 
   const clampVal = (val: number) => {
     if (!Number.isFinite(val)) return 1;
-    return Math.max(0.2, Math.min(15, Math.round(val * 10000) / 10000));
+    return Math.max(0.2, Math.min(15, Math.round(val * 1e6) / 1e6));
   };
 
   const handleChangeA = useCallback(
     (newA: number, recordHistory = true) => {
       const clamped = clampVal(newA);
       setA(clamped);
+      setLegMutationToken((n) => n + 1);
       if (recordHistory) {
-        pushHistory(clamped, b);
+        pushHistory(clamped, latestGeomRef.current.b);
       }
     },
-    [b, pushHistory]
+    [pushHistory]
   );
 
   const handleChangeB = useCallback(
     (newB: number, recordHistory = true) => {
       const clamped = clampVal(newB);
       setB(clamped);
+      setLegMutationToken((n) => n + 1);
       if (recordHistory) {
-        pushHistory(a, clamped);
+        pushHistory(latestGeomRef.current.a, clamped);
       }
     },
-    [a, pushHistory]
+    [pushHistory]
   );
 
   const handleSetBoth = useCallback(
@@ -113,6 +124,7 @@ export default function App() {
       const clampedB = clampVal(newB);
       setA(clampedA);
       setB(clampedB);
+      setLegMutationToken((n) => n + 1);
       if (recordHistory) {
         pushHistory(clampedA, clampedB);
       }
@@ -121,38 +133,63 @@ export default function App() {
   );
 
   const handleChangeT = useCallback(
-    (targetT: number, recordHistory = true) => {
+    (
+      targetT: number,
+      recordHistory = true,
+      fixedHypotenuse?: number,
+      fromSymmetryAnimation = false
+    ) => {
       if (!Number.isFinite(targetT) || targetT <= 0) return;
-      const { a: nextA, b: nextB } = legsFromRatioAndHypotenuse(targetT, calc.triangle.c, 0.2, 15);
-      handleSetBoth(nextA, nextB, recordHistory);
+      const refC =
+        fixedHypotenuse !== undefined && Number.isFinite(fixedHypotenuse) && fixedHypotenuse > 0
+          ? fixedHypotenuse
+          : latestGeomRef.current.c;
+      const { a: nextA, b: nextB } = legsFromRatioAndHypotenuse(targetT, refC, 0.2, 15);
+      const clampedA = clampVal(nextA);
+      const clampedB = clampVal(nextB);
+      setA(clampedA);
+      setB(clampedB);
+      if (recordHistory) {
+        pushHistory(clampedA, clampedB);
+      }
+      if (!fromSymmetryAnimation) {
+        setLegMutationToken((n) => n + 1);
+      }
+      setGraphMutationToken((n) => n + 1);
     },
-    [calc.triangle.c, handleSetBoth]
+    [pushHistory]
   );
 
   const handleCommitDrag = useCallback(() => {
-    pushHistory(a, b);
-  }, [a, b, pushHistory]);
+    pushHistory(latestGeomRef.current.a, latestGeomRef.current.b);
+  }, [pushHistory]);
 
-  const canUndo = historyIndex > 0;
-  const canRedo = historyIndex < history.length - 1;
+  const canUndo = historyState.index > 0;
+  const canRedo = historyState.index < historyState.entries.length - 1;
 
   const handleUndo = useCallback(() => {
-    if (historyIndex <= 0) return;
-    const prevIdx = historyIndex - 1;
-    const entry = history[prevIdx];
-    setHistoryIndex(prevIdx);
-    setA(entry.a);
-    setB(entry.b);
-  }, [history, historyIndex]);
+    setHistoryState((prev) => {
+      if (prev.index <= 0) return prev;
+      const prevIdx = prev.index - 1;
+      const entry = prev.entries[prevIdx];
+      setA(entry.a);
+      setB(entry.b);
+      setLegMutationToken((n) => n + 1);
+      return { ...prev, index: prevIdx };
+    });
+  }, []);
 
   const handleRedo = useCallback(() => {
-    if (historyIndex >= history.length - 1) return;
-    const nextIdx = historyIndex + 1;
-    const entry = history[nextIdx];
-    setHistoryIndex(nextIdx);
-    setA(entry.a);
-    setB(entry.b);
-  }, [history, historyIndex]);
+    setHistoryState((prev) => {
+      if (prev.index >= prev.entries.length - 1) return prev;
+      const nextIdx = prev.index + 1;
+      const entry = prev.entries[nextIdx];
+      setA(entry.a);
+      setB(entry.b);
+      setLegMutationToken((n) => n + 1);
+      return { ...prev, index: nextIdx };
+    });
+  }, []);
 
   const handleReset = useCallback(() => {
     handleSetBoth(4, 3, true);
@@ -297,11 +334,17 @@ export default function App() {
               onChangeA={handleChangeA}
               onChangeB={handleChangeB}
               onSetBoth={handleSetBoth}
+              externalGraphMutationToken={graphMutationToken}
               t={t}
             />
 
             {activeModule === 'spectral_analysis' ? (
-              <SpectralAnalysisPanel calc={calc} onChangeT={handleChangeT} t={t} />
+              <SpectralAnalysisPanel
+                calc={calc}
+                onChangeT={handleChangeT}
+                externalLegMutationToken={legMutationToken}
+                t={t}
+              />
             ) : (
               <FourCirclesPanel
                 calc={calc}

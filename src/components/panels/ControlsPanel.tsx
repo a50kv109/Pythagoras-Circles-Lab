@@ -14,6 +14,7 @@ interface ControlsPanelProps {
   onChangeA: (newA: number, recordHistory?: boolean) => void;
   onChangeB: (newB: number, recordHistory?: boolean) => void;
   onSetBoth: (newA: number, newB: number, recordHistory?: boolean) => void;
+  externalGraphMutationToken?: number;
   t?: Translations;
 }
 
@@ -22,6 +23,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
   onChangeA,
   onChangeB,
   onSetBoth,
+  externalGraphMutationToken = 0,
   t = TRANSLATIONS.ru,
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
@@ -29,7 +31,15 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
   const animFrameRef = useRef<number | null>(null);
   const animTimeRef = useRef<number>(0);
 
-  // Smooth parametric sweep keeping c near 5 while varying proportions a/b
+  const prevGraphTokenRef = useRef(externalGraphMutationToken);
+  useEffect(() => {
+    if (externalGraphMutationToken !== prevGraphTokenRef.current) {
+      prevGraphTokenRef.current = externalGraphMutationToken;
+      setIsAnimating(false);
+    }
+  }, [externalGraphMutationToken]);
+
+  // Smooth parametric sweep keeping c near 6 while varying proportions a/b
   useEffect(() => {
     if (!isAnimating) {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
@@ -38,7 +48,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
 
     let lastTimestamp = performance.now();
     const animate = (timestamp: number) => {
-      const dt = (timestamp - lastTimestamp) / 1000;
+      const dt = Math.min(0.05, (timestamp - lastTimestamp) / 1000);
       lastTimestamp = timestamp;
 
       animTimeRef.current += dt * animSpeed * 0.8;
@@ -49,7 +59,7 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
       const newA = Math.max(0.5, Math.min(12, baseC / Math.sqrt(1 + targetT * targetT)));
       const newB = Math.max(0.5, Math.min(12, newA * targetT));
 
-      onSetBoth(Math.round(newA * 100) / 100, Math.round(newB * 100) / 100, false);
+      onSetBoth(newA, newB, false);
 
       animFrameRef.current = requestAnimationFrame(animate);
     };
@@ -95,7 +105,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
               min="0.5"
               max="15"
               value={Number(calc.triangle.a.toFixed(3))}
-              onChange={(e) => onChangeA(parseFloat(e.target.value) || 1, true)}
+              onChange={(e) => {
+                setIsAnimating(false);
+                onChangeA(parseFloat(e.target.value) || 1, true);
+              }}
               className="w-16 px-1.5 py-0.5 text-right font-mono tabular-nums text-xs font-bold border border-slate-300 rounded bg-slate-50 focus:bg-white focus:outline-indigo-500"
             />
           </div>
@@ -105,7 +118,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             max="12"
             step="0.1"
             value={calc.triangle.a}
-            onChange={(e) => onChangeA(parseFloat(e.target.value), false)}
+            onChange={(e) => {
+              setIsAnimating(false);
+              onChangeA(parseFloat(e.target.value), false);
+            }}
             onPointerUp={() => onChangeA(calc.triangle.a, true)}
             className="w-full accent-blue-600 cursor-pointer"
           />
@@ -129,7 +145,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
               min="0.5"
               max="15"
               value={Number(calc.triangle.b.toFixed(3))}
-              onChange={(e) => onChangeB(parseFloat(e.target.value) || 1, true)}
+              onChange={(e) => {
+                setIsAnimating(false);
+                onChangeB(parseFloat(e.target.value) || 1, true);
+              }}
               className="w-16 px-1.5 py-0.5 text-right font-mono tabular-nums text-xs font-bold border border-slate-300 rounded bg-slate-50 focus:bg-white focus:outline-indigo-500"
             />
           </div>
@@ -139,7 +158,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             max="12"
             step="0.1"
             value={calc.triangle.b}
-            onChange={(e) => onChangeB(parseFloat(e.target.value), false)}
+            onChange={(e) => {
+              setIsAnimating(false);
+              onChangeB(parseFloat(e.target.value), false);
+            }}
             onPointerUp={() => onChangeB(calc.triangle.b, true)}
             className="w-full accent-emerald-600 cursor-pointer"
           />
@@ -162,7 +184,10 @@ export const ControlsPanel: React.FC<ControlsPanelProps> = ({
             return (
               <button
                 key={preset.id}
-                onClick={() => onSetBoth(preset.a, preset.b, true)}
+                onClick={() => {
+                  setIsAnimating(false);
+                  onSetBoth(preset.a, preset.b, true);
+                }}
                 title={t.controls.presetDescriptions[preset.id] || preset.description}
                 className={`px-2.5 py-1 text-xs font-mono font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
                   isActive

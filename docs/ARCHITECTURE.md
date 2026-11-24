@@ -63,6 +63,7 @@ All files in `src/math/` are pure TypeScript functions free of React or DOM side
 | `FourCirclesModel.ts` | Complete 4-circle model ($K_a, K_b, K_c, K_i$), tangency points, $\sqrt{K}$ identity, area contrast | `calculateFourCircles` | `PCL-C08`–`PCL-E17` |
 | `FourCirclesValidators.ts` | 8 scale-normalized invariants (tolerance `1e-9`) | `validateFourCirclesInvariants` | `PCL-B06`, `PCL-C09`–`PCL-E17` |
 | `FourCirclesSpectralAnalysis.ts` | Current-state ratios, parametric $t = b/a$ curve evaluator & sampler, $t \to (a, b)$ inverse mapping | `computeFourCirclesSpectralAnalysis`, `evaluateParametricFourCircles`, `sampleSpectralCurves`, `getNormalizedValuesForMode`, `legsFromRatioAndHypotenuse`, `REFERENCE_T_VALUES`, `CIRCLE_SERIES_META` | `PCL-F18`–`PCL-F24` |
+| `symmetryAnimation.ts` | Pure elapsed-time logarithmic trajectory $t_{\text{start}} \to 1/t_{\text{start}} \to t_{\text{start}}$ and $t = 1$ axis check | `evaluateSymmetryTrajectoryT`, `isAtSymmetryAxis`, `easeInOutCubic`, `SYMMETRY_ANIMATION_DURATION_MS` | — |
 | `presets.ts` | Built-in benchmark triangles | `FOUR_CIRCLES_PRESETS` | — |
 
 ---
@@ -103,13 +104,13 @@ All files in `src/math/` are pure TypeScript functions free of React or DOM side
 
 ## 6. State Management & Synchronization (`src/App.tsx`)
 
-- **Authoritative State:** `a` (default `4`) and `b` (default `3`) in `App.tsx`, clamped via `clampVal` to `[0.2, 15]` rounded to 4 decimal places (`1e-4`), with a 40-entry Undo/Redo history stack.
+- **Authoritative State:** `a` (default `4`) and `b` (default `3`) in `App.tsx`, clamped via `clampVal` to `[0.2, 15]` rounded to 6 decimal places (`1e-6`), with a 40-entry Undo/Redo history stack and stable callback refs so continuous sweeps never recreate animation effects.
 - **Forward Flow:** `calculateFourCircles(a, b)` runs inside `useMemo`, feeding `GeometryBoard`, `ControlsPanel`, `FourCirclesPanel`, `SpectralAnalysisPanel`, `InvariantsPanel`, and `ComparisonModal`.
-- **Reverse Flow from Graph ($t \to (a, b)$):** When the user scrubs the parametric SVG graph, clicks a reference $t$ card, or runs the symmetry sweep in `SpectralAnalysisPanel`, `onChangeT(targetT, recordHistory)` calls `legsFromRatioAndHypotenuse(targetT, calc.triangle.c, 0.2, 15)` to compute $(a, b)$ preserving $b/a = t$ and keeping hypotenuse $c$ steady (within leg bounds `[0.2, 15]`). Because `App.tsx` updates `(a, b)`, the geometry board, sliders, invariant panel, graph cursor, and readout table stay strictly synchronized without duplicate state.
+- **Reverse Flow from Graph ($t \to (a, b)$):** When the user scrubs the parametric SVG graph, clicks a reference $t$ card, or runs the symmetry sweep in `SpectralAnalysisPanel`, `onChangeT(targetT, recordHistory, fixedHypotenuse, fromSymmetryAnimation)` calls `legsFromRatioAndHypotenuse(targetT, referenceC, 0.2, 15)` to compute $(a, b)$ preserving $b/a = t$ and keeping hypotenuse $c$ steady (within leg bounds `[0.2, 15]`). Because `App.tsx` updates `(a, b)`, the geometry board, sliders, invariant panel, graph cursor, and readout table stay strictly synchronized without duplicate state.
 
 ---
 
 ## 7. Test Architecture (`src/tests/geometry.test.ts`)
 
 - Executed directly via `tsx src/tests/geometry.test.ts` (`npm test`) using Node's `node:assert/strict`.
-- Covers 7 test sections: control triangles, leg-swap symmetry, invalid input rejection, micro/macro/extreme aspect ratio stability (`1e-6` to `1e50`), mutation (fault-injection) tests for validators, current-state spectral analysis, and parametric graph & synchronization verification for $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$.
+- Covers 8 test sections: control triangles, leg-swap symmetry, invalid input rejection, micro/macro/extreme aspect ratio stability (`1e-6` to `1e50`), mutation (fault-injection) tests for validators, current-state spectral analysis, parametric graph & synchronization verification for $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$, and regression checks for $t \leftrightarrow 1/t$ reciprocal symmetry, $t = 1$ fixed-point edge cases, and monotonic log-space animation trajectory stability.

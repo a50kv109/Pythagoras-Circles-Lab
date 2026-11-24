@@ -127,10 +127,14 @@ export const CoordinateGrid: React.FC<CoordinateGridProps> = ({
             stroke="#64748b"
             strokeWidth={1.5}
           />
-          {/* Origin Label */}
+          {/* Origin Label (anchored in empty Quadrant III to clear Q_a, Q_b, and triangle) */}
           <text
-            x={origin.x - 10}
-            y={origin.y + 15}
+            x={origin.x - 8}
+            y={origin.y + 16}
+            textAnchor="end"
+            stroke="#f8fafc"
+            strokeWidth="3"
+            style={{ paintOrder: 'stroke' }}
             className="text-xs font-mono font-semibold fill-slate-600 select-none pointer-events-none"
           >
             O (0,0)

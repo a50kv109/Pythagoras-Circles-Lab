@@ -9,6 +9,11 @@ import { validateFourCirclesInvariants } from '../math/FourCirclesValidators.ts'
 import { calculateRightTriangle } from '../math/RightTriangle.ts';
 import { calculateSquareA, calculateSquareB, calculateSquareC } from '../math/SquareConstruction.ts';
 import { InvalidTriangleInputError } from '../math/inputValidation.ts';
+import {
+  SYMMETRY_AXIS_EPSILON,
+  evaluateSymmetryTrajectoryT,
+  isAtSymmetryAxis,
+} from '../math/symmetryAnimation.ts';
 
 const TOL = 1e-9;
 
@@ -342,5 +347,99 @@ console.log('✓ Spectral analysis unit tests passed successfully.');
   assertClose(sampledModeC.Ka, Math.SQRT1_2, 'getNormalizedValuesForMode diameter matches 1/√2');
 }
 console.log('✓ Parametric spectral graph & synchronization tests (t = 0.1, 0.5, 1, 2, 10) passed.');
+
+// ============================================================================
+// 8. Regression Tests: Symmetry t <-> 1/t & Symmetry Sweep Trajectory Stability
+// ============================================================================
+{
+  // 8a. Exact symmetry axis values at t = 1 across all modes
+  const sym1 = evaluateParametricFourCircles(1.0);
+  assertClose(sym1.areas.Ka, 0.5, 'Regression t=1: Ka/Kc = 0.5');
+  assertClose(sym1.areas.Kb, 0.5, 'Regression t=1: Kb/Kc = 0.5');
+  assertClose(sym1.areas.Kc, 1.0, 'Regression t=1: Kc/Kc = 1.0');
+  assertClose(sym1.areas.Ki, 3 - 2 * Math.SQRT2, 'Regression t=1: Ki/Kc = 3 - 2√2');
+  assertClose(sym1.perimeters.Ka, Math.SQRT1_2, 'Regression t=1: Pa/Pc = 1/√2');
+  assertClose(sym1.perimeters.Kb, Math.SQRT1_2, 'Regression t=1: Pb/Pc = 1/√2');
+  assertClose(sym1.perimeters.Ki, Math.SQRT2 - 1, 'Regression t=1: Pi/Pc = √2 - 1');
+  assertClose(sym1.radii.Ki, Math.SQRT2 - 1, 'Regression t=1: Ri/Rc = √2 - 1');
+
+  // 8b. Reciprocal symmetry t <-> 1/t across diverse positive ratios (including screenshot case t = 0.2989)
+  const asymRatios = [0.1, 0.25, 0.2989, 0.5, 2.0, 4.0, 10.0];
+  for (const t of asymRatios) {
+    const pT = evaluateParametricFourCircles(t);
+    const pInv = evaluateParametricFourCircles(1 / t);
+
+    assertClose(pT.areas.Ka, pInv.areas.Kb, `Reciprocal symmetry t=${t}: Ka/Kc(t) === Kb/Kc(1/t)`);
+    assertClose(pT.areas.Kb, pInv.areas.Ka, `Reciprocal symmetry t=${t}: Kb/Kc(t) === Ka/Kc(1/t)`);
+    assertClose(pT.areas.Ki, pInv.areas.Ki, `Reciprocal symmetry t=${t}: Ki/Kc(t) === Ki/Kc(1/t)`);
+    assertClose(pT.areas.Kc, 1.0, `Reciprocal symmetry t=${t}: Kc/Kc(t) === 1`);
+    assertClose(pInv.areas.Kc, 1.0, `Reciprocal symmetry t=${t}: Kc/Kc(1/t) === 1`);
+
+    assertClose(pT.perimeters.Ka, pInv.perimeters.Kb, `Reciprocal symmetry t=${t}: Pa/Pc(t) === Pb/Pc(1/t)`);
+    assertClose(pT.perimeters.Kb, pInv.perimeters.Ka, `Reciprocal symmetry t=${t}: Pb/Pc(t) === Pa/Pc(1/t)`);
+    assertClose(pT.perimeters.Ki, pInv.perimeters.Ki, `Reciprocal symmetry t=${t}: Pi/Pc(t) === Pi/Pc(1/t)`);
+
+    assertClose(pT.radii.Ka, pInv.radii.Kb, `Reciprocal symmetry t=${t}: Ra/Rc(t) === Rb/Rc(1/t)`);
+    assertClose(pT.radii.Kb, pInv.radii.Ka, `Reciprocal symmetry t=${t}: Rb/Rc(t) === Ra/Rc(1/t)`);
+    assertClose(pT.radii.Ki, pInv.radii.Ki, `Reciprocal symmetry t=${t}: Ri/Rc(t) === Ri/Rc(1/t)`);
+  }
+
+  // 8c. Symmetry axis predicate and t = 1 fixed point
+  assert.equal(isAtSymmetryAxis(1.0), true, 't = 1 is on symmetry axis');
+  assert.equal(isAtSymmetryAxis(Math.exp(SYMMETRY_AXIS_EPSILON * 0.5)), true, 'tiny epsilon near 1 stays on symmetry axis');
+  assert.equal(isAtSymmetryAxis(0.2989), false, 't = 0.2989 is outside symmetry axis epsilon');
+  assert.equal(isAtSymmetryAxis(NaN), false, 'NaN is not on symmetry axis');
+  assert.equal(isAtSymmetryAxis(-1), false, 'negative value is not on symmetry axis');
+
+  for (let i = 0; i <= 20; i++) {
+    const p = i / 20;
+    const valAtOne = evaluateSymmetryTrajectoryT(1.0, p);
+    assert.equal(valAtOne, 1, `t_start = 1 fixed point holds at progress=${p}`);
+  }
+  assert.equal(evaluateSymmetryTrajectoryT(0, 0.5), 1, 'non-positive t_start falls back cleanly to 1');
+  assert.equal(evaluateSymmetryTrajectoryT(Number.NaN, 0.5), 1, 'NaN t_start falls back cleanly to 1');
+
+  // 8d. Smooth logarithmic trajectory t_start -> 1/t_start -> t_start passing through t = 1
+  const trajectoryStarts = [0.05, 0.2989, 0.5, 2.5, 20.0];
+  for (const tStart of trajectoryStarts) {
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 0), tStart, `Trajectory(${tStart}) start at p=0`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, -0.2), tStart, `Trajectory(${tStart}) clamps p<0`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 0.21), 1.0, `Trajectory(${tStart}) passes cleanly through t=1 on forward leg (p=0.21)`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 0.5), 1 / tStart, `Trajectory(${tStart}) reaches reciprocal 1/t_start at hold midpoint (p=0.5)`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 0.79), 1.0, `Trajectory(${tStart}) passes cleanly through t=1 on return leg (p=0.79)`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 1), tStart, `Trajectory(${tStart}) returns to t_start at p=1`);
+    assertClose(evaluateSymmetryTrajectoryT(tStart, 1.5), tStart, `Trajectory(${tStart}) clamps p>1`);
+
+    // Verify monotonicity and zero jitter across dense progress steps + geometry invariant stability
+    const N = 120;
+    const expectedSign = tStart < 1 ? 1 : -1;
+    let prevU = Math.log(evaluateSymmetryTrajectoryT(tStart, 0));
+    for (let i = 1; i <= N; i++) {
+      const p = i / N;
+      const tVal = evaluateSymmetryTrajectoryT(tStart, p);
+      assert.ok(Number.isFinite(tVal) && tVal > 0, `Trajectory(${tStart}) step ${i} finite positive`);
+      const currU = Math.log(tVal);
+
+      if (p <= 0.42) {
+        assert.ok((currU - prevU) * expectedSign >= -1e-12, `Forward leg monotone without jitter at p=${p}`);
+      } else if (p < 0.58 && i / N > 0.42) {
+        assertClose(currU, -Math.log(tStart), `Hold segment stays stationary at ln(1/tStart) p=${p}`);
+      } else if (p > 0.58) {
+        assert.ok((currU - prevU) * (-expectedSign) >= -1e-12, `Return leg monotone without jitter at p=${p}`);
+      }
+      prevU = currU;
+
+      // Geometry round-trip check under fixed reference hypotenuse c = 5
+      const { a, b } = legsFromRatioAndHypotenuse(tVal, 5, 0.2, 15);
+      assert.ok(a >= 0.2 - 1e-12 && a <= 15 + 1e-12 && b >= 0.2 - 1e-12 && b <= 15 + 1e-12, `Leg bounds respected along sweep`);
+      const calc = calculateFourCircles(a, b);
+      const invs = validateFourCirclesInvariants(calc, TOL);
+      for (const inv of invs) {
+        assert.ok(inv.isValid, `Sweep step t=${tVal} failed invariant ${inv.id}: delta=${inv.delta}`);
+      }
+    }
+  }
+}
+console.log('✓ Regression tests (symmetry t <-> 1/t, t=1 edge case, smooth log trajectory) passed.');
 
 console.log('\nALL PYTHAGORAS — FOUR CIRCLES TESTS PASSED SUCCESSFULLY!');

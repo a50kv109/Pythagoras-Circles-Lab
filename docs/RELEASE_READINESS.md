@@ -11,9 +11,9 @@
 
 1. **Mathematical Core Preserved Intact:**
    - Zero changes to mathematical formulas, geometric constructions, coordinate transforms, parametric ratio mapping, application state management, or existing test assertions (`src/math/*`, `src/geometry/*`, `src/tests/geometry.test.ts`).
-   - Only `SPDX-License-Identifier: MIT` header comments (`29/29` `.ts`/`.tsx` files under `src/`) were established alongside clean UI translation props (`t`) without altering math logic.
+   - Only `SPDX-License-Identifier: MIT` header comments (`30/30` `.ts`/`.tsx` files under `src/`) were established alongside clean UI translation props (`t`) without altering math logic.
 2. **MIT License & Dependency Hygiene (`package.json`, `bun.lock`):**
-   - Established standard MIT License text in `LICENSE`, `"license": "MIT"` in `package.json`, `SPDX-License-Identifier: MIT` across all `29/29` source files in `src/`, and aligned notices across `README.md`, `README_RU.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, and `docs/PROJECT_STATUS.md`.
+   - Established standard MIT License text in `LICENSE`, `"license": "MIT"` in `package.json`, `SPDX-License-Identifier: MIT` across all `30/30` source files in `src/`, and aligned notices across `README.md`, `README_RU.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, and `docs/PROJECT_STATUS.md`.
    - Removed unused template dependencies (`@google/genai`, `express`, `dotenv`, `canvas-confetti`, `motion`, `@types/express`, `@types/canvas-confetti`) from `package.json` and `bun.lock`.
    - Aligned `bun.lock` workspace `"name": "pythagoras-circles-lab"` and verified deterministic installation via `bun install --frozen-lockfile`.
    - Cleaned `metadata.json` (removed unused `MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API`) and `.env.example` (no runtime API keys/secrets required).
@@ -45,11 +45,11 @@
 | Check | Command / Method | Result | Notes |
 |---|---|---|---|
 | Frozen Dependency Lockfile | `bun install --frozen-lockfile` | **PASS** | `bun.lock` (`"name": "pythagoras-circles-lab"`) verified cleanly with zero changes. |
-| Automated Mathematical & Sync Tests | `npm test` (`tsx src/tests/geometry.test.ts`) | **PASS** | All 7 test suites pass at `tol = 1e-9` (6 control triangles, leg-swap symmetry, invalid inputs, micro/macro/aspect scales, fault-injection mutations, current-state spectral shares, parametric $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$ & sync). |
+| Automated Mathematical & Sync Tests | `npm test` (`tsx src/tests/geometry.test.ts`) | **PASS** | All 8 test suites pass at `tol = 1e-9` (6 control triangles, leg-swap symmetry, invalid inputs, micro/macro/aspect scales, fault-injection mutations, current-state spectral shares, parametric $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$ & sync, and $t \leftrightarrow 1/t$ symmetry / smooth log trajectory regressions). |
 | TypeScript Static Type Check | `npm run lint` (`tsc --noEmit`) | **PASS** | 0 type or syntax errors across `src/`. |
 | Production Bundle Build | `npm run build` (`vite build`) | **PASS** | Clean production build in `dist/` with locally bundled KaTeX CSS & `.woff2`/`.woff`/`.ttf` assets. |
 | Markdown Relative Link Audit | Node link checker across all `.md` files | **PASS** | 0 broken relative links across `README*.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, and `docs/*.md`. |
-| License & Secret Hygiene Scan | `grep` scan across repository | **PASS** | `29/29` `src/` files carry `SPDX-License-Identifier: MIT`; no `.env` secrets or API keys committed; `.gitignore` covers `node_modules/`, `dist/`, `.env*`. |
+| License & Secret Hygiene Scan | `grep` scan across repository | **PASS** | `30/30` `src/` files carry `SPDX-License-Identifier: MIT`; no `.env` secrets or API keys committed; `.gitignore` covers `node_modules/`, `dist/`, `.env*`. |
 | Responsive Layout & CSS Inspection | Tailwind responsive class audit | **PARTIAL** | Fixed mobile canvas height, popover centering, horizontal table scroll, and summary grid breakpoints in source; live viewport pixel screenshots not captured. |
 | Headless Browser E2E / Visual Check | Browser automation check | **NOT RUN** | Chromium / Playwright binaries are not installed in this execution container. |
 

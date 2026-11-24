@@ -389,6 +389,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showLabels={showLabels}
           showAngles={showAngles}
           showAltitude={false}
+          hasExteriorSquares={layerFilter !== 'triangle_incircle'}
           onHoverObject={setHoveredObj}
           t={t}
         />

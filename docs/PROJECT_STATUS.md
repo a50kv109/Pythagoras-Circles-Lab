@@ -22,7 +22,7 @@ This document summarizes the verified current state of the repository based on d
 ## 2. Tested
 
 Verified by executing `npm test`, `npm run lint`, and `npm run build`:
-- All 7 test sections in `src/tests/geometry.test.ts` pass at tolerance `1e-9` (control triangles, leg-swap symmetry, invalid input rejection, extreme micro/macro/aspect stability, validator mutation tests, current-state spectral metrics, and parametric graph + synchronization checks at $t = 0.1, 0.5, 1.0, 2.0, 10.0$).
+- All 8 test sections in `src/tests/geometry.test.ts` pass at tolerance `1e-9` (control triangles, leg-swap symmetry, invalid input rejection, extreme micro/macro/aspect stability, validator mutation tests, current-state spectral metrics, parametric graph + synchronization checks at $t = 0.1, 0.5, 1.0, 2.0, 10.0$, and $t \leftrightarrow 1/t$ symmetry / log-space animation regression checks).
 - `tsc --noEmit` completes with zero TypeScript errors.
 - `vite build` produces a clean production bundle in `dist/`.
 

@@ -192,6 +192,17 @@ export interface Translations {
     colDiameter: string;
     shareToggle: string;
     shareLabel: string;
+    formulaSecA: string;
+    formulaAsteriskNote: string;
+    formulaSecBNormalizedAreas: string;
+    formulaSecBNormalizedPerimeters: string;
+    formulaSecBNormalizedRadii: string;
+    formulaSecBNormalizedDiameters: string;
+    formulaSecCRatioAreas: string;
+    formulaSecCRatioPerimeters: string;
+    formulaSecCRatioRadii: string;
+    formulaSecCRatioDiameters: string;
+    atSymmetryNotice: string;
   };
   invariants: {
     title: string;
@@ -464,6 +475,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       colDiameter: 'Диаметр D',
       shareToggle: 'Долевое распределение в текущем состоянии (вспомогательно)',
       shareLabel: 'доля',
+      formulaSecA: 'A. Параметрическое отношение и нормированная геометрия (a_norm = 1)',
+      formulaAsteriskNote: 'Символ * обозначает нормированные величины при a_norm = 1 (не размерные величины исходного треугольника).',
+      formulaSecBNormalizedAreas: 'B. Нормированные площади (a_norm = 1)',
+      formulaSecBNormalizedPerimeters: 'B. Нормированные периметры (a_norm = 1)',
+      formulaSecBNormalizedRadii: 'B. Нормированные радиусы (a_norm = 1)',
+      formulaSecBNormalizedDiameters: 'B. Нормированные диаметры (a_norm = 1)',
+      formulaSecCRatioAreas: 'C. Отношения площадей (функции на графике)',
+      formulaSecCRatioPerimeters: 'C. Отношения периметров (функции на графике)',
+      formulaSecCRatioRadii: 'C. Отношения радиусов (функции на графике)',
+      formulaSecCRatioDiameters: 'C. Отношения диаметров (функции на графике)',
+      atSymmetryNotice: 'Треугольник уже на оси симметрии t = 1 (a = b, 1/t = t).',
     },
     invariants: {
       title: 'Верификация геометрии и тождеств',
@@ -773,6 +795,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       colDiameter: 'Діаметр D',
       shareToggle: 'Частковий розподіл у поточному стані (допоміжно)',
       shareLabel: 'частка',
+      formulaSecA: 'A. Параметричне відношення та нормована геометрія (a_norm = 1)',
+      formulaAsteriskNote: 'Символ * позначає нормовані величини при a_norm = 1 (не розмірні величини вихідного трикутника).',
+      formulaSecBNormalizedAreas: 'B. Нормовані площі (a_norm = 1)',
+      formulaSecBNormalizedPerimeters: 'B. Нормовані периметри (a_norm = 1)',
+      formulaSecBNormalizedRadii: 'B. Нормовані радіуси (a_norm = 1)',
+      formulaSecBNormalizedDiameters: 'B. Нормовані діаметри (a_norm = 1)',
+      formulaSecCRatioAreas: 'C. Відношення площ (функції на графіку)',
+      formulaSecCRatioPerimeters: 'C. Відношення периметрів (функції на графіку)',
+      formulaSecCRatioRadii: 'C. Відношення радіусів (функції на графіку)',
+      formulaSecCRatioDiameters: 'C. Відношення діаметрів (функції на графіку)',
+      atSymmetryNotice: 'Трикутник уже на осі симетрії t = 1 (a = b, 1/t = t).',
     },
     invariants: {
       title: 'Верифікація геометрії та тотожностей',
@@ -1061,7 +1094,7 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       symmetryBtn: 't = 1 (Symmetry)',
       symmetryBtnTitle: 'Set symmetric triangle t = 1 (a = b)',
       pauseBtn: 'Pause',
-      sweepBtn: 'Sweep through symmetry',
+      sweepBtn: 'Play Through Symmetry',
       outOfRangeBefore: 'Current value',
       outOfRangeMiddle: 'is outside visible range',
       fitRangeBtn: 'Include in range',
@@ -1082,6 +1115,17 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       colDiameter: 'Diameter D',
       shareToggle: 'Current-state proportional breakdown (auxiliary)',
       shareLabel: 'share',
+      formulaSecA: 'A. Parameter Ratio & Normalized Geometry (a_norm = 1)',
+      formulaAsteriskNote: 'The asterisk (*) denotes normalized quantities with a_norm = 1 (distinct from dimensional triangle values).',
+      formulaSecBNormalizedAreas: 'B. Normalized Areas (a_norm = 1)',
+      formulaSecBNormalizedPerimeters: 'B. Normalized Perimeters (a_norm = 1)',
+      formulaSecBNormalizedRadii: 'B. Normalized Radii (a_norm = 1)',
+      formulaSecBNormalizedDiameters: 'B. Normalized Diameters (a_norm = 1)',
+      formulaSecCRatioAreas: 'C. Area Ratios (Plotted Graph Functions)',
+      formulaSecCRatioPerimeters: 'C. Perimeter Ratios (Plotted Graph Functions)',
+      formulaSecCRatioRadii: 'C. Radius Ratios (Plotted Graph Functions)',
+      formulaSecCRatioDiameters: 'C. Diameter Ratios (Plotted Graph Functions)',
+      atSymmetryNotice: 'Already at the symmetry axis t = 1 (a = b, 1/t = t).',
     },
     invariants: {
       title: 'Geometry & Identity Verification',

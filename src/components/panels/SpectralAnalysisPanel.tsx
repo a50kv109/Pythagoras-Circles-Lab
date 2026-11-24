@@ -20,6 +20,11 @@ import {
 import { MathFormula } from '../common/MathFormula.tsx';
 import { Translations, TRANSLATIONS } from '../../i18n/translations.ts';
 import {
+  SYMMETRY_ANIMATION_DURATION_MS,
+  evaluateSymmetryTrajectoryT,
+  isAtSymmetryAxis,
+} from '../../math/symmetryAnimation.ts';
+import {
   Activity,
   ChevronDown,
   ChevronUp,
@@ -34,7 +39,13 @@ import {
 
 interface SpectralAnalysisPanelProps {
   calc: FourCirclesCalculations;
-  onChangeT: (targetT: number, recordHistory?: boolean) => void;
+  onChangeT: (
+    targetT: number,
+    recordHistory?: boolean,
+    fixedHypotenuse?: number,
+    fromSymmetryAnimation?: boolean
+  ) => void;
+  externalLegMutationToken?: number;
   t?: Translations;
 }
 
@@ -65,6 +76,7 @@ function formatTLabel(val: number): string {
 export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
   calc,
   onChangeT,
+  externalLegMutationToken = 0,
   t = TRANSLATIONS.ru,
 }) => {
   const [graphMode, setGraphMode] = useState<SpectralGraphMode>('areas');
@@ -74,11 +86,26 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
   const [tMax, setTMax] = useState<number>(10);
   const [showShareBars, setShowShareBars] = useState<boolean>(false);
   const [isSweepingSymmetry, setIsSweepingSymmetry] = useState<boolean>(false);
+  const [atSymmetryNotice, setAtSymmetryNotice] = useState<boolean>(false);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const isDraggingRef = useRef<boolean>(false);
-  const sweepDirRef = useRef<number>(1);
-  const sweepFrameRef = useRef<number | null>(null);
+
+  // Authoritative single animation controller state (never recreated on rerenders)
+  const animStateRef = useRef<{
+    rafId: number | null;
+    startTime: number;
+    tStart: number;
+    referenceC: number;
+  }>({
+    rafId: null,
+    startTime: 0,
+    tStart: 1,
+    referenceC: calc.triangle.c,
+  });
+
+  const onChangeTRef = useRef(onChangeT);
+  onChangeTRef.current = onChangeT;
 
   // Authoritative parameter t = b / a from unified geometry model
   const currentT = calc.triangle.b / calc.triangle.a;
@@ -122,41 +149,95 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
     [graphMode, linearKind]
   );
 
-  // Smooth symmetry sweep animation across t = 1
+  // Cancel symmetry animation cleanly whenever user modifies geometry externally
+  const prevLegMutationTokenRef = useRef(externalLegMutationToken);
+  useEffect(() => {
+    if (externalLegMutationToken !== prevLegMutationTokenRef.current) {
+      prevLegMutationTokenRef.current = externalLegMutationToken;
+      setIsSweepingSymmetry(false);
+    }
+  }, [externalLegMutationToken]);
+
+  // Clear t = 1 notice automatically once t moves away from the symmetry axis
+  useEffect(() => {
+    if (atSymmetryNotice && !isAtSymmetryAxis(currentT)) {
+      setAtSymmetryNotice(false);
+    }
+  }, [atSymmetryNotice, currentT]);
+
+  // Single authoritative requestAnimationFrame loop: smooth t_start -> 1/t_start -> t_start in log space
   useEffect(() => {
     if (!isSweepingSymmetry) {
-      if (sweepFrameRef.current) cancelAnimationFrame(sweepFrameRef.current);
+      if (animStateRef.current.rafId !== null) {
+        cancelAnimationFrame(animStateRef.current.rafId);
+        animStateRef.current.rafId = null;
+      }
       return;
     }
 
-    let lastTime = performance.now();
-    let logT = Math.log10(Math.max(tMin, Math.min(tMax, currentT)));
-    const logMin = Math.log10(tMin);
-    const logMax = Math.log10(tMax);
+    const { startTime, tStart, referenceC } = animStateRef.current;
 
     const step = (now: number) => {
-      const dt = Math.min(0.05, (now - lastTime) / 1000);
-      lastTime = now;
+      const elapsed = Math.max(0, now - startTime);
+      const progress = Math.min(1, elapsed / SYMMETRY_ANIMATION_DURATION_MS);
+      const nextT = evaluateSymmetryTrajectoryT(tStart, progress);
 
-      const span = Math.max(0.2, logMax - logMin);
-      logT += sweepDirRef.current * dt * span * 0.35;
-      if (logT >= logMax) {
-        logT = logMax;
-        sweepDirRef.current = -1;
-      } else if (logT <= logMin) {
-        logT = logMin;
-        sweepDirRef.current = 1;
+      onChangeTRef.current(nextT, false, referenceC, true);
+
+      if (progress >= 1) {
+        animStateRef.current.rafId = null;
+        onChangeTRef.current(tStart, true, referenceC, true);
+        setIsSweepingSymmetry(false);
+        return;
       }
 
-      onChangeT(Math.pow(10, logT), false);
-      sweepFrameRef.current = requestAnimationFrame(step);
+      animStateRef.current.rafId = requestAnimationFrame(step);
     };
 
-    sweepFrameRef.current = requestAnimationFrame(step);
+    animStateRef.current.rafId = requestAnimationFrame(step);
     return () => {
-      if (sweepFrameRef.current) cancelAnimationFrame(sweepFrameRef.current);
+      if (animStateRef.current.rafId !== null) {
+        cancelAnimationFrame(animStateRef.current.rafId);
+        animStateRef.current.rafId = null;
+      }
     };
-  }, [isSweepingSymmetry, tMin, tMax, onChangeT]);
+  }, [isSweepingSymmetry]);
+
+  const handleToggleSymmetrySweep = () => {
+    if (isSweepingSymmetry) {
+      setIsSweepingSymmetry(false);
+      return;
+    }
+
+    if (isAtSymmetryAxis(currentT)) {
+      // Already at t = 1: preserve exact axis cleanly without unnecessary oscillation
+      if (Math.abs(currentT - 1) > 1e-6) {
+        onChangeT(1, false, calc.triangle.c, true);
+      }
+      setAtSymmetryNotice(true);
+      setIsSweepingSymmetry(false);
+      return;
+    }
+
+    const reciprocalT = 1 / currentT;
+    const neededMin = Math.min(currentT, reciprocalT);
+    const neededMax = Math.max(currentT, reciprocalT);
+    if (neededMin < tMin) {
+      setTMin(Math.max(0.02, neededMin * 0.85));
+    }
+    if (neededMax > tMax) {
+      setTMax(Math.min(50, neededMax * 1.15));
+    }
+
+    animStateRef.current = {
+      rafId: null,
+      startTime: performance.now(),
+      tStart: currentT,
+      referenceC: calc.triangle.c,
+    };
+    setAtSymmetryNotice(false);
+    setIsSweepingSymmetry(true);
+  };
 
   // Coordinate mapping helpers
   const xToPx = useCallback(
@@ -325,14 +406,53 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
       ? 'R'
       : 'D';
 
-  const modeFormulaTex =
+  const normalizedSectionTitle =
     graphMode === 'areas'
-      ? '\\frac{K_x(t)}{K_c(t)}, \\quad K_a=\\frac{\\pi}{4},\\; K_b=\\frac{\\pi t^2}{4},\\; K_c=\\frac{\\pi(1+t^2)}{4},\\; K_i=\\pi r^2'
+      ? t.spectral.formulaSecBNormalizedAreas
       : graphMode === 'perimeters'
-      ? '\\frac{P_x(t)}{P_c(t)}, \\quad P = 2\\pi R = \\pi D'
+      ? t.spectral.formulaSecBNormalizedPerimeters
       : linearKind === 'radius'
-      ? '\\frac{R_x(t)}{R_c(t)}, \\quad R_a=\\frac{1}{2},\\; R_b=\\frac{t}{2},\\; R_c=\\frac{\\sqrt{1+t^2}}{2},\\; R_i=r(t)'
-      : '\\frac{D_x(t)}{D_c(t)}, \\quad D_a=1,\\; D_b=t,\\; D_c=\\sqrt{1+t^2},\\; D_i=2r(t)';
+      ? t.spectral.formulaSecBNormalizedRadii
+      : t.spectral.formulaSecBNormalizedDiameters;
+
+  const ratioSectionTitle =
+    graphMode === 'areas'
+      ? t.spectral.formulaSecCRatioAreas
+      : graphMode === 'perimeters'
+      ? t.spectral.formulaSecCRatioPerimeters
+      : linearKind === 'radius'
+      ? t.spectral.formulaSecCRatioRadii
+      : t.spectral.formulaSecCRatioDiameters;
+
+  const paramGeomTex =
+    't = \\frac{b}{a}, \\quad a_{\\text{norm}} = 1, \\quad b_{\\text{norm}} = t, \\quad c_{\\text{norm}}(t) = \\sqrt{1 + t^2}';
+
+  const normalizedCirclesTex =
+    graphMode === 'areas'
+      ? 'K_a^* = \\frac{\\pi}{4}, \\quad K_b^* = \\frac{\\pi t^2}{4}, \\quad K_c^*(t) = \\frac{\\pi(1+t^2)}{4}'
+      : graphMode === 'perimeters'
+      ? 'P_a^* = \\pi, \\quad P_b^* = \\pi t, \\quad P_c^*(t) = \\pi\\sqrt{1+t^2}'
+      : linearKind === 'radius'
+      ? 'R_a^* = \\frac{1}{2}, \\quad R_b^* = \\frac{t}{2}, \\quad R_c^*(t) = \\frac{\\sqrt{1+t^2}}{2}'
+      : 'D_a^* = 1, \\quad D_b^* = t, \\quad D_c^*(t) = \\sqrt{1+t^2}';
+
+  const normalizedIncircleTex =
+    graphMode === 'areas'
+      ? 'r^*(t) = \\frac{1 + t - \\sqrt{1+t^2}}{2}, \\qquad K_i^*(t) = \\pi\\left(r^*(t)\\right)^2'
+      : graphMode === 'perimeters'
+      ? 'r^*(t) = \\frac{1 + t - \\sqrt{1+t^2}}{2}, \\qquad P_i^*(t) = 2\\pi\\,r^*(t) = \\pi\\left(1 + t - \\sqrt{1+t^2}\\right)'
+      : linearKind === 'radius'
+      ? 'r^*(t) = \\frac{1 + t - \\sqrt{1+t^2}}{2}, \\qquad R_i^*(t) = r^*(t)'
+      : 'r^*(t) = \\frac{1 + t - \\sqrt{1+t^2}}{2}, \\qquad D_i^*(t) = 2r^*(t) = 1 + t - \\sqrt{1+t^2}';
+
+  const graphRatiosTex =
+    graphMode === 'areas'
+      ? '\\frac{K_a}{K_c} = \\frac{1}{1+t^2}, \\quad \\frac{K_b}{K_c} = \\frac{t^2}{1+t^2}, \\quad \\frac{K_c}{K_c} = 1, \\quad \\frac{K_i}{K_c} = \\frac{\\left(1 + t - \\sqrt{1+t^2}\\right)^2}{1+t^2}'
+      : graphMode === 'perimeters'
+      ? '\\frac{P_a}{P_c} = \\frac{1}{\\sqrt{1+t^2}}, \\quad \\frac{P_b}{P_c} = \\frac{t}{\\sqrt{1+t^2}}, \\quad \\frac{P_c}{P_c} = 1, \\quad \\frac{P_i}{P_c} = \\frac{1 + t - \\sqrt{1+t^2}}{\\sqrt{1+t^2}}'
+      : linearKind === 'radius'
+      ? '\\frac{R_a}{R_c} = \\frac{1}{\\sqrt{1+t^2}}, \\quad \\frac{R_b}{R_c} = \\frac{t}{\\sqrt{1+t^2}}, \\quad \\frac{R_c}{R_c} = 1, \\quad \\frac{R_i}{R_c} = \\frac{1 + t - \\sqrt{1+t^2}}{\\sqrt{1+t^2}}'
+      : '\\frac{D_a}{D_c} = \\frac{1}{\\sqrt{1+t^2}}, \\quad \\frac{D_b}{D_c} = \\frac{t}{\\sqrt{1+t^2}}, \\quad \\frac{D_c}{D_c} = 1, \\quad \\frac{D_i}{D_c} = \\frac{1 + t - \\sqrt{1+t^2}}{\\sqrt{1+t^2}}';
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/80 p-4 space-y-4">
@@ -449,9 +569,42 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
           </div>
         </div>
 
-        {/* Formula Strip */}
-        <div className="px-2.5 py-1.5 rounded bg-slate-50 border border-slate-200/70 text-center overflow-x-auto">
-          <MathFormula tex={modeFormulaTex} />
+        {/* Structured Formula Panel: A. Parameter & Normalization · B. Normalized Circles · C. Graph Ratios */}
+        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 space-y-2 text-left">
+          <div>
+            <div className="text-[11px] font-semibold text-slate-600 mb-1">
+              {t.spectral.formulaSecA}
+            </div>
+            <div className="overflow-x-auto py-0.5 text-center">
+              <MathFormula tex={paramGeomTex} className="text-xs sm:text-sm" />
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+              {t.spectral.formulaAsteriskNote}
+            </div>
+          </div>
+
+          <div className="pt-1.5 border-t border-slate-200/70">
+            <div className="text-[11px] font-semibold text-slate-600 mb-1">
+              {normalizedSectionTitle}
+            </div>
+            <div className="overflow-x-auto space-y-1 py-0.5 text-center">
+              <div>
+                <MathFormula tex={normalizedCirclesTex} className="text-xs sm:text-sm" />
+              </div>
+              <div>
+                <MathFormula tex={normalizedIncircleTex} className="text-xs sm:text-sm" />
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-1.5 border-t border-slate-200/70">
+            <div className="text-[11px] font-semibold text-slate-800 mb-1">
+              {ratioSectionTitle}
+            </div>
+            <div className="overflow-x-auto py-0.5 text-center">
+              <MathFormula tex={graphRatiosTex} className="text-xs sm:text-sm" />
+            </div>
+          </div>
         </div>
 
         {/* Graph Controls Bar: Scale, Zoom, Symmetry Sweep */}
@@ -509,6 +662,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
             <button
               onClick={() => {
                 setIsSweepingSymmetry(false);
+                setAtSymmetryNotice(false);
                 onChangeT(1.0, true);
               }}
               className={`px-2.5 py-1 rounded font-semibold transition-colors whitespace-nowrap shrink-0 ${
@@ -521,7 +675,7 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
               {t.spectral.symmetryBtn}
             </button>
             <button
-              onClick={() => setIsSweepingSymmetry(!isSweepingSymmetry)}
+              onClick={handleToggleSymmetrySweep}
               className={`px-2.5 py-1 rounded font-semibold flex items-center gap-1 transition-colors whitespace-nowrap shrink-0 ${
                 isSweepingSymmetry
                   ? 'bg-amber-600 text-white hover:bg-amber-700'
@@ -540,6 +694,13 @@ export const SpectralAnalysisPanel: React.FC<SpectralAnalysisPanelProps> = ({
             </button>
           </div>
         </div>
+
+        {/* Notice if user clicks Play Through Symmetry while already on symmetry axis t = 1 */}
+        {atSymmetryNotice && (
+          <div className="px-2.5 py-1.5 rounded bg-indigo-50 border border-indigo-200 text-[11px] text-indigo-800">
+            {t.spectral.atSymmetryNotice}
+          </div>
+        )}
 
         {/* Out-of-range alert when user zoomed away from currentT */}
         {!isCurrentTInRange && (

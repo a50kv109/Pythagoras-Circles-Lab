@@ -77,6 +77,12 @@ For each reference ratio $t \in \{0.1, 0.5, 1.0, 2.0, 10.0\}$:
 - Verifies `sampleSpectralCurves` explicitly includes $t = 1$ in the sampled curve.
 - Verifies synchronization round-trip: `legsFromRatioAndHypotenuse(t, 5)` $\to$ `calculateFourCircles(a, b)` $\to$ `computeFourCirclesSpectralAnalysis` matches `evaluateParametricFourCircles(t)` and preserves $b / a = t$.
 
+### Section 8: Regression Tests (`t <-> 1/t` Symmetry & Sweep Trajectory Stability)
+- Verifies exact values at the symmetry axis $t = 1$ ($K_a/K_c = K_b/K_c = 0.5$, $K_i/K_c = 3 - 2\sqrt{2}$, $P_i/P_c = R_i/R_c = \sqrt{2} - 1$).
+- Verifies reciprocal leg-swap symmetry $t \leftrightarrow 1/t$ across $t \in \{0.1, 0.25, 0.2989, 0.5, 2.0, 4.0, 10.0\}$ for areas, perimeters, and radii.
+- Verifies `isAtSymmetryAxis` and exact $t = 1$ fixed-point trajectory handling (`evaluateSymmetryTrajectoryT(1, p) === 1`) plus finite safe fallback on invalid inputs.
+- Verifies smooth monotonic log-space sweep $t_{\text{start}} \to 1/t_{\text{start}} \to t_{\text{start}}$ crossing $t = 1$ and maintaining all 8 geometry invariants across dense progress steps.
+
 ---
 
 ## 4. Desirable Future Tests (Not Yet Implemented)

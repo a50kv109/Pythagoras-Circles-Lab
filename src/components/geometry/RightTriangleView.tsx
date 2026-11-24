@@ -15,6 +15,7 @@ interface RightTriangleViewProps {
   showLabels?: boolean;
   showAngles?: boolean;
   showAltitude?: boolean;
+  hasExteriorSquares?: boolean;
   onHoverObject?: (obj: HoveredObject | null) => void;
   t?: Translations;
 }
@@ -46,6 +47,7 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
   showLabels = true,
   showAngles = true,
   showAltitude = false,
+  hasExteriorSquares = true,
   onHoverObject,
   t = TRANSLATIONS.ru,
 }) => {
@@ -201,37 +203,59 @@ export const RightTriangleView: React.FC<RightTriangleViewProps> = ({
         </>
       )}
 
-      {/* Side labels */}
-      {showLabels && (
-        <>
-          <text
-            x={pO.x - 8}
-            y={(pO.y + pA.y) / 2}
-            textAnchor="end"
-            dominantBaseline="middle"
-            className="text-xs font-mono font-bold fill-blue-700 select-none pointer-events-none"
-          >
-            a = {triangle.a.toFixed(2)}
-          </text>
+      {/* Side labels with adaptive offsets to prevent overlapping K_a, K_b, and Q_c radii */}
+      {showLabels && (() => {
+        const legAPx = triangle.a * scale;
+        const legBPx = triangle.b * scale;
+        const placeAOutsideSquare = hasExteriorSquares && legAPx < 96;
+        const placeBOutsideSquare = hasExteriorSquares && legBPx < 76;
 
-          <text
-            x={(pO.x + pB.x) / 2}
-            y={pO.y + 16}
-            textAnchor="middle"
-            className="text-xs font-mono font-bold fill-emerald-700 select-none pointer-events-none"
-          >
-            b = {triangle.b.toFixed(2)}
-          </text>
+        // Outward normal from hypotenuse AB into Q_c in screen space (+y is down)
+        const outNx = triangle.a / triangle.c;
+        const outNy = -triangle.b / triangle.c;
 
-          <text
-            x={(pA.x + pB.x) / 2 + 8}
-            y={(pA.y + pB.y) / 2 - 8}
-            className="text-xs font-mono font-bold fill-rose-700 select-none pointer-events-none"
-          >
-            c = {triangle.c.toFixed(2)}
-          </text>
-        </>
-      )}
+        return (
+          <>
+            <text
+              x={placeAOutsideSquare ? pO.x - legAPx - 8 : pO.x - 10}
+              y={(pO.y + pA.y) / 2}
+              textAnchor="end"
+              dominantBaseline="middle"
+              stroke="#f8fafc"
+              strokeWidth="3.5"
+              style={{ paintOrder: 'stroke' }}
+              className="text-xs font-mono font-bold fill-blue-700 select-none pointer-events-none"
+            >
+              a = {triangle.a.toFixed(2)}
+            </text>
+
+            <text
+              x={(pO.x + pB.x) / 2}
+              y={placeBOutsideSquare ? pO.y + legBPx + 15 : pO.y + 16}
+              textAnchor="middle"
+              stroke="#f8fafc"
+              strokeWidth="3.5"
+              style={{ paintOrder: 'stroke' }}
+              className="text-xs font-mono font-bold fill-emerald-700 select-none pointer-events-none"
+            >
+              b = {triangle.b.toFixed(2)}
+            </text>
+
+            <text
+              x={(pA.x + pB.x) / 2 + outNx * 16}
+              y={(pA.y + pB.y) / 2 + outNy * 16}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              stroke="#f8fafc"
+              strokeWidth="3.5"
+              style={{ paintOrder: 'stroke' }}
+              className="text-xs font-mono font-bold fill-rose-700 select-none pointer-events-none"
+            >
+              c = {triangle.c.toFixed(2)}
+            </text>
+          </>
+        );
+      })()}
 
       {/* Angles alpha and beta labels */}
       {showAngles && (

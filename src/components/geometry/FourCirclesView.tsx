@@ -150,23 +150,34 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
           {showLabels && (
             <>
               <text
-                x={pCa.x + 6}
-                y={pCa.y + 14}
-                className="text-[10px] font-mono font-semibold fill-blue-700/80 select-none pointer-events-none"
+                x={pxRa >= 24 ? pCa.x + 6 : pCa.x - 4}
+                y={pxRa >= 24 ? pCa.y + 14 : pCa.y - 5}
+                textAnchor={pxRa >= 24 ? 'start' : 'end'}
+                stroke="#f8fafc"
+                strokeWidth="2.8"
+                style={{ paintOrder: 'stroke' }}
+                className="text-[10px] font-mono font-semibold fill-blue-700/85 select-none pointer-events-none"
               >
                 Q_a
               </text>
               <text
-                x={pCb.x - 18}
-                y={pCb.y - 6}
-                className="text-[10px] font-mono font-semibold fill-emerald-700/80 select-none pointer-events-none"
+                x={pxRb >= 28 ? pCb.x - 6 : pCb.x + 5}
+                y={pxRb >= 28 ? pCb.y - 6 : pCb.y - 4}
+                textAnchor={pxRb >= 28 ? 'end' : 'start'}
+                stroke="#f8fafc"
+                strokeWidth="2.8"
+                style={{ paintOrder: 'stroke' }}
+                className="text-[10px] font-mono font-semibold fill-emerald-700/85 select-none pointer-events-none"
               >
                 Q_b
               </text>
               <text
                 x={pAc.x + 6}
                 y={pAc.y + 16}
-                className="text-[10px] font-mono font-semibold fill-rose-700/80 select-none pointer-events-none"
+                stroke="#f8fafc"
+                strokeWidth="2.8"
+                style={{ paintOrder: 'stroke' }}
+                className="text-[10px] font-mono font-semibold fill-rose-700/85 select-none pointer-events-none"
               >
                 Q_c
               </text>
@@ -243,14 +254,14 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             onPointerLeave={() => onHoverObject?.(null)}
           />
 
-          {/* Radii / Diameter Lines in Squares */}
+          {/* Radii Lines oriented away from side labels a, b, c */}
           {(showRadii || activeModule === 'identity_proof') && (
             <>
               <line
                 x1={pOa.x}
                 y1={pOa.y}
-                x2={pOa.x + pxRa}
-                y2={pOa.y}
+                x2={pOa.x}
+                y2={pOa.y + pxRa}
                 stroke="#1d4ed8"
                 strokeWidth="1.4"
                 strokeDasharray="3,2"
@@ -259,8 +270,8 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               <line
                 x1={pOb.x}
                 y1={pOb.y}
-                x2={pOb.x}
-                y2={pOb.y - pxRb}
+                x2={pOb.x + pxRb}
+                y2={pOb.y}
                 stroke="#047857"
                 strokeWidth="1.4"
                 strokeDasharray="3,2"
@@ -269,8 +280,8 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               <line
                 x1={pOc.x}
                 y1={pOc.y}
-                x2={toScreen(circleC.tangencyPoints[0], origin, scale).x}
-                y2={toScreen(circleC.tangencyPoints[0], origin, scale).y}
+                x2={toScreen(circleC.tangencyPoints[1], origin, scale).x}
+                y2={toScreen(circleC.tangencyPoints[1], origin, scale).y}
                 stroke="#be123c"
                 strokeWidth="1.4"
                 strokeDasharray="3,2"
@@ -279,21 +290,22 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             </>
           )}
 
-          {/* Tangency Dots on Square Sides */}
+          {/* Tangency Rings (hollow) vs Solid Circle Centers Oa, Ob, Oc */}
           {showCenters && (
             <>
               {[...circleA.tangencyPoints, ...circleB.tangencyPoints, ...circleC.tangencyPoints].map(
                 (pt, idx) => {
                   const sPt = toScreen(pt, origin, scale);
-                  const fillColor = idx < 4 ? '#2563eb' : idx < 8 ? '#059669' : '#e11d48';
+                  const strokeColor = idx < 4 ? '#2563eb' : idx < 8 ? '#059669' : '#e11d48';
                   return (
                     <circle
                       key={`sq-tan-${idx}`}
                       cx={sPt.x}
                       cy={sPt.y}
-                      r="2.5"
-                      fill={fillColor}
-                      fillOpacity="0.7"
+                      r="2.4"
+                      fill="#ffffff"
+                      stroke={strokeColor}
+                      strokeWidth="1.4"
                       className="pointer-events-none"
                     />
                   );
@@ -301,55 +313,91 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               )}
 
               {/* Circle Centers Oa, Ob, Oc */}
-              <circle cx={pOa.x} cy={pOa.y} r="3.5" fill="#1d4ed8" stroke="#fff" strokeWidth="1.2" className="pointer-events-none" />
-              <circle cx={pOb.x} cy={pOb.y} r="3.5" fill="#047857" stroke="#fff" strokeWidth="1.2" className="pointer-events-none" />
-              <circle cx={pOc.x} cy={pOc.y} r="3.5" fill="#be123c" stroke="#fff" strokeWidth="1.2" className="pointer-events-none" />
+              <circle cx={pOa.x} cy={pOa.y} r="3.8" fill="#1d4ed8" stroke="#fff" strokeWidth="1.3" className="pointer-events-none" />
+              <circle cx={pOb.x} cy={pOb.y} r="3.8" fill="#047857" stroke="#fff" strokeWidth="1.3" className="pointer-events-none" />
+              <circle cx={pOc.x} cy={pOc.y} r="3.8" fill="#be123c" stroke="#fff" strokeWidth="1.3" className="pointer-events-none" />
             </>
           )}
 
-          {/* Labels for Ka, Kb, Kc */}
+          {/* Labels for Ka, Kb, Kc & Centers Oa, Ob, Oc */}
           {showLabels && (
             <>
-              {pxRa > 18 && (
-                <g transform={`translate(${pOa.x}, ${pOa.y - (showCenters ? 12 : 0)})`} className="pointer-events-none select-none">
+              {pxRa >= 24 ? (
+                <g transform={`translate(${pOa.x}, ${pOa.y - (showCenters ? 13 : 0)})`} className="pointer-events-none select-none">
                   <text
                     textAnchor="middle"
                     dominantBaseline="middle"
+                    stroke="#f8fafc"
+                    strokeWidth="3"
+                    style={{ paintOrder: 'stroke' }}
                     className="text-xs font-mono font-bold fill-blue-900"
                   >
                     K_a
                   </text>
-                  {activeModule === 'identity_proof' && pxRa > 32 && (
+                  {activeModule === 'identity_proof' && pxRa > 36 && (
                     <text
-                      y="15"
+                      y="28"
                       textAnchor="middle"
+                      stroke="#f8fafc"
+                      strokeWidth="2.8"
+                      style={{ paintOrder: 'stroke' }}
                       className="text-[10px] font-mono font-semibold fill-blue-700"
                     >
                       √K_a={circleA.sqrtArea.toFixed(2)}
                     </text>
                   )}
                 </g>
+              ) : (
+                <text
+                  x={pOa.x}
+                  y={pA.y - 7}
+                  textAnchor="middle"
+                  stroke="#f8fafc"
+                  strokeWidth="3"
+                  style={{ paintOrder: 'stroke' }}
+                  className="text-xs font-mono font-bold fill-blue-900 select-none pointer-events-none"
+                >
+                  K_a
+                </text>
               )}
 
-              {pxRb > 18 && (
-                <g transform={`translate(${pOb.x}, ${pOb.y + (showCenters ? 14 : 0)})`} className="pointer-events-none select-none">
+              {pxRb >= 28 ? (
+                <g transform={`translate(${pOb.x}, ${pOb.y - (showCenters ? 13 : 0)})`} className="pointer-events-none select-none">
                   <text
                     textAnchor="middle"
                     dominantBaseline="middle"
+                    stroke="#f8fafc"
+                    strokeWidth="3"
+                    style={{ paintOrder: 'stroke' }}
                     className="text-xs font-mono font-bold fill-emerald-900"
                   >
                     K_b
                   </text>
-                  {activeModule === 'identity_proof' && pxRb > 32 && (
+                  {activeModule === 'identity_proof' && pxRb > 36 && (
                     <text
-                      y="14"
+                      y="28"
                       textAnchor="middle"
+                      stroke="#f8fafc"
+                      strokeWidth="2.8"
+                      style={{ paintOrder: 'stroke' }}
                       className="text-[10px] font-mono font-semibold fill-emerald-700"
                     >
                       √K_b={circleB.sqrtArea.toFixed(2)}
                     </text>
                   )}
                 </g>
+              ) : (
+                <text
+                  x={pB.x + 8}
+                  y={pOb.y + 4}
+                  textAnchor="start"
+                  stroke="#f8fafc"
+                  strokeWidth="3"
+                  style={{ paintOrder: 'stroke' }}
+                  className="text-xs font-mono font-bold fill-emerald-900 select-none pointer-events-none"
+                >
+                  K_b
+                </text>
               )}
 
               {pxRc > 22 && (
@@ -357,14 +405,20 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
                   <text
                     textAnchor="middle"
                     dominantBaseline="middle"
+                    stroke="#f8fafc"
+                    strokeWidth="3"
+                    style={{ paintOrder: 'stroke' }}
                     className="text-xs font-mono font-bold fill-rose-900"
                   >
                     K_c
                   </text>
-                  {activeModule === 'identity_proof' && pxRc > 36 && (
+                  {activeModule === 'identity_proof' && pxRc > 38 && (
                     <text
-                      y="15"
+                      y="29"
                       textAnchor="middle"
+                      stroke="#f8fafc"
+                      strokeWidth="2.8"
+                      style={{ paintOrder: 'stroke' }}
                       className="text-[10px] font-mono font-semibold fill-rose-700"
                     >
                       √K_c={circleC.sqrtArea.toFixed(2)}
@@ -375,18 +429,41 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
 
               {showCenters && (
                 <>
-                  {pxRa > 24 && (
-                    <text x={pOa.x + 6} y={pOa.y + 12} className="text-[10px] font-mono font-semibold fill-blue-800 select-none pointer-events-none">
+                  {pxRa >= 30 && (
+                    <text
+                      x={pOa.x + 8}
+                      y={pOa.y + 4}
+                      stroke="#f8fafc"
+                      strokeWidth="2.5"
+                      style={{ paintOrder: 'stroke' }}
+                      className="text-[10px] font-mono font-semibold fill-blue-800 select-none pointer-events-none"
+                    >
                       O_a
                     </text>
                   )}
-                  {pxRb > 24 && (
-                    <text x={pOb.x + 6} y={pOb.y - 6} className="text-[10px] font-mono font-semibold fill-emerald-800 select-none pointer-events-none">
+                  {pxRb >= 32 && (
+                    <text
+                      x={pOb.x}
+                      y={pOb.y + 14}
+                      textAnchor="middle"
+                      stroke="#f8fafc"
+                      strokeWidth="2.5"
+                      style={{ paintOrder: 'stroke' }}
+                      className="text-[10px] font-mono font-semibold fill-emerald-800 select-none pointer-events-none"
+                    >
                       O_b
                     </text>
                   )}
-                  {pxRc > 24 && (
-                    <text x={pOc.x + 6} y={pOc.y + 12} className="text-[10px] font-mono font-semibold fill-rose-800 select-none pointer-events-none">
+                  {pxRc >= 30 && (
+                    <text
+                      x={pOc.x}
+                      y={pOc.y + 14}
+                      textAnchor="middle"
+                      stroke="#f8fafc"
+                      strokeWidth="2.5"
+                      style={{ paintOrder: 'stroke' }}
+                      className="text-[10px] font-mono font-semibold fill-rose-800 select-none pointer-events-none"
+                    >
                       O_c
                     </text>
                   )}
@@ -457,16 +534,16 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             </>
           )}
 
-          {/* Tangency points on OA, OB, AB & center I */}
+          {/* Tangency points on OA, OB, AB (hollow rings) & solid Incenter I */}
           {(showCenters || incircleFocusGlow) && (
             <>
               <circle
                 cx={pTa.x}
                 cy={pTa.y}
-                r="3"
-                fill="#b45309"
-                stroke="#fff"
-                strokeWidth="1"
+                r="2.8"
+                fill="#ffffff"
+                stroke="#b45309"
+                strokeWidth="1.6"
                 className="cursor-pointer"
                 onPointerEnter={() =>
                   onHoverObject?.({
@@ -481,10 +558,10 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               <circle
                 cx={pTb.x}
                 cy={pTb.y}
-                r="3"
-                fill="#b45309"
-                stroke="#fff"
-                strokeWidth="1"
+                r="2.8"
+                fill="#ffffff"
+                stroke="#b45309"
+                strokeWidth="1.6"
                 className="cursor-pointer"
                 onPointerEnter={() =>
                   onHoverObject?.({
@@ -499,10 +576,10 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               <circle
                 cx={pTc.x}
                 cy={pTc.y}
-                r="3.2"
-                fill="#b45309"
-                stroke="#fff"
-                strokeWidth="1"
+                r="3"
+                fill="#ffffff"
+                stroke="#b45309"
+                strokeWidth="1.7"
                 className="cursor-pointer"
                 onPointerEnter={() =>
                   onHoverObject?.({
@@ -537,30 +614,41 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
             </>
           )}
 
-          {/* Labels for Ki, I, and radius r */}
+          {/* Labels for Ki, I, and radius r positioned cleanly inside or around Ki */}
           {showLabels && (
             <>
               <text
                 x={pI.x}
-                y={pxRi > 20 ? pI.y - 8 : pI.y - pxRi - 8}
+                y={pxRi >= 20 ? pI.y - Math.max(10, pxRi * 0.44) : pI.y - pxRi - 9}
                 textAnchor="middle"
+                stroke="#f8fafc"
+                strokeWidth="3"
+                style={{ paintOrder: 'stroke' }}
                 className="text-xs font-mono font-bold fill-amber-950 select-none pointer-events-none"
               >
                 K_i
               </text>
               {(showRadii || incircleFocusGlow) && (
                 <text
-                  x={(pI.x + pTc.x) / 2 + 5}
-                  y={(pI.y + pTc.y) / 2 - 4}
+                  x={pxRi >= 20 ? pI.x : pI.x + pxRi + 7}
+                  y={pxRi >= 20 ? pI.y + Math.max(13, pxRi * 0.48) : pI.y + 4}
+                  textAnchor={pxRi >= 20 ? 'middle' : 'start'}
+                  stroke="#f8fafc"
+                  strokeWidth="3"
+                  style={{ paintOrder: 'stroke' }}
                   className="text-[10px] font-mono font-bold fill-amber-900 select-none pointer-events-none"
                 >
                   r={incircle.radius.toFixed(2)}
                 </text>
               )}
-              {showCenters && pxRi > 16 && (
+              {showCenters && pxRi >= 22 && (
                 <text
-                  x={pI.x + 6}
-                  y={pI.y + 11}
+                  x={pI.x - 7}
+                  y={pI.y + 3}
+                  textAnchor="end"
+                  stroke="#f8fafc"
+                  strokeWidth="2.5"
+                  style={{ paintOrder: 'stroke' }}
                   className="text-[10px] font-mono font-semibold fill-amber-900 select-none pointer-events-none"
                 >
                   I
@@ -568,13 +656,34 @@ export const FourCirclesView: React.FC<FourCirclesViewProps> = ({
               )}
               {incircleFocusGlow && pxRi > 16 && (
                 <>
-                  <text x={pTa.x - 16} y={pTa.y + 3} className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none">
+                  <text
+                    x={pTa.x - 16}
+                    y={pTa.y + 3}
+                    stroke="#f8fafc"
+                    strokeWidth="2.5"
+                    style={{ paintOrder: 'stroke' }}
+                    className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none"
+                  >
                     T_a
                   </text>
-                  <text x={pTb.x - 4} y={pTb.y + 12} className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none">
+                  <text
+                    x={pTb.x - 4}
+                    y={pTb.y + 12}
+                    stroke="#f8fafc"
+                    strokeWidth="2.5"
+                    style={{ paintOrder: 'stroke' }}
+                    className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none"
+                  >
                     T_b
                   </text>
-                  <text x={pTc.x + 6} y={pTc.y - 4} className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none">
+                  <text
+                    x={pTc.x + 6}
+                    y={pTc.y - 4}
+                    stroke="#f8fafc"
+                    strokeWidth="2.5"
+                    style={{ paintOrder: 'stroke' }}
+                    className="text-[10px] font-mono fill-amber-900 select-none pointer-events-none"
+                  >
                     T_c
                   </text>
                 </>
