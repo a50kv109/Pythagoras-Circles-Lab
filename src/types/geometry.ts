@@ -152,7 +152,11 @@ export type ActiveModuleId =
   | 'identity_proof'
   | 'incircle_focus'
   | 'spectral_analysis'
-  | 'thales_circumcircle';
+  | 'thales_circumcircle'
+  | 'arc_classification'
+  | 'arc_angle_analysis'
+  | 'incircle_arc_distribution'
+  | 'arc_side_area';
 
 export type DisplayMode = 'school' | 'research';
 

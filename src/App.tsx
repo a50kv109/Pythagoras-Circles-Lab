@@ -15,10 +15,21 @@ import { ControlsPanel } from './components/panels/ControlsPanel.tsx';
 import { FourCirclesPanel } from './components/panels/FourCirclesPanel.tsx';
 import { SpectralAnalysisPanel } from './components/panels/SpectralAnalysisPanel.tsx';
 import { ThalesCircumcirclePanel } from './components/panels/ThalesCircumcirclePanel.tsx';
+import { ArcClassificationPanel } from './components/panels/ArcClassificationPanel.tsx';
+import { ArcAngleAnalysisPanel } from './components/panels/ArcAngleAnalysisPanel.tsx';
+import { IncircleArcDistributionPanel } from './components/panels/IncircleArcDistributionPanel.tsx';
+import { ArcSideAreaPanel } from './components/panels/ArcSideAreaPanel.tsx';
 import { InvariantsPanel } from './components/panels/InvariantsPanel.tsx';
 import { ComparisonModal } from './components/panels/ComparisonModal.tsx';
 import { TestRunnerModal } from './components/panels/TestRunnerModal.tsx';
 import { HelpModal } from './components/panels/HelpModal.tsx';
+import {
+  DiscretizationMode,
+  discretizeArcAngular,
+  discretizeArcLinear,
+  triangleFromPhysicalArcAngle,
+} from './math/experiments/arcBasedClassification.ts';
+import { EXPERIMENT04_RESEARCH_ZONES } from './math/experiments/arcAngleParametricAnalysis.ts';
 
 interface HistoryEntry {
   a: number;
@@ -68,10 +79,34 @@ export default function App() {
   // SVG Board ref for Snapshot export
   const svgBoardRef = useRef<SVGSVGElement | null>(null);
 
+  // Experiment 02 & 04 Arc interactive state
+  const [arcMode, setArcMode] = useState<DiscretizationMode>('angular');
+  const [arcAngularStepDeg, setArcAngularStepDeg] = useState<number>(15);
+  const [arcLinearStepL, setArcLinearStepL] = useState<number>(0.25);
+  const [exp04ZoneId, setExp04ZoneId] = useState<string | null>('zone_15_30');
+
   // Unified mathematical calculation for all 4 circles, 3 squares, and triangle
   const calc = useMemo(() => {
     return calculateFourCircles(a, b);
   }, [a, b]);
+
+  const currentArcPhiDeg = useMemo(() => {
+    const deg = (Math.atan2(calc.triangle.a, calc.triangle.b) * 180) / Math.PI;
+    return Math.max(0.5, Math.min(89.5, deg));
+  }, [calc.triangle.a, calc.triangle.b]);
+
+  const selectedExp04Zone = useMemo(
+    () => EXPERIMENT04_RESEARCH_ZONES.find((z) => z.id === exp04ZoneId) ?? null,
+    [exp04ZoneId]
+  );
+
+  const arcDiscretization = useMemo(() => {
+    if (activeModule !== 'arc_classification') return undefined;
+    const r = calc.incircle.radius;
+    return arcMode === 'angular'
+      ? discretizeArcAngular(r, arcAngularStepDeg)
+      : discretizeArcLinear(r, arcLinearStepL);
+  }, [activeModule, calc.incircle.radius, arcMode, arcAngularStepDeg, arcLinearStepL]);
 
   // Latest authoritative (a, b, c) ref so callbacks never recreate on every animation frame
   const latestGeomRef = useRef({ a, b, c: calc.triangle.c });
@@ -176,6 +211,25 @@ export default function App() {
       setGraphMutationToken((n) => n + 1);
       if (recordHistory) {
         pushHistory(newA, newB);
+      }
+    },
+    [pushHistory]
+  );
+
+  const handleChangeArcPhi = useCallback(
+    (newR: number, newPhiDeg: number, recordHistory = true) => {
+      if (!Number.isFinite(newR) || newR <= 0 || !Number.isFinite(newPhiDeg)) return;
+      const clampedR = Math.max(0.25, Math.min(10, newR));
+      const clampedPhi = Math.max(1, Math.min(89, newPhiDeg));
+      const sample = triangleFromPhysicalArcAngle(clampedR, clampedPhi);
+      const nextA = Math.max(0.1, Math.min(150, Math.round(sample.triangle.a * 1e6) / 1e6));
+      const nextB = Math.max(0.1, Math.min(150, Math.round(sample.triangle.b * 1e6) / 1e6));
+      setA(nextA);
+      setB(nextB);
+      setLegMutationToken((n) => n + 1);
+      setGraphMutationToken((n) => n + 1);
+      if (recordHistory) {
+        pushHistory(nextA, nextB);
       }
     },
     [pushHistory]
@@ -347,6 +401,10 @@ export default function App() {
             isRightPanelOpen={isRightPanelOpen}
             onToggleRightPanel={() => setIsRightPanelOpen(!isRightPanelOpen)}
             svgRefExternal={svgBoardRef}
+            arcPhiDeg={currentArcPhiDeg}
+            arcDiscretization={arcDiscretization}
+            selectedArcAngleZone={selectedExp04Zone}
+            onChangeArcPhi={handleChangeArcPhi}
             t={t}
           />
         </section>
@@ -357,17 +415,59 @@ export default function App() {
             aria-label={t.aria.panelAside}
             className="flex-1 lg:flex-[1] h-[55vh] lg:h-full overflow-y-auto bg-slate-50/70 p-4 space-y-4"
           >
-            <ControlsPanel
-              calc={calc}
-              onChangeA={handleChangeA}
-              onChangeB={handleChangeB}
-              onSetBoth={handleSetBoth}
-              onChangeLambda={handleChangeLambda}
-              externalGraphMutationToken={graphMutationToken}
-              t={t}
-            />
+            {activeModule !== 'arc_classification' &&
+              activeModule !== 'arc_angle_analysis' &&
+              activeModule !== 'incircle_arc_distribution' &&
+              activeModule !== 'arc_side_area' && (
+              <ControlsPanel
+                calc={calc}
+                onChangeA={handleChangeA}
+                onChangeB={handleChangeB}
+                onSetBoth={handleSetBoth}
+                onChangeLambda={handleChangeLambda}
+                externalGraphMutationToken={graphMutationToken}
+                t={t}
+              />
+            )}
 
-            {activeModule === 'spectral_analysis' ? (
+            {activeModule === 'arc_side_area' ? (
+              <ArcSideAreaPanel
+                calc={calc}
+                alphaDeg={currentArcPhiDeg}
+                onChangeRadiusAndAlpha={handleChangeArcPhi}
+                lang={lang}
+              />
+            ) : activeModule === 'incircle_arc_distribution' ? (
+              <IncircleArcDistributionPanel
+                calc={calc}
+                alphaDeg={currentArcPhiDeg}
+                onChangeRadiusAndAlpha={handleChangeArcPhi}
+                lang={lang}
+              />
+            ) : activeModule === 'arc_angle_analysis' ? (
+              <ArcAngleAnalysisPanel
+                calc={calc}
+                alphaDeg={currentArcPhiDeg}
+                selectedZoneId={exp04ZoneId}
+                onSelectZoneId={setExp04ZoneId}
+                onChangeRadiusAndAlpha={handleChangeArcPhi}
+                lang={lang}
+              />
+            ) : activeModule === 'arc_classification' && arcDiscretization ? (
+              <ArcClassificationPanel
+                calc={calc}
+                phiDeg={currentArcPhiDeg}
+                discretizationMode={arcMode}
+                angularStepDeg={arcAngularStepDeg}
+                linearStepL={arcLinearStepL}
+                discretization={arcDiscretization}
+                onChangeRadiusAndPhi={handleChangeArcPhi}
+                onChangeMode={setArcMode}
+                onChangeAngularStep={setArcAngularStepDeg}
+                onChangeLinearStep={setArcLinearStepL}
+                lang={lang}
+              />
+            ) : activeModule === 'spectral_analysis' ? (
               <SpectralAnalysisPanel
                 calc={calc}
                 onChangeT={handleChangeT}

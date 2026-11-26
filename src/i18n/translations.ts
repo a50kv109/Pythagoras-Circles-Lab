@@ -22,6 +22,10 @@ export interface Translations {
     incircleFocus: string;
     spectralAnalysis: string;
     thalesCircumcircle: string;
+    arcClassification: string;
+    arcAngleAnalysis: string;
+    incircleArcDistribution: string;
+    arcSideArea: string;
   };
   actions: {
     compare: string;
@@ -387,6 +391,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       incircleFocus: '03. Вписанный круг Kᵢ',
       spectralAnalysis: '04. Спектральный анализ',
       thalesCircumcircle: '05. Окружность Фалеса Kₒ',
+      arcClassification: '06. Дуга и классификация',
+      arcAngleAnalysis: '07. Дуга и углы',
+      incircleArcDistribution: '08. Три дуги Kᵢ',
+      arcSideArea: '09. Дуги–Стороны–Площади',
     },
     actions: {
       compare: 'Сравнить',
@@ -832,6 +840,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       incircleFocus: '03. Вписане коло Kᵢ',
       spectralAnalysis: '04. Спектральний аналіз',
       thalesCircumcircle: '05. Коло Фалеса Kₒ',
+      arcClassification: '06. Дуга і класифікація',
+      arcAngleAnalysis: '07. Дуга і кути',
+      incircleArcDistribution: '08. Три дуги Kᵢ',
+      arcSideArea: '09. Дуги–Сторони–Площі',
     },
     actions: {
       compare: 'Порівняти',
@@ -1277,6 +1289,10 @@ export const TRANSLATIONS: Record<LanguageCode, Translations> = {
       incircleFocus: '03. Incircle Kᵢ',
       spectralAnalysis: '04. Spectral Analysis',
       thalesCircumcircle: '05. Thales Circle Kₒ',
+      arcClassification: '06. Arc Classification',
+      arcAngleAnalysis: '07. Arc & Angles',
+      incircleArcDistribution: '08. Three Arcs Kᵢ',
+      arcSideArea: '09. Arc–Side–Area',
     },
     actions: {
       compare: 'Compare',

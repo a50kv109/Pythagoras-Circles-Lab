@@ -16,6 +16,15 @@ import { CoordinateGrid } from './CoordinateGrid.tsx';
 import { RightTriangleView } from './RightTriangleView.tsx';
 import { FourCirclesView } from './FourCirclesView.tsx';
 import { InteractivePoint } from './InteractivePoint.tsx';
+import { ArcClassificationBoardOverlay } from './ArcClassificationBoardOverlay.tsx';
+import { ArcAngleBoardOverlay } from './ArcAngleBoardOverlay.tsx';
+import { IncircleArcDistributionOverlay } from './IncircleArcDistributionOverlay.tsx';
+import { ArcSideAreaBoardOverlay } from './ArcSideAreaBoardOverlay.tsx';
+import {
+  ArcDiscretizationResult,
+  ArcSampleTriangle,
+} from '../../math/experiments/arcBasedClassification.ts';
+import { ArcAngleZoneSpec } from '../../math/experiments/arcAngleParametricAnalysis.ts';
 import { toScreen, toMath } from '../../geometry/transforms.ts';
 import {
   ZoomIn,
@@ -40,6 +49,10 @@ interface GeometryBoardProps {
   isRightPanelOpen: boolean;
   onToggleRightPanel: () => void;
   svgRefExternal?: React.RefObject<SVGSVGElement | null>;
+  arcPhiDeg?: number;
+  arcDiscretization?: ArcDiscretizationResult;
+  selectedArcAngleZone?: ArcAngleZoneSpec | null;
+  onChangeArcPhi?: (newR: number, newPhiDeg: number, recordHistory?: boolean) => void;
   t: Translations;
 }
 
@@ -54,6 +67,10 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
   isRightPanelOpen,
   onToggleRightPanel,
   svgRefExternal,
+  arcPhiDeg = 45,
+  arcDiscretization,
+  selectedArcAngleZone = null,
+  onChangeArcPhi,
   t,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -64,8 +81,8 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
   const [scale, setScale] = useState(38);
   const [originOffset, setOriginOffset] = useState<Point2D>({ x: 260, y: 400 });
 
-  // Dragging states (only A along Y, B along X, or pan background)
-  const [activeDrag, setActiveDrag] = useState<'A' | 'B' | 'pan' | null>(null);
+  // Dragging states (A along Y, B along X, T_AB along quarter-circle arc, or pan background)
+  const [activeDrag, setActiveDrag] = useState<'A' | 'B' | 'T_AB' | 'pan' | null>(null);
   const dragStartRef = useRef<{ clientX: number; clientY: number; origOffset: Point2D }>({
     clientX: 0,
     clientY: 0,
@@ -100,7 +117,12 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
   const handleFitView = useCallback(() => {
     const a = calc.triangle.a;
     const b = calc.triangle.b;
-    const focusTriangleOnly = activeModule === 'incircle_focus';
+    const focusTriangleOnly =
+      activeModule === 'incircle_focus' ||
+      activeModule === 'arc_classification' ||
+      activeModule === 'arc_angle_analysis' ||
+      activeModule === 'incircle_arc_distribution' ||
+      activeModule === 'arc_side_area';
     const focusThalesOnly =
       activeModule === 'thales_circumcircle' || layerFilter === 'thales_only';
 
@@ -116,10 +138,11 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
       minY = Math.min(-0.8, center.y - radius - 0.9);
       maxY = Math.max(a + 0.9, center.y + radius + 1.1);
     } else if (focusTriangleOnly) {
+      const r2 = 2 * calc.incircle.radius;
       minX = -0.8;
-      maxX = b + 1;
+      maxX = Math.max(b + 1.2, r2 + 1.6);
       minY = -0.8;
-      maxY = a + 1;
+      maxY = Math.max(a + 1.2, r2 + 1.6);
     }
 
     const mathWidth = maxX - minX;
@@ -160,6 +183,16 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
+  const handlePointerDownTangent = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    setActiveDrag('T_AB');
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+
+  const handleSelectArcSample = (sample: ArcSampleTriangle) => {
+    onChangeArcPhi?.(sample.r, sample.phiDeg, true);
+  };
+
   const handleBackgroundPointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
     setActiveDrag('pan');
@@ -195,6 +228,13 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
     } else if (activeDrag === 'B') {
       const newB = Math.max(0.5, Math.min(15, Math.round(mathP.x * 10) / 10));
       onChangeB(newB, false);
+    } else if (activeDrag === 'T_AB') {
+      const r = calc.incircle.radius;
+      const dx = Math.max(1e-4, mathP.x - r);
+      const dy = Math.max(1e-4, mathP.y - r);
+      const rawPhiDeg = (Math.atan2(dx, dy) * 180) / Math.PI;
+      const clampedPhi = Math.max(2, Math.min(88, Math.round(rawPhiDeg * 10) / 10));
+      onChangeArcPhi?.(r, clampedPhi, false);
     }
   };
 
@@ -205,7 +245,7 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
       } catch {
         // ignore
       }
-      if (activeDrag === 'A' || activeDrag === 'B') {
+      if (activeDrag === 'A' || activeDrag === 'B' || activeDrag === 'T_AB') {
         onCommitDrag?.();
       }
       setActiveDrag(null);
@@ -412,7 +452,15 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           origin={originOffset}
           scale={scale}
           activeModule={activeModule}
-          layerFilter={layerFilter}
+          layerFilter={
+            (activeModule === 'arc_classification' ||
+              activeModule === 'arc_angle_analysis' ||
+              activeModule === 'incircle_arc_distribution' ||
+              activeModule === 'arc_side_area') &&
+            layerFilter === 'all'
+              ? 'triangle_incircle'
+              : layerFilter
+          }
           showLabels={showLabels}
           showCenters={showCenters}
           showRadii={showRadii}
@@ -430,11 +478,72 @@ export const GeometryBoard: React.FC<GeometryBoardProps> = ({
           showAngles={showAngles}
           showAltitude={false}
           hasExteriorSquares={
-            layerFilter !== 'triangle_incircle' && layerFilter !== 'thales_only'
+            activeModule !== 'arc_classification' &&
+            activeModule !== 'arc_angle_analysis' &&
+            activeModule !== 'incircle_arc_distribution' &&
+            activeModule !== 'arc_side_area' &&
+            layerFilter !== 'triangle_incircle' &&
+            layerFilter !== 'thales_only'
           }
           onHoverObject={setHoveredObj}
           t={t}
         />
+
+        {/* Experiment 02 Arc-Based Classification Overlay */}
+        {activeModule === 'arc_classification' && arcDiscretization && (
+          <ArcClassificationBoardOverlay
+            calc={calc}
+            origin={originOffset}
+            scale={scale}
+            phiDeg={arcPhiDeg}
+            discretization={arcDiscretization}
+            isDraggingTangent={activeDrag === 'T_AB'}
+            onPointerDownTangent={handlePointerDownTangent}
+            onSelectSample={handleSelectArcSample}
+            onHoverObject={setHoveredObj}
+          />
+        )}
+
+        {/* Experiment 04 Arc-Angle Parametric Analysis Overlay */}
+        {activeModule === 'arc_angle_analysis' && (
+          <ArcAngleBoardOverlay
+            calc={calc}
+            origin={originOffset}
+            scale={scale}
+            alphaDeg={arcPhiDeg}
+            selectedZone={selectedArcAngleZone}
+            isDraggingTangent={activeDrag === 'T_AB'}
+            onPointerDownTangent={handlePointerDownTangent}
+            onSelectAlpha={(deg) => onChangeArcPhi?.(calc.incircle.radius, deg, true)}
+            onHoverObject={setHoveredObj}
+          />
+        )}
+
+        {/* Experiment 05 Incircle Three-Arc Distribution Overlay */}
+        {activeModule === 'incircle_arc_distribution' && (
+          <IncircleArcDistributionOverlay
+            calc={calc}
+            origin={originOffset}
+            scale={scale}
+            alphaDeg={arcPhiDeg}
+            isDraggingTangent={activeDrag === 'T_AB'}
+            onPointerDownTangent={handlePointerDownTangent}
+            onHoverObject={setHoveredObj}
+          />
+        )}
+
+        {/* Experiment 06 Arc-Side-Area Correspondence Overlay */}
+        {activeModule === 'arc_side_area' && (
+          <ArcSideAreaBoardOverlay
+            calc={calc}
+            origin={originOffset}
+            scale={scale}
+            alphaDeg={arcPhiDeg}
+            isDraggingTangent={activeDrag === 'T_AB'}
+            onPointerDownTangent={handlePointerDownTangent}
+            onHoverObject={setHoveredObj}
+          />
+        )}
 
         {/* Fixed Origin Vertex O */}
         <circle

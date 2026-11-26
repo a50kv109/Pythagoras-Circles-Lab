@@ -31,11 +31,15 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'incircle_focus', label: t.modules.incircleFocus },
     { id: 'spectral_analysis', label: t.modules.spectralAnalysis },
     { id: 'thales_circumcircle', label: t.modules.thalesCircumcircle },
+    { id: 'arc_classification', label: t.modules.arcClassification },
+    { id: 'arc_angle_analysis', label: t.modules.arcAngleAnalysis },
+    { id: 'incircle_arc_distribution', label: t.modules.incircleArcDistribution },
+    { id: 'arc_side_area', label: t.modules.arcSideArea },
   ];
 
   return (
     <header className="bg-white border-b border-slate-200 shrink-0">
-      <div className="flex items-center justify-between gap-3 lg:gap-5 px-4 lg:px-6 py-3">
+      <div className="flex items-center justify-between gap-3 lg:gap-4 px-4 lg:px-6 py-3">
         {/* Zone 1: Single text element wordmark */}
         <div className="flex items-center whitespace-nowrap shrink-0">
           <span className="text-base font-bold tracking-tight text-slate-900 font-sans">
@@ -44,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Zone 2: Concise single-line navigation tabs (desktop) */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-5 text-xs font-semibold text-slate-600 overflow-x-auto">
+        <nav className="hidden md:flex items-center gap-2.5 lg:gap-4 text-xs font-semibold text-slate-600 overflow-x-auto">
           {modules.map((m) => (
             <button
               key={m.id}
@@ -53,7 +57,13 @@ export const Header: React.FC<HeaderProps> = ({
                 activeModule === m.id
                   ? m.id === 'thales_circumcircle'
                     ? 'border-violet-600 text-violet-900 font-bold'
-                    : 'border-indigo-600 text-indigo-900 font-bold'
+                    : m.id === 'arc_classification'
+                      ? 'border-amber-600 text-amber-900 font-bold'
+                      : m.id === 'arc_angle_analysis'
+                        ? 'border-sky-600 text-sky-900 font-bold'
+                        : m.id === 'incircle_arc_distribution'
+                          ? 'border-blue-600 text-blue-900 font-bold'
+                          : 'border-indigo-600 text-indigo-900 font-bold'
                   : 'border-transparent hover:text-slate-900'
               }`}
             >
